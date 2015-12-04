@@ -9,29 +9,29 @@ import weka.core.Instances;
  */
 public class EquivalentNumberOfFeatures extends AbstractDiscretizeExtractor {
 
-    public static final String NAME = "Equivalent number of features";
+	public static final String NAME = "Equivalent number of features";
 
-    private double meanMutualInformation;
+	private double meanMutualInformation;
 
-    @Override
-    public String getName() {
-        return NAME;
-    }
+	@Override
+	public String getName() {
+		return NAME;
+	}
 
-    @Override
-    public double extractValue(Instances instances) {
-        meanMutualInformation = new MeanMutualInformation().extractValue(instances);
-        return super.extractValue(instances);
-    }
+	@Override
+	public double extractValue(Instances instances) throws Exception {
+		meanMutualInformation = new MeanMutualInformation().extractValue(instances);
+		return super.extractValue(instances);
+	}
 
-    @Override
-    protected double extractValueInternal(Instances instances) {
-        int classIndex = instances.classIndex();
-        if (classIndex < 0) {
-            throw new IllegalArgumentException("dataset hasn't class attribute");
-        }
-        double[] values = instances.attributeToDoubleArray(classIndex);
-        EntropyResult result = entropy(values, instances.classAttribute().numValues());
-        return result.entropy / meanMutualInformation;
-    }
+	@Override
+	protected double extractValueInternal(Instances instances) {
+		int classIndex = instances.classIndex();
+		if (classIndex < 0) {
+			throw new IllegalArgumentException("dataset hasn't class attribute");
+		}
+		double[] values = instances.attributeToDoubleArray(classIndex);
+		EntropyResult result = entropy(values, instances.classAttribute().numValues());
+		return result.entropy / meanMutualInformation;
+	}
 }

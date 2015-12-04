@@ -11,18 +11,18 @@ import weka.core.Instances;
  */
 public abstract class AbstractDiscretizeExtractor extends MetaFeatureExtractor {
 
-    @Override
-    public double extractValue(Instances instances) {
-        Instances discretizeInstances = InstancesUtils.discretize(instances);
-        if (discretizeInstances != null) {
-            return extractValueInternal(discretizeInstances);
-        }
-        return 0;
-    }
+	@Override
+	public double extractValue(Instances instances) throws Exception {
+		Instances discretizeInstances = InstancesUtils.discretize(instances);
+		if (discretizeInstances != null) {
+			return extractValueInternal(discretizeInstances);
+		}
+		return 0;
+	}
 
-    protected boolean isNonClassNominalAttribute(Instances instances, int attributeIndex) {
-        return isNonClassAttributeWithType(instances, attributeIndex, Attribute.NOMINAL);
-    }
+	protected boolean isNonClassNominalAttribute(Instances instances, int attributeIndex) {
+		return isNonClassAttributeWithType(instances, attributeIndex, Attribute.NOMINAL);
+	}
 
-    protected abstract double extractValueInternal(Instances instances);
+	protected abstract double extractValueInternal(Instances instances);
 }

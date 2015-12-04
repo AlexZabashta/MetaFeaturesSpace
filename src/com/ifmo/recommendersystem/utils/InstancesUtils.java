@@ -60,7 +60,7 @@ public class InstancesUtils {
 		return createInstances(filename, 0);
 	}
 
-	public static Instances selectAttributes(Instances instances, ASSearch search, ASEvaluation evaluation) {
+	public static Instances selectAttributes(Instances instances, ASSearch search, ASEvaluation evaluation) throws Exception {
 		AttributeSelection filter = new AttributeSelection();
 		filter.setSearch(search);
 		filter.setEvaluator(evaluation);
@@ -68,24 +68,22 @@ public class InstancesUtils {
 			filter.setInputFormat(instances);
 			return Filter.useFilter(instances, filter);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw e;
 		}
 	}
 
-	public static Instances discretize(Instances instances) {
+	public static Instances discretize(Instances instances) throws Exception {
 		Discretize discretize = new Discretize();
 		discretize.setUseBetterEncoding(true);
 		try {
 			discretize.setInputFormat(instances);
 			return Filter.useFilter(instances, discretize);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw e;
 		}
 	}
 
-	public static Instances reorder(Instances instances, int[] order) {
+	public static Instances reorder(Instances instances, int[] order) throws Exception {
 		String newOrder = String.join(",", IntStream.of(order).mapToObj(String::valueOf).collect(Collectors.toList()));
 		try {
 			Reorder reorder = new Reorder();
@@ -93,12 +91,11 @@ public class InstancesUtils {
 			reorder.setInputFormat(instances);
 			return Filter.useFilter(instances, reorder);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw e;
 		}
 	}
 
-	public static Instances removeAttributes(Instances instances, Instances pattern) {
+	public static Instances removeAttributes(Instances instances, Instances pattern) throws Exception {
 		Set<String> attributes = new HashSet<>(pattern.numAttributes());
 		for (int i = 0; i < pattern.numAttributes(); i++) {
 			attributes.add(pattern.attribute(i).name());
@@ -112,7 +109,7 @@ public class InstancesUtils {
 		return removeAttribute(instances, removingAttributes.toArray(new Integer[0]));
 	}
 
-	private static Instances removeAttribute(Instances instances, Integer[] removingAttributes) {
+	private static Instances removeAttribute(Instances instances, Integer[] removingAttributes) throws Exception {
 		Remove remove = new Remove();
 
 		int[] removingAttributesInt = new int[removingAttributes.length];
@@ -124,8 +121,7 @@ public class InstancesUtils {
 			remove.setInputFormat(instances);
 			return Filter.useFilter(instances, remove);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw e;
 		}
 	}
 
