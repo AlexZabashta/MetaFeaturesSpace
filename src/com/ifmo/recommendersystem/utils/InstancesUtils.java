@@ -64,35 +64,29 @@ public class InstancesUtils {
 		AttributeSelection filter = new AttributeSelection();
 		filter.setSearch(search);
 		filter.setEvaluator(evaluation);
-		try {
-			filter.setInputFormat(instances);
-			return Filter.useFilter(instances, filter);
-		} catch (Exception e) {
-			throw e;
-		}
+
+		filter.setInputFormat(instances);
+		return Filter.useFilter(instances, filter);
+
 	}
 
 	public static Instances discretize(Instances instances) throws Exception {
 		Discretize discretize = new Discretize();
 		discretize.setUseBetterEncoding(true);
-		try {
-			discretize.setInputFormat(instances);
-			return Filter.useFilter(instances, discretize);
-		} catch (Exception e) {
-			throw e;
-		}
+
+		discretize.setInputFormat(instances);
+		return Filter.useFilter(instances, discretize);
+
 	}
 
 	public static Instances reorder(Instances instances, int[] order) throws Exception {
 		String newOrder = String.join(",", IntStream.of(order).mapToObj(String::valueOf).collect(Collectors.toList()));
-		try {
-			Reorder reorder = new Reorder();
-			reorder.setOptions(new String[] { "-R", newOrder });
-			reorder.setInputFormat(instances);
-			return Filter.useFilter(instances, reorder);
-		} catch (Exception e) {
-			throw e;
-		}
+
+		Reorder reorder = new Reorder();
+		reorder.setOptions(new String[] { "-R", newOrder });
+		reorder.setInputFormat(instances);
+		return Filter.useFilter(instances, reorder);
+
 	}
 
 	public static Instances removeAttributes(Instances instances, Instances pattern) throws Exception {
@@ -116,13 +110,11 @@ public class InstancesUtils {
 		for (int i = 0; i < removingAttributes.length; i++) {
 			removingAttributesInt[i] = removingAttributes[i];
 		}
-		try {
-			remove.setAttributeIndicesArray(removingAttributesInt);
-			remove.setInputFormat(instances);
-			return Filter.useFilter(instances, remove);
-		} catch (Exception e) {
-			throw e;
-		}
+
+		remove.setAttributeIndicesArray(removingAttributesInt);
+		remove.setInputFormat(instances);
+		return Filter.useFilter(instances, remove);
+
 	}
 
 	static void printAttr(Instances instances) {

@@ -1,10 +1,9 @@
 package com.ifmo.recommendersystem.metafeatures.informationtheoretic;
 
-import static com.ifmo.recommendersystem.utils.InformationTheoreticUtils.entropy;
-
 import com.ifmo.recommendersystem.utils.InformationTheoreticUtils.EntropyResult;
-
 import weka.core.Instances;
+
+import static com.ifmo.recommendersystem.utils.InformationTheoreticUtils.entropy;
 
 /**
  * Created by warrior on 23.03.15.

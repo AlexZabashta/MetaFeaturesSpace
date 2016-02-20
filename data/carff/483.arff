@@ -1,0 +1,33 @@
+@relation dataset
+
+@attribute value_0 numeric
+@attribute value_1 numeric
+@attribute value_2 numeric
+@attribute value_3 numeric
+@attribute value_4 numeric
+@attribute value_5 numeric
+@attribute value_6 numeric
+@attribute value_7 numeric
+@attribute class {class_0,class_1,class_2,class_3,class_4,class_5,class_6,class_7,class_8,class_9,class_10,class_11,class_12,class_13,class_14,class_15,class_16,class_17}
+
+@data
+6.08,96,54.7,0,0,0,1913.88,1005,class_0
+5.73,89,54.2,1,0,0,1684.89,963,class_1
+6.22,87,53,0,1,0,1902.36,1035,class_2
+5.8,87,52.9,1,1,0,1860.24,1027,class_3
+7.99,101,57.8,0,2,0,2264.25,1281,class_4
+8.42,103,56.9,1,2,0,2216.4,1272,class_5
+7.44,103,56.6,0,3,0,1866.99,1051,class_6
+6.84,96,55.3,1,3,0,1850.64,1079,class_7
+6.48,127,53.1,0,4,0,1743.04,1034,class_8
+6.43,126,54.8,1,4,0,1709.3,1070,class_9
+7.99,101,57.2,1,5,1,1689.6,1173,class_10
+8.76,96,57.2,0,5,1,1806.31,1079,class_10
+6.32,93,57.2,1,6,1,2136.37,1067,class_11
+6.32,88,57.2,0,6,1,2018.92,1104,class_12
+7.52,113,59.2,1,9,1,1773.83,1204,class_12
+7.6,94,55.8,1,7,1,1966.81,1347,class_13
+7.62,85,57.2,0,7,1,2154.67,1439,class_14
+6.03,97,57.2,0,8,1,1767.56,1029,class_15
+6.59,114,56.5,1,8,1,1827.92,1100,class_16
+7.67,124,58.5,0,9,1,1971.63,1160,class_17

@@ -19,10 +19,13 @@ public class TestMF {
 		List<MetaFeatureExtractor> mfel = MetaFeatureExtractorsCollection.getMetaFeatureExtractors();
 
 		for (MetaFeatureExtractor e : mfel) {
-			 System.out.println(e.extractValue(instances));
+			System.out.println(e.extractValue(instances));
 		}
 
 		System.out.println(mfel.size());
 
+		
+		
+		
 	}
 }

@@ -1,8 +1,8 @@
 package com.ifmo.recommendersystem.metafeatures.informationtheoretic;
 
-import static com.ifmo.recommendersystem.utils.InformationTheoreticUtils.*;
-
 import weka.core.Instances;
+
+import static com.ifmo.recommendersystem.utils.InformationTheoreticUtils.*;
 
 /**
  * Created by warrior on 23.03.15.

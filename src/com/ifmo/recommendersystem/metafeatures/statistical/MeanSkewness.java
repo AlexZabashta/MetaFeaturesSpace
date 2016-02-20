@@ -1,7 +1,6 @@
 package com.ifmo.recommendersystem.metafeatures.statistical;
 
 import com.ifmo.recommendersystem.utils.StatisticalUtils;
-
 import weka.core.Instances;
 
 /**

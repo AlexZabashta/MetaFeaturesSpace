@@ -1,0 +1,57 @@
+@relation dataset
+
+@attribute value_0 numeric
+@attribute value_1 numeric
+@attribute value_2 numeric
+@attribute value_3 numeric
+@attribute class {class_0,class_1,class_2,class_3,class_4,class_5}
+
+@data
+0,1,0,747,class_0
+1,1,0,276,class_0
+0,0,0,765,class_0
+1,0,0,231,class_0
+0,1,1,321,class_0
+1,1,1,47,class_0
+0,0,1,216,class_0
+1,0,1,26,class_0
+0,1,0,629,class_1
+1,1,0,243,class_1
+0,0,0,652,class_1
+1,0,0,190,class_1
+0,1,1,805,class_1
+1,1,1,62,class_1
+0,0,1,350,class_1
+1,0,1,66,class_1
+0,1,0,512,class_2
+1,1,0,178,class_2
+0,0,0,483,class_2
+1,0,0,176,class_2
+0,1,1,944,class_2
+1,1,1,62,class_2
+0,0,1,384,class_2
+1,0,1,28,class_2
+0,1,0,453,class_3
+1,1,0,163,class_3
+0,0,0,449,class_3
+1,0,0,119,class_3
+0,1,1,797,class_3
+1,1,1,70,class_3
+0,0,1,340,class_3
+1,0,1,36,class_3
+0,1,0,464,class_4
+1,1,0,138,class_4
+0,0,0,399,class_4
+1,0,0,142,class_4
+0,1,1,577,class_4
+1,1,1,72,class_4
+0,0,1,218,class_4
+1,0,1,32,class_4
+0,1,0,1112,class_5
+1,1,0,369,class_5
+0,0,0,986,class_5
+1,0,0,389,class_5
+0,1,1,541,class_5
+1,1,1,121,class_5
+0,0,1,220,class_5
+1,0,1,59,class_5

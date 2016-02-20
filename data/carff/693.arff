@@ -1,0 +1,57 @@
+@relation dataset
+
+@attribute value_0 numeric
+@attribute value_1 numeric
+@attribute value_2 numeric
+@attribute value_3 numeric
+@attribute class {class_0,class_1,class_2,class_3,class_4,class_5,class_6,class_7,class_8,class_9,class_10,class_11,class_12,class_13,class_14,class_15,class_16,class_17,class_18,class_19}
+
+@data
+1,2.2,5.5,4.3,class_0
+2,2.2,4.5,4.6,class_0
+3,2.3,5.1,4.7,class_0
+34,3.2,5.5,5.4,class_0
+4,2,5.5,4.1,class_1
+13,3,5.2,4.4,class_1
+18,2.7,4.4,4.1,class_1
+19,3.1,4.7,4.1,class_1
+5,1.6,5.7,4.1,class_2
+39,4.6,5.5,5.2,class_2
+45,0,4.5,3.4,class_2
+6,1.4,5.1,5.2,class_3
+37,4.1,4.7,4.6,class_3
+7,1.8,4.3,5,class_4
+8,2.2,4.8,4.4,class_4
+25,3.3,4.8,4.5,class_4
+32,4,4.8,6,class_4
+9,2.9,5.6,4.2,class_5
+10,2.6,5.9,5.1,class_6
+26,3.8,5.5,4.6,class_6
+27,3.7,5.1,5.8,class_6
+11,2.4,6,5.1,class_7
+20,2.5,4.6,3.6,class_7
+21,2.4,6,3.1,class_7
+12,2.1,5.1,4.7,class_8
+36,3.6,4.4,4.4,class_8
+14,2.5,4.4,3.9,class_9
+22,2.3,5.6,4.8,class_9
+35,3.7,4.9,5,class_9
+15,2.7,5.5,5.4,class_10
+16,2.2,5.4,5.9,class_10
+17,2.4,4.1,4.2,class_11
+23,2.4,5.1,5.1,class_11
+30,2.7,4,4.5,class_11
+31,4.1,3.7,4.2,class_11
+24,1.9,4.7,5.1,class_12
+47,0,4.9,5.5,class_12
+28,3.5,5.2,5,class_13
+29,3.1,5,5.1,class_13
+48,0,5.9,5.6,class_13
+33,3.4,5.9,5.6,class_14
+44,3,4.9,4.8,class_14
+38,2,4.2,5.7,class_15
+40,4.1,4.9,5,class_16
+41,3.2,4.8,4.4,class_17
+42,2.9,4.5,5.7,class_17
+43,2.7,4.9,5.7,class_18
+46,0,4.2,5.5,class_19

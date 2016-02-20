@@ -5,8 +5,6 @@ import weka.core.Instances;
 
 import java.util.Arrays;
 
-import com.ifmo.recommendersystem.utils.MetaFeature;
-
 public abstract class MetaFeatureExtractor {
 	public abstract String getName();
 
@@ -36,24 +34,22 @@ public abstract class MetaFeatureExtractor {
 	 *            the fully qualified class name of the meta feature extractor
 	 * @return new instance of the meta feature extractor. If the extractor name
 	 *         is invalid return null
-	 * @throws ReflectiveOperationException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 */
-	public static MetaFeatureExtractor forName(String className) throws ReflectiveOperationException {
+	public static MetaFeatureExtractor forName(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class<?> clazz;
-		try {
-			clazz = Class.forName(className);
-		} catch (ClassNotFoundException e) {
-			throw e;
-		}
+
+		clazz = Class.forName(className);
+
 		if (!MetaFeatureExtractor.class.isAssignableFrom(clazz)) {
 			return null;
 		}
 		Object newInstance;
-		try {
-			newInstance = clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw e;
-		}
+
+		newInstance = clazz.newInstance();
+
 		return (MetaFeatureExtractor) newInstance;
 	}
 }

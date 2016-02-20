@@ -1,7 +1,6 @@
 package com.ifmo.recommendersystem.metafeatures.general;
 
 import com.ifmo.recommendersystem.metafeatures.MetaFeatureExtractor;
-
 import weka.core.Instances;
 
 /**

@@ -26,15 +26,27 @@ import weka.core.Instances;
 public class NearestNeighborImg {
 
 	public static void main(String[] args) throws IOException {
+		File dataFolder = new File("data/carff");
 
-		for (int rep = 0; rep < 30; rep++) {
+		Random random = new Random();
+		List<MetaFeatureExtractor> mfel = MetaFeatureExtractorsCollection.getMetaFeatureExtractors();
+
+		int nf = mfel.size();
+
+		List<Instances> data = new ArrayList<>();
+		for (File arff : dataFolder.listFiles()) {
+			try {
+				Instances instances = new Instances(new FileReader(arff));
+				instances.setClassIndex(instances.numAttributes() - 1);
+				data.add(instances);
+			} catch (Exception err) {
+				System.out.println(arff + " " + err.getMessage());
+			}
+		}
+
+		for (int rep = 0; rep < 100; rep++) {
 
 			List<double[]> points = new ArrayList<>();
-
-			Random random = new Random();
-			List<MetaFeatureExtractor> mfel = MetaFeatureExtractorsCollection.getMetaFeatureExtractors();
-
-			int nf = mfel.size();
 
 			int fx = random.nextInt(nf);
 			int fy = random.nextInt(nf);
@@ -46,46 +58,22 @@ public class NearestNeighborImg {
 			MetaFeatureExtractor ex = mfel.get(fx);
 			MetaFeatureExtractor ey = mfel.get(fy);
 
-			File dataFolder = new File("data/arff");
-
 			double l = Double.POSITIVE_INFINITY, r = Double.NEGATIVE_INFINITY;
 			double d = Double.POSITIVE_INFINITY, u = Double.NEGATIVE_INFINITY;
 
-			for (File arff : dataFolder.listFiles()) {
-
-				if (arff.length() > 200000) {
-					continue;
-				}
+			for (Instances instances : data) {
 				try {
-					boolean find = false;
-					Instances instances = InstancesUtils.createInstances(arff.getPath());
+					double x = ex.extractValue(instances);
+					double y = ey.extractValue(instances);
 
-					int n = instances.numAttributes();
-					for (int i = n - 1; i >= 0; i--) {
-						Attribute attribute = instances.attribute(i);
-						if (!attribute.isNumeric()) {
-							instances.setClassIndex(i);
-							find = true;
-							break;
-						}
-					}
+					l = Math.min(l, x);
+					d = Math.min(d, y);
+					r = Math.max(r, x);
+					u = Math.max(u, y);
 
-					if (find) {
-						double x = ex.extractValue(instances);
-						double y = ey.extractValue(instances);
-
-						l = Math.min(l, x);
-						d = Math.min(d, y);
-						r = Math.max(r, x);
-						u = Math.max(u, y);
-
-						points.add(new double[] { x, y });
-						System.out.println(arff);
-					} else {
-						System.out.println(arff + " classless");
-					}
+					points.add(new double[] { x, y });
 				} catch (Exception err) {
-					System.out.println(arff + " " + err);
+					System.out.println(err.getMessage());
 				}
 			}
 
@@ -117,7 +105,7 @@ public class NearestNeighborImg {
 								image.setRGB(x, h - y - 1, 0);
 							}
 
-						} 
+						}
 
 					}
 				}
@@ -125,7 +113,7 @@ public class NearestNeighborImg {
 
 			System.out.println(points.size());
 
-			String imgName = ex.getName() + " " + ey.getName() + ".png";
+			String imgName = fx + " " + fy + ".png";
 			ImageIO.write(image, "png", new File("imgs/" + imgName));
 
 		}

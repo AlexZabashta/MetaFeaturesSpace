@@ -1,0 +1,55 @@
+@relation dataset
+
+@attribute value_0 numeric
+@attribute value_1 numeric
+@attribute value_2 numeric
+@attribute value_3 numeric
+@attribute class {class_0,class_1}
+
+@data
+1,1,1,13876,class_0
+3,1,3,18701,class_0
+6,2,2,20872,class_0
+11,3,1,14975,class_0
+12,3,2,21371,class_0
+13,3,3,19800,class_0
+15,4,3,20263,class_0
+20,5,1,15965,class_0
+22,6,3,21352,class_0
+24,6,2,22884,class_0
+25,7,1,16978,class_0
+27,8,1,17404,class_0
+28,8,3,22184,class_0
+32,10,3,23174,class_0
+33,10,2,23780,class_0
+34,11,2,25410,class_0
+37,12,3,24170,class_0
+39,13,2,26330,class_0
+41,15,3,25685,class_0
+42,16,2,27837,class_0
+2,1,3,11608,class_1
+4,1,2,11283,class_1
+5,1,3,11767,class_1
+7,2,2,11772,class_1
+8,2,1,10535,class_1
+9,2,3,12195,class_1
+10,3,2,12313,class_1
+14,4,1,11417,class_1
+16,4,3,13231,class_1
+17,4,2,12884,class_1
+18,5,2,13245,class_1
+19,5,3,13677,class_1
+21,6,1,12336,class_1
+23,6,2,13839,class_1
+26,8,2,14803,class_1
+29,8,1,13548,class_1
+30,10,1,14467,class_1
+31,10,2,15942,class_1
+35,11,1,14861,class_1
+36,12,2,16882,class_1
+38,13,1,15990,class_1
+40,14,2,17949,class_1
+43,16,2,18838,class_1
+44,16,1,17483,class_1
+45,17,2,19207,class_1
+46,20,1,19346,class_1

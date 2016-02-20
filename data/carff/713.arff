@@ -1,0 +1,60 @@
+@relation dataset
+
+@attribute value_0 numeric
+@attribute value_1 numeric
+@attribute value_2 numeric
+@attribute class {class_0,class_1}
+
+@data
+1,1,5,class_0
+2,3,8,class_0
+3,3,11,class_0
+27,4,12,class_0
+29,3,10,class_0
+30,5.5,13,class_0
+31,3,8,class_0
+32,2,7.5,class_0
+33,2,8,class_0
+34,2,8,class_0
+35,2,7,class_0
+36,3,10,class_0
+38,2,10,class_0
+40,2,10,class_0
+42,1.5,10,class_0
+43,1.5,8,class_0
+44,1.5,11,class_0
+46,1,7,class_0
+47,1,5,class_0
+48,1,7,class_0
+49,0.5,8,class_0
+50,0.5,6,class_0
+51,0,7.5,class_0
+52,0,2.5,class_0
+4,3,9,class_1
+5,5,9.5,class_1
+6,3.5,10,class_1
+7,3,12,class_1
+8,4.5,10,class_1
+9,5,11.5,class_1
+10,5,10,class_1
+11,6,11,class_1
+12,5,10,class_1
+13,4,10.5,class_1
+14,6,10,class_1
+15,5,11,class_1
+16,6.5,11,class_1
+17,4,11.5,class_1
+18,6,12,class_1
+19,3,12.5,class_1
+20,6,13,class_1
+21,5,11,class_1
+22,8,11,class_1
+23,4.5,11,class_1
+24,4,13,class_1
+25,4,11,class_1
+26,6.5,13,class_1
+28,5,14,class_1
+37,2,7,class_1
+39,2,8,class_1
+41,2,9,class_1
+45,1,10,class_1

@@ -9,16 +9,20 @@ public class MetaFeatureExtractorsCollection {
 	public static List<MetaFeatureExtractor> getMetaFeatureExtractors() {
 		List<MetaFeatureExtractor> metaFeatureExtractors = new ArrayList<>();
 
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.general.NumberOfInstances());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.general.NumberOfFeatures());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.general.NumberOfClasses());
-//		
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.general.DataSetDimensionality());
-//		
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.statistical.MeanLinearCorrelationCoefficient());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.statistical.MeanSkewness());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.statistical.MeanKurtosis());
-		
+		// metaFeatureExtractors.add(new
+		// com.ifmo.recommendersystem.metafeatures.general.NumberOfInstances());
+		// metaFeatureExtractors.add(new
+		// com.ifmo.recommendersystem.metafeatures.general.NumberOfFeatures());
+		// metaFeatureExtractors.add(new
+		// com.ifmo.recommendersystem.metafeatures.general.NumberOfClasses());
+		//
+		// metaFeatureExtractors.add(new
+		// com.ifmo.recommendersystem.metafeatures.general.DataSetDimensionality());
+		//
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.statistical.MeanLinearCorrelationCoefficient());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.statistical.MeanSkewness());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.statistical.MeanKurtosis());
+
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.informationtheoretic.NormalizedClassEntropy());
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.informationtheoretic.MeanNormalizedFeatureEntropy());
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.informationtheoretic.MeanMutualInformation());
@@ -26,21 +30,21 @@ public class MetaFeatureExtractorsCollection {
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.informationtheoretic.EquivalentNumberOfFeatures());
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.informationtheoretic.NoiseSignalRatio());
 
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeDevAttr());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeDevBranch());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeDevLevel());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeHeight());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeLeavesNumber());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMaxAttr());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMaxBranch());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMaxLevel());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMeanAttr());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMeanBranch());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMeanLevel());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMinAttr());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMinBranch());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeNodeNumber());
-//		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeWidth());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeDevAttr());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeDevBranch());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeDevLevel());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeHeight());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeLeavesNumber());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMaxAttr());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMaxBranch());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMaxLevel());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMeanAttr());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMeanBranch());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMeanLevel());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMinAttr());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeMinBranch());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeNodeNumber());
+		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.pruned.PrunedTreeWidth());
 
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.unpruned.UnprunedTreeDevAttr());
 		metaFeatureExtractors.add(new com.ifmo.recommendersystem.metafeatures.decisiontree.unpruned.UnprunedTreeDevBranch());
@@ -60,4 +64,15 @@ public class MetaFeatureExtractorsCollection {
 
 		return metaFeatureExtractors;
 	}
+
+	public static void main(String[] args) {
+		List<MetaFeatureExtractor> mfel = getMetaFeatureExtractors();
+		int n = mfel.size();
+
+		for (int i = 0; i < n; i++) {
+			System.out.printf("%2d %s%n", i, mfel.get(i).getClass().getSimpleName());
+		}
+
+	}
+
 }
