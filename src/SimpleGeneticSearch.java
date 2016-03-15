@@ -22,6 +22,7 @@ import com.ifmo.recommendersystem.utils.InstancesUtils;
 import com.ifmo.recommendersystem.utils.MetaFeatureExtractorsCollection;
 import com.sun.prism.Image;
 
+import fus.Fusion;
 import weka.core.Attribute;
 import weka.core.Instances;
 
@@ -92,10 +93,12 @@ public class SimpleGeneticSearch {
 
 		Random random = new Random();
 		List<MetaFeatureExtractor> mfel = MetaFeatureExtractorsCollection.getMetaFeatureExtractors();
-		int fx = 6, fy = 13;
+		int fx = 33, fy = 38;
 
-		double tx = 0.35, ty = 0.4;
-		int top = 35;
+		boolean test = false;
+
+		double tx = 0.8, ty = 0.8;
+		int top = 20;
 
 		MetaFeatureExtractor ex = mfel.get(fx);
 		MetaFeatureExtractor ey = mfel.get(fy);
@@ -119,7 +122,7 @@ public class SimpleGeneticSearch {
 		double l = Double.POSITIVE_INFINITY, r = Double.NEGATIVE_INFINITY;
 		double d = Double.POSITIVE_INFINITY, u = Double.NEGATIVE_INFINITY;
 
-		for (int step = 0; step < 30; step++) {
+		for (int step = 0; step < 20; step++) {
 			List<double[]> points = new ArrayList<>();
 			for (Instances instances : data) {
 				try {
@@ -188,8 +191,8 @@ public class SimpleGeneticSearch {
 					p[1] = (p[1] - d) / (u - d);
 				}
 
-				if (step == 0 && Math.hypot(p[0] - tx, p[1] - ty) < 0.2) {
-					 p[0] = p[1] = 100;
+				if (!test && step == 0 && Math.hypot(p[0] - tx, p[1] - ty) < 0.2) {
+					p[0] = p[1] = 100;
 				}
 			}
 
@@ -207,6 +210,7 @@ public class SimpleGeneticSearch {
 				best = Math.min(best, dist[i]);
 			}
 			System.out.println(best);
+			print("step" + step, points, tx, ty);
 
 			Arrays.sort(order, new Comparator<Integer>() {
 				@Override
@@ -231,7 +235,10 @@ public class SimpleGeneticSearch {
 				}
 			}
 			data = betterData;
-			print("step" + step, points, tx, ty);
+
+			if (test) {
+				break;
+			}
 		}
 
 	}
