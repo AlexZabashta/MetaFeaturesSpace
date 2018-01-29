@@ -25,7 +25,12 @@ public class MeanKurtosis extends AbstractStatisticalExtractor {
                 double[] values = instances.attributeToDoubleArray(i);
                 double mean = StatisticalUtils.mean(values);
                 double variance = StatisticalUtils.variance(values, mean);
-                sum += StatisticalUtils.centralMoment(values, 4, mean) / Math.pow(variance, 2);
+
+                if (variance < 1e-7) {
+                    sum += 1.5;
+                } else {
+                    sum += StatisticalUtils.centralMoment(values, 4, mean) / Math.pow(variance, 2);
+                }
             }
         }
         return sum / count;

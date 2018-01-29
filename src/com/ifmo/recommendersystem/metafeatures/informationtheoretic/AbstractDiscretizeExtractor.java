@@ -12,11 +12,15 @@ public abstract class AbstractDiscretizeExtractor extends MetaFeatureExtractor {
 
     @Override
     public double extractValue(Instances instances) throws Exception {
-        Instances discretizeInstances = InstancesUtils.discretize(instances);
-        if (discretizeInstances != null) {
-            return extractValueInternal(discretizeInstances);
+        try {
+            Instances discretizeInstances = InstancesUtils.discretize(instances);
+            if (discretizeInstances != null) {
+                return extractValueInternal(discretizeInstances);
+            }
+            return 0;
+        } catch (Exception exception) {
+            return 0;
         }
-        return 0;
     }
 
     protected boolean isNonClassNominalAttribute(Instances instances, int attributeIndex) {

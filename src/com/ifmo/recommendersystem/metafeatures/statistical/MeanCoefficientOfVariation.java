@@ -18,16 +18,12 @@ public class MeanCoefficientOfVariation extends AbstractStatisticalExtractor {
     }
 
     @Override
-	public double extractValue(Instances instances) {
-        return IntStream.range(0, instances.numAttributes())
-                .filter(i-> isNonClassNumericalAttribute(instances, i))
-                .mapToDouble(i -> {
-                    double[] values = instances.attributeToDoubleArray(i);
-                    double mean = StatisticalUtils.mean(values);
-                    double variance = StatisticalUtils.variance(values, mean);
-                    return Math.sqrt(variance) / mean;
-                })
-                .average()
-                .getAsDouble();
+    public double extractValue(Instances instances) {
+        return IntStream.range(0, instances.numAttributes()).filter(i -> isNonClassNumericalAttribute(instances, i)).mapToDouble(i -> {
+            double[] values = instances.attributeToDoubleArray(i);
+            double mean = StatisticalUtils.mean(values);
+            double variance = StatisticalUtils.variance(values, mean);
+            return Math.sqrt(variance) / mean;
+        }).average().getAsDouble();
     }
 }

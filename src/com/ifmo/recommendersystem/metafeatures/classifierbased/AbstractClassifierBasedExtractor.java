@@ -32,7 +32,7 @@ public abstract class AbstractClassifierBasedExtractor extends MetaFeatureExtrac
     }
 
     @Override
-	public double extractValue(Instances instances) throws Exception {
+    public double extractValue(Instances instances) throws Exception {
         String extractorName = getClass().getSimpleName();
         double[] values = new double[rounds];
         for (int i = 0; i < rounds; i++) {

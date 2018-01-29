@@ -18,7 +18,7 @@ public class MeanStandardDeviation extends AbstractStatisticalExtractor {
     }
 
     @Override
-	public double extractValue(Instances instances) {
+    public double extractValue(Instances instances) {
         return IntStream.range(0, instances.numAttributes())
                 .filter(i -> isNonClassNumericalAttribute(instances, i))
                 .mapToDouble(i -> Math.sqrt(StatisticalUtils.variance(instances.attributeToDoubleArray(i))))
