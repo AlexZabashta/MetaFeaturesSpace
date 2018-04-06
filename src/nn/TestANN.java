@@ -90,64 +90,6 @@ public class TestANN {
                             w[i] = random.nextGaussian() / 10;
                         }
 
-                        for (int i = 0; i < h1; i++) {
-
-                            int dendrites = n + 1;
-
-                            int[] from = new int[dendrites];
-                            int[] wid = new int[dendrites];
-
-                            from[0] = n;
-                            wid[0] = numWeights++;
-                            for (int d = 1; d < dendrites; d++) {
-                                from[d] = d - 1;
-                                wid[d] = numWeights++;
-                            }
-
-                            int to = neurons.size() + n + 1;
-
-                            Neuron neuron = new Sum(dendrites, from, wid, to, new Tanh());
-                            neurons.add(neuron);
-                        }
-
-                        for (int i = 0; i < h2; i++) {
-                            int dendrites = h1 + 1;
-
-                            int[] from = new int[dendrites];
-                            int[] wid = new int[dendrites];
-
-                            from[0] = n;
-                            wid[0] = numWeights++;
-                            for (int d = 1; d < dendrites; d++) {
-                                from[d] = d - 1 + n + 1;
-                                wid[d] = numWeights++;
-                            }
-
-                            int to = neurons.size() + n + 1;
-
-                            Neuron neuron = new Sum(dendrites, from, wid, to, new Tanh());
-                            neurons.add(neuron);
-                        }
-
-                        for (int i = 0; i < m; i++) {
-                            int dendrites = h2 + 1;
-
-                            int[] from = new int[dendrites];
-                            int[] wid = new int[dendrites];
-
-                            from[0] = n;
-                            wid[0] = numWeights++;
-                            for (int d = 1; d < dendrites; d++) {
-                                from[d] = d - 1 + n + 1 + h1;
-                                wid[d] = numWeights++;
-                            }
-
-                            int to = neurons.size() + n + 1;
-
-                            Neuron neuron = new Sum(dendrites, from, wid, to, new Tanh());
-                            neurons.add(neuron);
-                        }
-
                         // System.out.println(Arrays.toString(w));
 
                         w = Arrays.copyOf(w, numWeights);
