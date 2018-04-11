@@ -8,7 +8,7 @@ public class NeuralNetwork implements BPLearn {
 
     final Neuron[] neurons;
 
-    final int inpSize, outSize, numWeights, size;
+    public final int inpSize, outSize, numWeights, size;
 
     public NeuralNetwork(int inpSize, int outSize, int numWeights, Neuron... neurons) {
         this.inpSize = inpSize;

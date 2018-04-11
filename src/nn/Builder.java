@@ -1,6 +1,11 @@
 package nn;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import nn.act.Tanh;
 import nn.fld.Fold;
@@ -23,6 +28,48 @@ public class Builder {
             int[] wid = new int[length + 1];
             for (int d = 0; d <= length; d++) {
                 wid[d] = numWeights++;
+            }
+            neurons[i] = new Neuron(length, sid, wid, inpSize + i, fold);
+        }
+        return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
+    }
+
+    public static NeuralNetwork disperseLayer(int inpSize, int outSize, int deg, Random random, Fold fold) {
+        Neuron[] neurons = new Neuron[outSize];
+
+        Set<Integer>[] connections = new Set[outSize];
+
+        for (int t = 0; t < outSize; t++) {
+            Set<Integer> hashSet = new HashSet<>();
+            for (int d = 0; d < deg; d++) {
+                int f = random.nextInt(inpSize);
+                hashSet.add(f);
+            }
+            connections[t] = (hashSet);
+        }
+
+        for (int f = 0; f < inpSize; f++) {
+            for (int d = 0; d < deg; d++) {
+                int t = random.nextInt(outSize);
+                connections[t].add(f);
+            }
+        }
+
+        int numWeights = 0;
+
+        for (int i = 0; i < outSize; i++) {
+            Set<Integer> hashSet = connections[i];
+            int length = hashSet.size();
+
+            int[] wid = new int[length + 1];
+            for (int d = 0; d <= length; d++) {
+                wid[d] = numWeights++;
+            }
+
+            int[] sid = new int[length];
+            int p = 0;
+            for (int s : hashSet) {
+                sid[p++] = s;
             }
             neurons[i] = new Neuron(length, sid, wid, inpSize + i, fold);
         }
@@ -161,49 +208,35 @@ public class Builder {
         return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
     }
 
+    static void testConnections() {
+        Fold fold = new Sum(new Tanh());
+
+        NeuralNetwork[] layers = new NeuralNetwork[6];
+
+        layers[0] = cnnSharedLayer(256, 64, 1, 17, 17, 2, fold);
+        layers[1] = maxPoolLayer(240, 48, 2, 4, 2, 3, fold);
+        layers[2] = cnnSharedLayer(60, 24, 3, 5, 5, 4, fold);
+        layers[3] = maxPoolLayer(56, 20, 4, 4, 2, 5, fold);
+        layers[4] = cnnSharedLayer(14, 10, 5, 7, 3, 6, fold);
+        layers[5] = maxPoolLayer(8, 8, 6, 4, 2, 5, fold);
+
+        NeuralNetwork full = connect(layers);
+
+        System.out.println(full.inpSize);
+        System.out.println(full.outSize);
+        System.out.println(full.numWeights);
+        System.out.println(full.size);
+    }
+
     public static void main(String[] args) {
         Fold fold = new Sum(new Tanh());
-        {
-            NeuralNetwork network = cnnSharedLayer(256, 64, 1, 17, 17, 2, fold);
-            System.out.println(network.inpSize + " " + network.outSize);
-            System.out.println(network.size);
-            System.out.println(network.numWeights);
-        }
 
-        {
-            NeuralNetwork network = maxPoolLayer(240, 48, 2, 4, 2, 3, fold);
-            System.out.println(network.inpSize + " " + network.outSize);
-            System.out.println(network.size);
-            System.out.println(network.numWeights);
-        }
+        NeuralNetwork nn = disperseLayer(12, 15, 4, new Random(), fold);
 
-        {
-            NeuralNetwork network = cnnSharedLayer(60, 24, 3, 5, 5, 4, fold);
-            System.out.println(network.inpSize + " " + network.outSize);
-            System.out.println(network.size);
-            System.out.println(network.numWeights);
-        }
-
-        {
-            NeuralNetwork network = maxPoolLayer(56, 20, 4, 4, 2, 5, fold);
-            System.out.println(network.inpSize + " " + network.outSize);
-            System.out.println(network.size);
-            System.out.println(network.numWeights);
-        }
-
-        {
-            NeuralNetwork network = cnnSharedLayer(14, 10, 5, 7, 3, 6, fold);
-            System.out.println(network.inpSize + " " + network.outSize);
-            System.out.println(network.size);
-            System.out.println(network.numWeights);
-        }
-
-        {
-            NeuralNetwork network = maxPoolLayer(8, 8, 6, 4, 2, 5, fold);
-            System.out.println(network.inpSize + " " + network.outSize);
-            System.out.println(network.size);
-            System.out.println(network.numWeights);
-        }
+        System.out.println(nn.inpSize);
+        System.out.println(nn.outSize);
+        System.out.println(nn.numWeights);
+        System.out.println(nn.size);
 
     }
 }
