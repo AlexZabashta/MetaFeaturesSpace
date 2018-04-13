@@ -106,13 +106,13 @@ public class Builder {
 
         Neuron[] neurons = Arrays.copyOf(layers[0].neurons, numNeurons);
 
-        int indexOffset = 0, weightOffset = 0;
-        int p = 0;
+        int indexOffset = inpSize, weightOffset = 0;
+        int p = layers[0].neurons.length;
         for (int i = 1; i < depth; i++) {
             indexOffset += layers[i - 1].neurons.length;
             weightOffset += layers[i - 1].numWeights;
             for (Neuron neuron : layers[i].neurons) {
-                neurons[p++] = neuron.copyWithOffset(indexOffset, weightOffset);
+                neurons[p++] = neuron.copyWithOffset(indexOffset - layers[i].inpSize, weightOffset);
             }
         }
         return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
@@ -228,7 +228,8 @@ public class Builder {
         System.out.println(full.size);
     }
 
-    public static void main(String[] args) {
+    static void test() {
+
         Fold fold = new Sum(new Tanh());
 
         NeuralNetwork nn = disperseLayer(12, 15, 4, new Random(), fold);
@@ -237,6 +238,13 @@ public class Builder {
         System.out.println(nn.outSize);
         System.out.println(nn.numWeights);
         System.out.println(nn.size);
+    }
 
+    public static void main(String[] args) {
+        Fold fold = new Sum(new Tanh());
+        NeuralNetwork a = disperseLayer(7, 5, 1, new Random(23), fold);
+        NeuralNetwork b = disperseLayer(5, 3, 1, new Random(23), fold);
+        NeuralNetwork c = connect(a, b);
+        System.out.println(a.size + " " + b.size + " " + c.size);
     }
 }

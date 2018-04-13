@@ -38,8 +38,20 @@ public class TestCNN {
         layers[3] = Builder.maxPoolLayer(56, 56, 4, 4, 4, 5, new SoftMax(new Linear()));
         layers[4] = Builder.cnnSharedLayer(14, 14, 5, 7, 7, 5, new Sum(new ReLU()));
 
-        layers[5] = Builder.disperseLayer(layers[4].outSize, 30, 6, random, new Sum(new Tanh()));
-        layers[6] = Builder.fullLayer(30, k, new Sum(new Tanh()));
+        layers[5] = Builder.disperseLayer(layers[4].outSize, 40, 10, random, new Sum(new Tanh()));
+        layers[6] = Builder.fullLayer(layers[5].outSize, k, new Sum(new Tanh()));
+
+        return Builder.connect(layers);
+    }
+
+    static NeuralNetwork buildMNIST() {
+        NeuralNetwork[] layers = new NeuralNetwork[5];
+
+        layers[0] = Builder.cnnSharedLayer(28, 28, 1, 9, 9, 3, new SoftMax(new Linear()));
+        layers[1] = Builder.cnnSharedLayer(20, 20, 3, 9, 9, 5, new Sum(new ReLU()));
+        layers[2] = Builder.cnnSharedLayer(12, 12, 5, 6, 6, 7, new Sum(new ReLU()));
+        layers[3] = Builder.disperseLayer(layers[2].outSize, 30, 20, random, new Sum(new Tanh()));
+        layers[4] = Builder.fullLayer(layers[3].outSize, 10, new Sum(new Tanh()));
 
         return Builder.connect(layers);
     }

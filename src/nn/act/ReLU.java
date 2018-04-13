@@ -4,14 +4,22 @@ import nn.Activation;
 
 public class ReLU implements Activation {
 
+    double a = 0.01;
+
     @Override
     public double activate(double x) {
-        return Math.max(0, x);
+        if (x < 0) {
+            return x * a;
+        } else {
+            return x;
+        }
+
+        // return Math.max(0, x);
     }
 
     @Override
     public double derivative(double x) {
-        return (x < 0) ? 0 : 1;
+        return (x < 0) ? a : 1;
     }
 
 }

@@ -45,15 +45,11 @@ public class Neuron implements BPLearn {
     }
 
     @Override
-    public void weightsError(double[] x, double[] y, double[] e, double[] e_dy, double[] w, double[] dw, double[] cnt) {
+    public void weightsError(double[] x, double[] y, double[] e, double[] e_dy, double[] w, double[] dw) {
         for (int d = 0; d < length; d++) {
             dw[wid[d]] += y[sid[d]] * e_dy[to];
-            cnt[wid[d]] += 1;
         }
-        {
-            dw[wid[length]] += e_dy[to];
-            cnt[wid[length]] += 1;
-        }
+        dw[wid[length]] += e_dy[to];
     }
 
     @Override

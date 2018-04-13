@@ -8,13 +8,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class BinImgFileReader implements Closeable {
+public class BinImgFileReader implements Closeable, Iterable<LabledImg>, Iterator<LabledImg> {
 
     static void flipH(int[][] matrix) {
         int n = matrix.length;
@@ -52,11 +53,15 @@ public class BinImgFileReader implements Closeable {
         }
     }
 
-    final BlockingQueue<double[][][]> queue = new ArrayBlockingQueue<>(16, false);
+    private boolean open = true;
+
+    final BlockingQueue<LabledImg> queue = new ArrayBlockingQueue<>(16, false);
 
     final Thread thread;
 
-    public BinImgFileReader(String path) {
+    final int n;
+
+    public BinImgFileReader(String path, long seed) {
 
         final List<File[]> list = new ArrayList<>();
 
@@ -64,58 +69,42 @@ public class BinImgFileReader implements Closeable {
             list.add((folder.listFiles()));
         }
 
-        final int n = list.size();
+        n = list.size();
 
         final int k = 256;
 
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                final Random random = new Random();
+                final Random random = new Random(seed);
                 try {
-                    while (true) {
+                    while (open) {
 
                         int c = random.nextInt(n);
                         File[] files = list.get(c);
                         File file = files[random.nextInt(files.length)];
 
-                        int[][] matrix = new int[k][k];
+                        double[] vector = new double[256 * 256 * 3];
 
                         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+                            int p = 0;
                             for (int x = 0; x < k; x++) {
                                 for (int y = 0; y < k; y++) {
-                                    matrix[x][y] = raf.readInt();
+                                    int color = raf.readInt();
+                                    vector[p++] = (color & 0xFF) / 255.0;
+                                    color >>>= 8;
+                                    vector[p++] = (color & 0xFF) / 255.0;
+                                    color >>>= 8;
+                                    vector[p++] = (color & 0xFF) / 255.0;
                                 }
                             }
                         } catch (IOException e) {
                             System.err.println(e);
+                            open = false;
+                            break;
                         }
 
-                        if (random.nextBoolean()) {
-                            transpose(matrix);
-                        }
-
-                        if (random.nextBoolean()) {
-                            flipH(matrix);
-                        }
-
-                        if (random.nextBoolean()) {
-                            flipV(matrix);
-                        }
-
-                        double[][][] rgb = new double[3][256][256];
-
-                        for (int x = 0; x < k; x++) {
-                            for (int y = 0; y < k; y++) {
-                                int color = matrix[x][y];
-                                rgb[2][x][y] = (color & 0xFF) / 255.0;
-                                color >>>= 8;
-                                rgb[1][x][y] = (color & 0xFF) / 255.0;
-                                color >>>= 8;
-                                rgb[0][x][y] = (color & 0xFF) / 255.0;
-                            }
-                        }
-                        queue.put(rgb);
+                        queue.put(new LabledImg(vector, c));
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -128,17 +117,30 @@ public class BinImgFileReader implements Closeable {
 
     @Override
     public void close() {
-        if (thread != null) {
-            thread.interrupt();
-        }
+        open = false;
     }
 
-    public double[][][] next() {
+    @Override
+    public Iterator<LabledImg> iterator() {
+        return this;
+    }
 
-        try {
-            return queue.take();
-        } catch (InterruptedException e) {
-            return null;
+    @Override
+    public boolean hasNext() {
+        return open || !queue.isEmpty();
+    }
+
+    @Override
+    public LabledImg next() {
+        if (open) {
+            try {
+                return queue.take();
+            } catch (InterruptedException e) {
+                open = false;
+                return null;
+            }
+        } else {
+            return queue.poll();
         }
     }
 }

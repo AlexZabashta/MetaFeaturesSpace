@@ -5,5 +5,5 @@ public interface BPLearn {
 
     void backwardError(double[] x, double[] y, double[] e, double[] e_dy, double[] w);
 
-    void weightsError(double[] x, double[] y, double[] e, double[] e_dy, double[] w, double[] dw, double[] cnt);
+    void weightsError(double[] x, double[] y, double[] e, double[] e_dy, double[] w, double[] dw);
 }

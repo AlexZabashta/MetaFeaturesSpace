@@ -19,14 +19,14 @@ public class NeuralNetwork implements BPLearn {
         this.size = inpSize + neurons.length;
     }
 
-    double[] get(double[] input, double[] w) {
+    public double[] get(double[] input, double[] w) {
         double[] x = Arrays.copyOf(input, size);
         double[] y = x.clone();
         forward(x, y, w);
         return Arrays.copyOfRange(y, size - outSize, size);
     }
 
-    void update(double[] input, double[] output, double[] w, double learningRate) {
+    public double[] update(double[] input, double[] output, double[] w, double learningRate) {
         double[] x = Arrays.copyOf(input, size);
         double[] y = x.clone();
         forward(x, y, w);
@@ -42,14 +42,13 @@ public class NeuralNetwork implements BPLearn {
         double[] dw = new double[numWeights];
         double[] cnt = new double[numWeights];
 
-        weightsError(x, y, e_dy, e_dy, w, dw, cnt);
+        weightsError(x, y, e_dy, e_dy, w, dw);
 
         for (int wid = 0; wid < numWeights; wid++) {
-            if (cnt[wid] > 0) {
-                w[wid] -= learningRate * dw[wid] / cnt[wid];
-            }
+            w[wid] -= learningRate * dw[wid];
         }
 
+        return Arrays.copyOfRange(y, size - outSize, size);
     }
 
     @Override
@@ -67,9 +66,9 @@ public class NeuralNetwork implements BPLearn {
     }
 
     @Override
-    public void weightsError(double[] x, double[] y, double[] e, double[] e_dy, double[] w, double[] dw, double[] cnt) {
+    public void weightsError(double[] x, double[] y, double[] e, double[] e_dy, double[] w, double[] dw) {
         for (int i = 0; i < neurons.length; i++) {
-            neurons[i].weightsError(x, y, e, e_dy, w, dw, cnt);
+            neurons[i].weightsError(x, y, e, e_dy, w, dw);
         }
     }
 

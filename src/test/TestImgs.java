@@ -6,7 +6,12 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -14,21 +19,52 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 
+import nn.NeuralNetwork;
+
 public class TestImgs extends JFrame {
 
-    BinImgFileReader reader = new BinImgFileReader("imgdata\\bin");
+    final int n = 101;
+    private double[][] lm = new double[n][n];
+    private double la = 1.0 / n;
 
-    public void draw() {
+    final double alpha = 0.95;
 
-        // Icon icon = new
+    public void draw(int iter, int[][] cm) {
 
-        double[][][] rgb = reader.next();
+        int all = 0;
+        int cor = 0;
 
-        BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < n; i++) {
+            int sum = 0;
+            for (int j = 0; j < n; j++) {
+                sum += cm[i][j];
+            }
 
-        for (int x = 0; x < 256; x++) {
-            for (int y = 0; y < 256; y++) {
-                Color color = new Color((float) rgb[0][x][y], (float) rgb[1][x][y], (float) rgb[2][x][y]);
+            all += sum;
+            cor += cm[i][i];
+
+            if (sum > 0) {
+                for (int j = 0; j < n; j++) {
+                    lm[i][j] = lm[i][j] * alpha + cm[i][j] * (1.0 - alpha) / sum;
+                }
+            }
+        }
+
+        la = la * alpha + cor * (1.0 - alpha) / all;
+
+        String state = String.format(Locale.ENGLISH, "%3d %8.3f", iter, la * 100);
+
+        setTitle(state);
+        System.out.println(state);
+
+        int s = 4;
+        int m = s * n;
+        BufferedImage image = new BufferedImage(m, m, BufferedImage.TYPE_INT_RGB);
+
+        for (int x = 0; x < m; x++) {
+            for (int y = 0; y < m; y++) {
+                float g = (float) (1 - lm[y / s][x / s]);
+                Color color = new Color(g, g, g);
                 image.setRGB(x, y, color.getRGB());
             }
         }
@@ -39,26 +75,142 @@ public class TestImgs extends JFrame {
 
     }
 
+    class NNTester implements Runnable {
+        final FastBinImg reader = new FastBinImg("imgdata\\bin", 1234);
+        final TestImgs testImgs;
+
+        public NNTester(TestImgs testImgs) {
+            this.testImgs = testImgs;
+        }
+
+        @Override
+        public void run() {
+
+            NeuralNetwork nn = TestCNN.build(n);
+
+            Random random = new Random();
+
+            double[] w = new double[nn.numWeights];
+
+            for (int i = 0; i < w.length; i++) {
+                w[i] = random.nextGaussian() / 10;
+            }
+
+            for (int iter = 1; iter <= 3000; iter++) {
+                int[][] cm = new int[n][n];
+                for (int cnt = 0; cnt < 100; cnt++) {
+
+                    LabledImg img = reader.next();
+                    int e = img.label;
+
+                    double[] input = img.vector;
+
+                    double[] output = new double[n];
+                    Arrays.fill(output, -0.9999987654321);
+                    output[e] *= -1;
+
+                    output = nn.update(input, output, w, 0.001);
+
+                    int r = random.nextInt(n);
+
+                    for (int i = 0; i < n; i++) {
+                        if (output[i] > output[r]) {
+                            r = i;
+                        }
+                    }
+
+                    cm[e][r] += 1;
+
+                }
+                testImgs.draw(iter, cm);
+            }
+        }
+
+    }
+
+    class MNIST implements Runnable {
+        final TestImgs testImgs;
+
+        public MNIST(TestImgs testImgs) {
+            this.testImgs = testImgs;
+        }
+
+        @Override
+        public void run() {
+
+            List<List<Digit>> digits = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                digits.add(new ArrayList<>());
+            }
+
+            for (Digit digit : Digit.readDigits("imgdata\\data.bin")) {
+                digits.get(digit.label).add(digit);
+            }
+
+            final int m = digits.size();
+
+            NeuralNetwork nn = TestCNN.buildMNIST();
+
+            Random random = new Random();
+
+            double[] w = new double[nn.numWeights];
+
+            for (int i = 0; i < w.length; i++) {
+                w[i] = random.nextGaussian() / 10;
+            }
+
+            for (int iter = 1; iter <= 1000; iter++) {
+                int[][] cm = new int[n][n];
+                for (int cnt = 0; cnt < 100; cnt++) {
+
+                    if (cnt % 10 == 11) {
+                        double[] array = w.clone();
+                        for (int i = 0; i < array.length; i++) {
+                            array[i] = Math.abs(array[i]);
+                        }
+                        Arrays.sort(array);
+                        System.out.println(Arrays.toString(Arrays.copyOfRange(array, array.length - 30, array.length)));
+
+                    }
+
+                    int e = random.nextInt(n);
+                    List<Digit> subList = digits.get(e);
+                    Digit digit = subList.get(random.nextInt(subList.size()));
+
+                    double[] input = new double[28 * 28];
+
+                    for (int i = 0; i < input.length; i++) {
+                        input[i] = digit.convert(digit.pixels[i]);
+                    }
+
+                    double[] output = new double[n];
+                    Arrays.fill(output, -0.9999987654321);
+                    output[e] *= -1;
+
+                    output = nn.update(input, output, w, 0.001);
+
+                    int r = random.nextInt(n);
+
+                    for (int i = 0; i < n; i++) {
+                        if (output[i] > output[r]) {
+                            r = i;
+                        }
+                    }
+
+                    cm[e][r] += 1;
+
+                }
+                testImgs.draw(iter, cm);
+            }
+        }
+
+    }
+
     JLabel graph = new JLabel();
 
     public TestImgs() {
 
-        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        manager.addKeyEventDispatcher(new KeyEventDispatcher() {
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent e) {
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    int keyCode = e.getKeyCode();
-
-                    if (keyCode == 32) {
-                        draw();
-                    }
-                }
-                return false;
-            }
-        });
-
-     //   setLayout(null);
+        // setLayout(null);
 
         add(graph);
 
@@ -66,13 +218,20 @@ public class TestImgs extends JFrame {
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                reader.close();
                 System.exit(0);
             }
         });
 
         setBounds(640, 320, 640, 640);
         setVisible(true);
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                lm[i][j] = la;
+            }
+        }
+        (new Thread(new NNTester(this))).start();
+        // (new Thread(new MNIST(this))).start();
     }
 
     public static void main(String[] args) {
