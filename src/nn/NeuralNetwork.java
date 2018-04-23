@@ -8,6 +8,12 @@ public class NeuralNetwork implements BPLearn {
 
     final Neuron[] neurons;
 
+    public void setWZ(double[] w) {
+        for (int i = 0; i < neurons.length; i++) {
+            w[neurons[i].wid[neurons[i].length]] = 0;
+        }
+    }
+
     public final int inpSize, outSize, numWeights, size;
 
     public NeuralNetwork(int inpSize, int outSize, int numWeights, Neuron... neurons) {
@@ -40,7 +46,6 @@ public class NeuralNetwork implements BPLearn {
         backwardError(x, y, e, e_dy, w);
 
         double[] dw = new double[numWeights];
-        double[] cnt = new double[numWeights];
 
         weightsError(x, y, e_dy, e_dy, w, dw);
 

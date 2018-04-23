@@ -8,6 +8,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -57,7 +58,7 @@ public class TestImgs extends JFrame {
         setTitle(state);
         System.out.println(state);
 
-        int s = 4;
+        int s = 8;
         int m = s * n;
         BufferedImage image = new BufferedImage(m, m, BufferedImage.TYPE_INT_RGB);
 
@@ -67,6 +68,23 @@ public class TestImgs extends JFrame {
                 Color color = new Color(g, g, g);
                 image.setRGB(x, y, color.getRGB());
             }
+        }
+
+        for (int i = 0; i < n; i++) {
+            int rgb = Color.RED.getRGB();
+
+            int x = i * s, y = i * s;
+
+            for (int dx = 0; dx < s; dx++) {
+                image.setRGB(x + dx, y + s - s, rgb);
+                image.setRGB(x + dx, y + s - 1, rgb);
+            }
+
+            for (int dy = 0; dy < s; dy++) {
+                image.setRGB(x + s - s, y + dy, rgb);
+                image.setRGB(x + s - 1, y + dy, rgb);
+            }
+
         }
 
         graph.setIcon(new ImageIcon(image));
@@ -86,27 +104,35 @@ public class TestImgs extends JFrame {
         @Override
         public void run() {
 
-            NeuralNetwork nn = TestCNN.build(n);
+            NeuralNetwork nn = TestCNN.buildP(n);
 
             Random random = new Random();
 
             double[] w = new double[nn.numWeights];
 
             for (int i = 0; i < w.length; i++) {
-                w[i] = random.nextGaussian() / 10;
+                w[i] = random.nextGaussian() / 30;
             }
+
+            nn.setWZ(w);
 
             for (int iter = 1; iter <= 3000; iter++) {
                 int[][] cm = new int[n][n];
-                for (int cnt = 0; cnt < 100; cnt++) {
+
+                double target = Math.tanh(iter - 1);
+
+                double real = -1;
+
+                for (int cnt = 0; cnt < 322; cnt++) {
 
                     LabledImg img = reader.next();
+
                     int e = img.label;
 
                     double[] input = img.vector;
 
                     double[] output = new double[n];
-                    Arrays.fill(output, -0.9999987654321);
+                    Arrays.fill(output, -target);
                     output[e] *= -1;
 
                     output = nn.update(input, output, w, 0.001);
@@ -119,9 +145,13 @@ public class TestImgs extends JFrame {
                         }
                     }
 
+                    real = Math.max(real, output[r]);
+
                     cm[e][r] += 1;
 
                 }
+                System.out.println(real);
+
                 testImgs.draw(iter, cm);
             }
         }
@@ -212,6 +242,9 @@ public class TestImgs extends JFrame {
 
         // setLayout(null);
 
+        graph.setHorizontalAlignment(JLabel.CENTER);
+        graph.setVerticalAlignment(JLabel.CENTER);
+
         add(graph);
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -230,6 +263,43 @@ public class TestImgs extends JFrame {
                 lm[i][j] = la;
             }
         }
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                final FastBinImg reader = new FastBinImg("imgdata\\bin", 1234);
+
+                try {
+                    while (true) {
+
+                        BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_RGB);
+
+                        double[] vector = reader.next().vector;
+
+                        int p = 0;
+
+                        for (int x = 0; x < 256; x++) {
+                            for (int y = 0; y < 256; y++) {
+                                float b = (float) vector[p++];
+                                float g = (float) vector[p++];
+                                float r = (float) vector[p++];
+                                Color color = new Color(r, g, b);
+                                image.setRGB(x, y, color.getRGB());
+                            }
+                        }
+
+                        graph.setIcon(new ImageIcon(image));
+                        repaint();
+
+                        Thread.sleep(500);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         (new Thread(new NNTester(this))).start();
         // (new Thread(new MNIST(this))).start();
     }

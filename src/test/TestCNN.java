@@ -21,6 +21,7 @@ import nn.Builder;
 import nn.NeuralNetwork;
 import nn.act.Linear;
 import nn.act.ReLU;
+import nn.act.Sin;
 import nn.act.Tanh;
 import nn.fld.Fold;
 import nn.fld.SoftMax;
@@ -30,6 +31,37 @@ public class TestCNN {
     final static Random random = new Random(237);
 
     static NeuralNetwork build(int k) {
+        NeuralNetwork[] layers = new NeuralNetwork[5];
+
+        Fold fold = new SoftMax(new ReLU());
+
+        layers[0] = Builder.convLayer(256, 256, 3, 64, 64, 4, fold);
+        layers[1] = Builder.convLayer(64, 64, 4, 16, 16, 5, fold);
+        layers[2] = Builder.convLayer(16, 16, 5, 4, 4, 6, fold);
+        layers[3] = Builder.convLayer(4, 4, 6, 1, 1, 42, fold);
+
+        layers[4] = Builder.fullLayer(layers[3].outSize, k, new Sum(new Tanh()));
+
+        return Builder.connect(layers);
+    }
+
+    static NeuralNetwork buildP(int k) {
+        NeuralNetwork[] layers = new NeuralNetwork[5];
+
+        Fold max = new SoftMax(new Linear());
+        Fold sum = new Sum(new ReLU());
+
+        layers[0] = Builder.convLayer(256, 256, 3, 64, 64, 5, sum);
+        layers[1] = Builder.convLayer(64, 64, 5, 16, 16, 9, max);
+        layers[2] = Builder.convLayer(16, 16, 9, 4, 4, 17, sum);
+        layers[3] = Builder.convLayer(4, 4, 17, 1, 1, 30, max);
+
+        // layers[4] = Builder.disperseLayer(layers[3].outSize, k, 10, new Random(), new Sum(new Tanh()));
+        layers[4] = Builder.fullLayer(layers[3].outSize, k, new Sum(new Tanh()));
+        return Builder.connect(layers);
+    }
+
+    static NeuralNetwork build1(int k) {
         NeuralNetwork[] layers = new NeuralNetwork[7];
 
         layers[0] = Builder.cnnSharedLayer(256, 256, 3, 17, 17, 3, new Sum(new Tanh()));
@@ -127,7 +159,15 @@ public class TestCNN {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        NeuralNetwork nn = TestCNN.buildP(101);
+
+        System.out.println(nn.inpSize);
+        System.out.println(nn.outSize);
+        System.out.println(nn.numWeights);
+    }
+
+    public static void pretest() throws IOException {
         int n = 400, k = 8, m = 256;
         Map<String, List<BufferedImage>> raw = read("imgdata\\101_ObjectCategories.tar\\101_ObjectCategories");
         List<Entry<String, List<BufferedImage>>> list = new ArrayList<>(raw.entrySet());

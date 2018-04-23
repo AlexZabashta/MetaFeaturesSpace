@@ -46,7 +46,7 @@ public class FastBinImg implements Iterable<LabledImg>, Iterator<LabledImg> {
                     while ((len = (reader.read(bufer))) > 0) {
                         for (int i = 0; i < len; i++) {
                             r <<= 8;
-                            r |= bufer[i];
+                            r |= bufer[i] & (0xFF);
                             ++c;
 
                             if (c == 4) {

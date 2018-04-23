@@ -163,6 +163,72 @@ public class Builder {
         return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
     }
 
+    static int stp(int inp, int out) {
+        if (out <= 1) {
+            return 0;
+        } else {
+            return (inp - 1) / (out - 1);
+        }
+    }
+
+    public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int outW, int outH, int outD, Fold fold) {
+        return convLayer(inpW, inpH, inpD, stp(inpW, outW), stp(inpH, outH), outW, outH, outD, fold);
+    }
+
+    public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int stpW, int stpH, int outW, int outH, int outD, Fold fold) {
+
+        int winW = win(inpW, stpW, outW);
+        if (winW <= 0) {
+            throw new IllegalArgumentException(winW + " = winW = inpW - stpW * (outW - 1) should be > 0");
+        }
+
+        int winH = win(inpH, stpH, outH);
+        if (winH <= 0) {
+            throw new IllegalArgumentException(winH + " = winH = inpH - stpH * (outH - 1) should be > 0");
+        }
+
+        int inpSize = inpW * inpH * inpD;
+        int outSize = outW * outH * outD;
+
+        int numWeights = 0;
+        Neuron[] neurons = new Neuron[outSize];
+
+        int length = winW * winH * inpD;
+
+        int[][] wid = new int[outD][length + 1];
+
+        for (int z = 0; z < outD; z++) {
+            for (int d = 0; d <= length; d++) {
+                wid[z][d] = numWeights++;
+            }
+        }
+
+        for (int x = 0, i = 0; x < outW; x++) {
+            for (int y = 0; y < outH; y++) {
+
+                int[] sid = new int[length];
+
+                for (int dx = 0, j = 0; dx < winW; dx++) {
+                    int fx = x * stpW + dx;
+
+                    for (int dy = 0; dy < winH; dy++) {
+                        int fy = y * stpH + dy;
+
+                        for (int fz = 0; fz < inpD; fz++, j++) {
+                            sid[j] = ((fx) * inpH + fy) * inpD + fz;
+                        }
+                    }
+                }
+
+                for (int z = 0; z < outD; z++, i++) {
+                    neurons[i] = new Neuron(length, sid, wid[z], inpSize + i, fold);
+                }
+            }
+        }
+
+        return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
+    }
+
     public static NeuralNetwork maxPoolLayer(int inpW, int inpH, int inpD, int scaleW, int scaleH, int outD, Fold fold) {
 
         int outW = inpW / scaleW;
@@ -240,7 +306,36 @@ public class Builder {
         System.out.println(nn.size);
     }
 
+    static int testStp(int inp, int out) {
+        int stp = 10000;
+
+        while (inp - stp * (out - 1) <= 0) {
+            --stp;
+        }
+
+        return stp;
+    }
+
+    static int win(int inp, int stp, int out) {
+        return inp - stp * (out - 1);
+    }
+
     public static void main(String[] args) {
+        Random random = new Random();
+
+        int out = random.nextInt(100) + 2;
+        int inp = random.nextInt(100) + out + 1;
+
+        int stp1 = stp(inp, out);
+        int stp2 = testStp(inp, out);
+
+        System.out.println(inp + " " + out);
+        System.out.println(stp1 + " " + win(inp, stp1, out));
+        System.out.println(stp2 + " " + win(inp, stp2, out));
+
+    }
+
+    public static void test2() {
         Fold fold = new Sum(new Tanh());
         NeuralNetwork a = disperseLayer(7, 5, 1, new Random(23), fold);
         NeuralNetwork b = disperseLayer(5, 3, 1, new Random(23), fold);
