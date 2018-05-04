@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 import nn.act.Tanh;
 import nn.fld.Fold;
@@ -34,18 +35,16 @@ public class Builder {
         return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
     }
 
-    public static NeuralNetwork disperseLayer(int inpSize, int outSize, int deg, Random random, Fold fold) {
-        Neuron[] neurons = new Neuron[outSize];
-
+    public static int[][] disperseConnections(int inpSize, int outSize, int deg, Random random) {
         Set<Integer>[] connections = new Set[outSize];
 
         for (int t = 0; t < outSize; t++) {
-            Set<Integer> hashSet = new HashSet<>();
+            Set<Integer> set = new TreeSet<>();
             for (int d = 0; d < deg; d++) {
                 int f = random.nextInt(inpSize);
-                hashSet.add(f);
+                set.add(f);
             }
-            connections[t] = (hashSet);
+            connections[t] = set;
         }
 
         for (int f = 0; f < inpSize; f++) {
@@ -55,23 +54,37 @@ public class Builder {
             }
         }
 
+        int[][] result = new int[outSize][];
+
+        for (int t = 0; t < outSize; t++) {
+            Set<Integer> set = connections[t];
+            int length = set.size();
+            int[] array = result[t] = new int[length];
+
+            int p = 0;
+
+            for (int f : set) {
+                array[p++] = f;
+            }
+        }
+
+        return result;
+    }
+
+    public static NeuralNetwork disperseLayer(int inpSize, int outSize, int deg, Random random, Fold fold) {
+        Neuron[] neurons = new Neuron[outSize];
+
+        int[][] connections = disperseConnections(inpSize, outSize, deg, random);
+
         int numWeights = 0;
 
         for (int i = 0; i < outSize; i++) {
-            Set<Integer> hashSet = connections[i];
-            int length = hashSet.size();
-
+            int length = connections[i].length;
             int[] wid = new int[length + 1];
             for (int d = 0; d <= length; d++) {
                 wid[d] = numWeights++;
             }
-
-            int[] sid = new int[length];
-            int p = 0;
-            for (int s : hashSet) {
-                sid[p++] = s;
-            }
-            neurons[i] = new Neuron(length, sid, wid, inpSize + i, fold);
+            neurons[i] = new Neuron(length, connections[i], wid, inpSize + i, fold);
         }
         return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
     }
@@ -173,6 +186,67 @@ public class Builder {
 
     public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int outW, int outH, int outD, Fold fold) {
         return convLayer(inpW, inpH, inpD, stp(inpW, outW), stp(inpH, outH), outW, outH, outD, fold);
+    }
+
+    public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int outW, int outH, int outD, int deg, Random random, Fold fold) {
+        return convLayer(inpW, inpH, inpD, stp(inpW, outW), stp(inpH, outH), outW, outH, outD, deg, random, fold);
+    }
+
+    public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int stpW, int stpH, int outW, int outH, int outD, int deg, Random random, Fold fold) {
+        int winW = win(inpW, stpW, outW);
+        if (winW <= 0) {
+            throw new IllegalArgumentException(winW + " = winW = inpW - stpW * (outW - 1) should be > 0");
+        }
+
+        int winH = win(inpH, stpH, outH);
+        if (winH <= 0) {
+            throw new IllegalArgumentException(winH + " = winH = inpH - stpH * (outH - 1) should be > 0");
+        }
+
+        int inpSize = inpW * inpH * inpD;
+        int outSize = outW * outH * outD;
+
+        int numWeights = 0;
+        Neuron[] neurons = new Neuron[outSize];
+
+        int[][] connections = disperseConnections(inpD, outD, deg, random);
+
+        int[][] wid = new int[outD][];
+
+        for (int z = 0; z < outD; z++) {
+            int length = winW * winH * connections[z].length;
+            wid[z] = new int[length + 1];
+            for (int d = 0; d <= length; d++) {
+                wid[z][d] = numWeights++;
+            }
+        }
+
+        for (int x = 0, i = 0; x < outW; x++) {
+            for (int y = 0; y < outH; y++) {
+                for (int z = 0; z < outD; z++, i++) {
+
+                    int length = winW * winH * connections[z].length;
+
+                    int[] sid = new int[length];
+
+                    for (int dx = 0, j = 0; dx < winW; dx++) {
+                        int fx = x * stpW + dx;
+
+                        for (int dy = 0; dy < winH; dy++) {
+                            int fy = y * stpH + dy;
+
+                            for (int fz : connections[z]) {
+                                sid[j++] = ((fx) * inpH + fy) * inpD + fz;
+                            }
+                        }
+                    }
+
+                    neurons[i] = new Neuron(length, sid, wid[z], inpSize + i, fold);
+                }
+            }
+        }
+
+        return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
     }
 
     public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int stpW, int stpH, int outW, int outH, int outD, Fold fold) {
@@ -321,6 +395,49 @@ public class Builder {
     }
 
     public static void main(String[] args) {
+        Random random = new Random(42);
+        Fold fold = new Sum(new Tanh());
+
+        NeuralNetwork network = convLayer(5, 5, 2, 3, 3, 3, 1, random, fold);
+
+        int n = network.neurons.length;
+
+        System.out.println(network.inpSize + " " + network.outSize);
+        System.out.println(network.size + " " + network.numWeights);
+
+        Neuron[] neurons = network.neurons;
+        for (int i = 0; i < n; i++) {
+
+            int m = neurons[i].length;
+
+            for (int j = 0; j <= m; j++) {
+                if (j == m) {
+                    System.out.print("c");
+                } else {
+                    System.out.print(neurons[i].sid[j]);
+                }
+                System.out.print(", ");
+                System.out.print(neurons[i].wid[j]);
+                System.out.print("      ");
+            }
+
+            System.out.print(neurons[i].to);
+
+            System.out.println();
+
+        }
+
+    }
+
+    public static void test2() {
+        Fold fold = new Sum(new Tanh());
+        NeuralNetwork a = disperseLayer(7, 5, 1, new Random(23), fold);
+        NeuralNetwork b = disperseLayer(5, 3, 1, new Random(23), fold);
+        NeuralNetwork c = connect(a, b);
+        System.out.println(a.size + " " + b.size + " " + c.size);
+    }
+
+    public static void test3() {
         Random random = new Random();
 
         int out = random.nextInt(100) + 2;
@@ -332,14 +449,5 @@ public class Builder {
         System.out.println(inp + " " + out);
         System.out.println(stp1 + " " + win(inp, stp1, out));
         System.out.println(stp2 + " " + win(inp, stp2, out));
-
-    }
-
-    public static void test2() {
-        Fold fold = new Sum(new Tanh());
-        NeuralNetwork a = disperseLayer(7, 5, 1, new Random(23), fold);
-        NeuralNetwork b = disperseLayer(5, 3, 1, new Random(23), fold);
-        NeuralNetwork c = connect(a, b);
-        System.out.println(a.size + " " + b.size + " " + c.size);
     }
 }

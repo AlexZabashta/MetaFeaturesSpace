@@ -6,6 +6,8 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -14,6 +16,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -24,7 +27,7 @@ import nn.NeuralNetwork;
 
 public class TestImgs extends JFrame {
 
-    final int n = 101;
+    final int n = 20;
     private double[][] lm = new double[n][n];
     private double la = 1.0 / n;
 
@@ -58,7 +61,7 @@ public class TestImgs extends JFrame {
         setTitle(state);
         System.out.println(state);
 
-        int s = 8;
+        int s = 40;
         int m = s * n;
         BufferedImage image = new BufferedImage(m, m, BufferedImage.TYPE_INT_RGB);
 
@@ -94,7 +97,10 @@ public class TestImgs extends JFrame {
     }
 
     class NNTester implements Runnable {
-        final FastBinImg reader = new FastBinImg("imgdata\\bin", 1234);
+        int n = 20, m = 72;
+
+        double[][][] imgs = new double[n][m][128 * 128];
+
         final TestImgs testImgs;
 
         public NNTester(TestImgs testImgs) {
@@ -104,32 +110,49 @@ public class TestImgs extends JFrame {
         @Override
         public void run() {
 
-            NeuralNetwork nn = TestCNN.buildP(n);
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
+                    try {
+                        File file = new File("imgdata\\coil20\\obj" + (i + 1) + "__" + (j) + ".png");
+                        BufferedImage image = ImageIO.read(file);
+
+                        int p = 0;
+                        for (int x = 0; x < 128; x++) {
+                            for (int y = 0; y < 128; y++) {
+                                imgs[i][j][p++] = (image.getRGB(x, y) & 0xFF) / 255.0;
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println(i);
+            }
+
+            NeuralNetwork nn = TestCNN.buildCoil();
 
             Random random = new Random();
 
             double[] w = new double[nn.numWeights];
 
             for (int i = 0; i < w.length; i++) {
-                w[i] = random.nextGaussian() / 30;
+                w[i] = random.nextGaussian() / 100;
             }
 
             nn.setWZ(w);
 
-            for (int iter = 1; iter <= 3000; iter++) {
+            for (int iter = 1; iter <= 15000; iter++) {
                 int[][] cm = new int[n][n];
 
-                double target = Math.tanh(iter - 1);
+                double target = 0.999999;// Math.tanh(iter - 1);
 
                 double real = -1;
 
                 for (int cnt = 0; cnt < 322; cnt++) {
 
-                    LabledImg img = reader.next();
+                    int e = random.nextInt(n);
 
-                    int e = img.label;
-
-                    double[] input = img.vector;
+                    double[] input = imgs[e][random.nextInt(m)];
 
                     double[] output = new double[n];
                     Arrays.fill(output, -target);

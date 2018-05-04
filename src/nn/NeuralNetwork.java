@@ -32,6 +32,8 @@ public class NeuralNetwork implements BPLearn {
         return Arrays.copyOfRange(y, size - outSize, size);
     }
 
+    double[] last = new double[123456];
+
     public double[] update(double[] input, double[] output, double[] w, double learningRate) {
         double[] x = Arrays.copyOf(input, size);
         double[] y = x.clone();
@@ -50,7 +52,9 @@ public class NeuralNetwork implements BPLearn {
         weightsError(x, y, e_dy, e_dy, w, dw);
 
         for (int wid = 0; wid < numWeights; wid++) {
-            w[wid] -= learningRate * dw[wid];
+            last[wid] = last[wid] * 0.9 + 0.1 * Math.signum(dw[wid]);
+
+            w[wid] -= learningRate * last[wid] * last[wid] * last[wid];
         }
 
         return Arrays.copyOfRange(y, size - outSize, size);
