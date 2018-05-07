@@ -100,6 +100,27 @@ public class TestCNN {
         layers[5] = Builder.disperseLayer(layers[4].outSize, 20, 10, new Random(), tanh);
         // layers[4] = Builder.fullLayer(layers[3].outSize, k, new Sum(new Tanh()));
         return Builder.connect(layers);
+
+    }
+
+    static NeuralNetwork buildCoilS() {
+        NeuralNetwork[] layers = new NeuralNetwork[6];
+
+        Random random = new Random(42);
+
+        Fold tanh = new Sum(new Tanh());
+        Fold relu = new Sum(new ReLU());
+        Fold soft = new SoftMax(new Linear());
+
+        layers[0] = Builder.convLayer(128, 128, 1, 120, 120, 3, relu);
+        layers[1] = Builder.convLayer(120, 120, 3, 112, 112, 5, tanh);
+        layers[2] = Builder.convLayer(112, 112, 5, 28, 28, 7, 3, random, relu);
+        layers[3] = Builder.convLayer(28, 28, 7, 7, 7, 9, 4, random, tanh);
+        layers[4] = Builder.convLayer(7, 7, 9, 1, 1, 27, 6, random, relu);
+
+        layers[5] = Builder.disperseLayer(layers[4].outSize, 20, 10, new Random(), tanh);
+        // layers[4] = Builder.fullLayer(layers[3].outSize, k, new Sum(new Tanh()));
+        return Builder.connect(layers);
     }
 
     static NeuralNetwork build1(int k) {
@@ -201,12 +222,21 @@ public class TestCNN {
     }
 
     public static void main(String[] args) {
-        NeuralNetwork nn = TestCNN.buildCoil();
-
-        System.out.println(nn.inpSize);
-        System.out.println(nn.outSize);
-        System.out.println(nn.size);
-        System.out.println(nn.numWeights);
+        {
+            NeuralNetwork nn = TestCNN.buildCoil();
+            System.out.println(nn.inpSize);
+            System.out.println(nn.outSize);
+            System.out.println(nn.size);
+            System.out.println(nn.numWeights);
+        }
+        
+        {
+            NeuralNetwork nn = TestCNN.buildCoilS();
+            System.out.println(nn.inpSize);
+            System.out.println(nn.outSize);
+            System.out.println(nn.size);
+            System.out.println(nn.numWeights);
+        }
     }
 
     public static void pretest() throws IOException {

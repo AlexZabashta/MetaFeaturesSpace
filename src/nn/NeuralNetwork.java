@@ -52,7 +52,7 @@ public class NeuralNetwork implements BPLearn {
         weightsError(x, y, e_dy, e_dy, w, dw);
 
         for (int wid = 0; wid < numWeights; wid++) {
-            last[wid] = last[wid] * 0.9 + 0.1 * Math.signum(dw[wid]);
+            last[wid] = last[wid] * 0.9 + 0.1 * (dw[wid]);
 
             w[wid] -= learningRate * last[wid] * last[wid] * last[wid];
         }

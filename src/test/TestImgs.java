@@ -14,6 +14,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
@@ -23,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 
+import nn.Learner;
 import nn.NeuralNetwork;
 
 public class TestImgs extends JFrame {
@@ -61,7 +67,7 @@ public class TestImgs extends JFrame {
         setTitle(state);
         System.out.println(state);
 
-        int s = 40;
+        int s = 800 / n;
         int m = s * n;
         BufferedImage image = new BufferedImage(m, m, BufferedImage.TYPE_INT_RGB);
 
@@ -131,52 +137,52 @@ public class TestImgs extends JFrame {
 
             NeuralNetwork nn = TestCNN.buildCoil();
 
+            ExecutorService executor = Executors.newFixedThreadPool(6);
+
+            final Learner learner = new Learner(0.01, 0.1, nn);
+
             Random random = new Random();
 
-            double[] w = new double[nn.numWeights];
-
-            for (int i = 0; i < w.length; i++) {
-                w[i] = random.nextGaussian() / 100;
-            }
-
-            nn.setWZ(w);
+            int bs = 100;
 
             for (int iter = 1; iter <= 15000; iter++) {
                 int[][] cm = new int[n][n];
 
                 double target = 0.999999;// Math.tanh(iter - 1);
 
-                double real = -1;
+                Future<int[]>[] futures = new Future[bs];
 
-                for (int cnt = 0; cnt < 322; cnt++) {
+                for (int i = 0; i < bs; i++) {
 
-                    int e = random.nextInt(n);
+                    final int e = random.nextInt(n);
+                    final double[] input = imgs[e][random.nextInt(m)];
 
-                    double[] input = imgs[e][random.nextInt(m)];
-
-                    double[] output = new double[n];
-                    Arrays.fill(output, -target);
-                    output[e] *= -1;
-
-                    output = nn.update(input, output, w, 0.001);
-
-                    int r = random.nextInt(n);
-
-                    for (int i = 0; i < n; i++) {
-                        if (output[i] > output[r]) {
-                            r = i;
+                    futures[i] = executor.submit(new Callable<int[]>() {
+                        @Override
+                        public int[] call() {
+                            double[] output = new double[n];
+                            Arrays.fill(output, -target);
+                            output[e] *= -1;
+                            return learner.update(input, output);
                         }
-                    }
-
-                    real = Math.max(real, output[r]);
-
-                    cm[e][r] += 1;
-
+                    });
                 }
-                System.out.println(real);
+
+                for (int i = 0; i < bs; i++) {
+                    try {
+                        int[] r = futures[i].get();
+                        cm[r[0]][r[1]] += 1;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 testImgs.draw(iter, cm);
             }
+
+            executor.shutdown();
         }
 
     }
