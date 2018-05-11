@@ -12,7 +12,7 @@ public class Learner {
 
     final double[] weights, speed;
 
-    final double learningRate, momentum;
+    double learningRate, momentum;
 
     final Random random = new Random();
 
@@ -22,7 +22,7 @@ public class Learner {
         this.weights = new double[nn.numWeights];
 
         for (int wid = 0; wid < nn.numWeights; wid++) {
-            weights[wid] = random.nextGaussian() / 50;
+            weights[wid] = random.nextGaussian() * learningRate ;
         }
         nn.setWZ(weights);
 
@@ -74,9 +74,14 @@ public class Learner {
         synchronized (weights) {
 
             for (int wid = 0; wid < nn.numWeights; wid++) {
-                speed[wid] = speed[wid] * (1 - momentum) + momentum * Math.signum(dw[wid]) ;
+                speed[wid] = speed[wid] * (1 - momentum) + momentum * Math.signum(dw[wid]);
                 // speed[wid] += Math.signum(dw[wid]);
-                weights[wid] -= learningRate  * speed[wid];
+                weights[wid] -= learningRate * speed[wid];
+            }
+            learningRate *= 0.9999;
+
+            if (random.nextInt(150) == 0) {
+                System.out.println(learningRate);
             }
         }
 

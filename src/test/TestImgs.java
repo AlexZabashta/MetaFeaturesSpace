@@ -137,9 +137,9 @@ public class TestImgs extends JFrame {
 
             NeuralNetwork nn = TestCNN.buildCoil();
 
-            ExecutorService executor = Executors.newFixedThreadPool(6);
+            ExecutorService executor = Executors.newFixedThreadPool(4);
 
-            final Learner learner = new Learner(0.01, 0.1, nn);
+            final Learner learner = new Learner(0.001, 0.5, nn);
 
             Random random = new Random();
 
