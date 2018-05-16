@@ -1,20 +1,18 @@
 package tmp;
 
+import utils.StatUtils;
+
 public class MahalanobisDistance {
     final double[][] invCov;
     final int d;
 
-    final double[] mu;
-
     public MahalanobisDistance(int n, int m, double[][] data) {
-        this.d = m;
+        this(m, MatrixUtils.inv(m, StatUtils.covarianceMatrix(n, m, data)));
+    }
 
-        this.mu = new double[m];
-        
-        
-        
-        this.invCov = new double[m][m];
-
+    public MahalanobisDistance(int d, double[][] invCov) {
+        this.d = d;
+        this.invCov = invCov;
     }
 
 }

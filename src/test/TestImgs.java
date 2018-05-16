@@ -246,7 +246,7 @@ public class TestImgs extends JFrame {
                     Arrays.fill(output, -0.9999987654321);
                     output[e] *= -1;
 
-                    output = nn.update(input, output, w, 0.001);
+                   // output = nn.update(input, output, w, 0.001);
 
                     int r = random.nextInt(n);
 

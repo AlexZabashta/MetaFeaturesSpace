@@ -4,6 +4,39 @@ import java.util.Random;
 
 public class StatUtils {
 
+    public static double[] mean(int n, int m, double[][] data) {
+        double[] mu = new double[m];
+        for (double[] vector : data) {
+            for (int j = 0; j < m; j++) {
+                mu[j] += vector[j];
+            }
+        }
+        for (int j = 0; j < m; j++) {
+            mu[j] /= n;
+        }
+        return mu;
+    }
+
+    public static double[][] covarianceMatrix(int n, int m, double[][] data) {
+        double[] mean = mean(n, m, data);
+        double[][] covariance = new double[m][m];
+
+        for (int i = 0; i < n; i++) {
+            for (int x = 0; x < m; x++) {
+                for (int y = 0; y < m; y++) {
+                    covariance[x][y] += (data[i][x] - mean[x]) * (data[i][y] - mean[y]);
+                }
+            }
+        }
+        for (int x = 0; x < m; x++) {
+            for (int y = 0; y < m; y++) {
+                covariance[x][y] /= n;
+            }
+        }
+
+        return covariance;
+    }
+
     public static double mean(double sum0, double sum1) {
         if (sum0 < 1e-9) {
             return 0;
