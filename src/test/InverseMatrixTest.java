@@ -8,46 +8,6 @@ import tmp.MatrixUtils;
 
 public class InverseMatrixTest {
 
-    static void print(double[] array) {
-        for (double s : array) {
-            System.out.printf(Locale.ENGLISH, "%7.3f ", s);
-        }
-    }
-
-    static void print(double[][] matrix) {
-        for (double[] array : matrix) {
-            print(array);
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    static void print(int n, double[][] a, double[][] b) {
-        for (int i = 0; i < n; i++) {
-            print(a[i]);
-            System.out.print("      ");
-            print(b[i]);
-            System.out.println();
-        }
-        System.out.println();
-    }
-
- 
-
-    static double[][] mul(int n, int m, int k, double[][] a, double[][] b) {
-        double[][] c = new double[n][k];
-
-        for (int x = 0; x < n; x++) {
-            for (int y = 0; y < m; y++) {
-                for (int z = 0; z < k; z++) {
-                    c[x][z] += a[x][y] * b[y][z];
-                }
-            }
-        }
-
-        return c;
-    }
-
     public static boolean nextPermutation(int[] permutation) {
         int n = permutation.length, a = n - 2;
         while (0 <= a && permutation[a] >= permutation[a + 1]) {
@@ -92,7 +52,7 @@ public class InverseMatrixTest {
                     c[i][j] = b[p[i]][j];
                 }
             }
-            print(mul(n, n, n, a, c));
+            // print(mul(n, n, n, a, c));
 
         } while (nextPermutation(p));
 
@@ -126,8 +86,8 @@ public class InverseMatrixTest {
 
         // find(n, a, b);
 
-        print(a);
-        print(b);
-        print(mul(n, n, n, a, b));
+        MatrixUtils.print(a);
+        MatrixUtils.print(b);
+        MatrixUtils.print(MatrixUtils.mul(n, a, b));
     }
 }

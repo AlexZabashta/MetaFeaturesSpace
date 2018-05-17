@@ -71,6 +71,18 @@ public class Builder {
         return result;
     }
 
+    public static int[][] fullConnections(int inpSize, int outSize) {
+        int[] part = new int[inpSize];
+        for (int f = 0; f < inpSize; f++) {
+            part[f] = f;
+        }
+        int[][] connections = new int[outSize][];
+        for (int t = 0; t < outSize; t++) {
+            connections[t] = part;
+        }
+        return connections;
+    }
+
     public static NeuralNetwork disperseLayer(int inpSize, int outSize, int deg, Random random, Fold fold) {
         Neuron[] neurons = new Neuron[outSize];
 
@@ -182,6 +194,64 @@ public class Builder {
         } else {
             return (inp - 1) / (out - 1);
         }
+    }
+
+    public static int triangle(int n) {
+        return n * (n + 1) / 2;
+    }
+
+    public static NeuralNetwork triangle(int inpL, int inpD, int outL, int outD, int[][] connections, Fold fold) {
+        return triangle(inpL, inpD, stp(inpL, outL), outL, outD, connections, fold);
+    }
+
+    public static NeuralNetwork triangle(int inpL, int inpD, int stp, int outL, int outD, int[][] connections, Fold fold) {
+        int win = win(inpL, stp, outL);
+        if (win <= 0) {
+            throw new IllegalArgumentException(win + " = win = inpL - stp * (outL - 1) should be > 0");
+        }
+
+        int inpSize = triangle(inpL) * inpD;
+        int outSize = triangle(outL) * outD;
+
+        int numWeights = 0;
+        Neuron[] neurons = new Neuron[outSize];
+
+        int[][] wid = new int[outD][];
+
+        for (int z = 0; z < outD; z++) {
+            int length = triangle(win) * connections[z].length;
+            wid[z] = new int[length + 1];
+            for (int d = 0; d <= length; d++) {
+                wid[z][d] = numWeights++;
+            }
+        }
+
+        for (int x = 0, i = 0; x < outL; x++) {
+            for (int y = 0; y <= x; y++) {
+                for (int z = 0; z < outD; z++, i++) {
+
+                    int length = triangle(win) * connections[z].length;
+
+                    int[] sid = new int[length];
+
+                    for (int dx = 0, j = 0; dx < win; dx++) {
+                        int fx = x * stp + dx;
+
+                        for (int dy = 0; dy <= dx; dy++) {
+                            int fy = y * stp + dy;
+
+                            for (int fz : connections[z]) {
+                                sid[j++] = (triangle(fx) + fy) * inpD + fz;
+                            }
+                        }
+                    }
+
+                    neurons[i] = new Neuron(length, sid, wid[z], inpSize + i, fold);
+                }
+            }
+        }
+
+        return new NeuralNetwork(inpSize, outSize, numWeights, neurons);
     }
 
     public static NeuralNetwork convLayer(int inpW, int inpH, int inpD, int outW, int outH, int outD, Fold fold) {
@@ -398,7 +468,9 @@ public class Builder {
         Random random = new Random(42);
         Fold fold = new Sum(new Tanh());
 
-        NeuralNetwork network = convLayer(5, 5, 2, 3, 3, 3, 1, random, fold);
+        int[][] connections = fullConnections(1, 1);
+
+        NeuralNetwork network = triangle(5, 1, 2, 3, 1, connections, fold);
 
         int n = network.neurons.length;
 

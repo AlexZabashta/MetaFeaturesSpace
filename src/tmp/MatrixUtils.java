@@ -1,14 +1,32 @@
 package tmp;
 
+import java.util.Locale;
+
+import jMEF.PMatrix;
+
 public class MatrixUtils {
 
-    static double[] copy(int n, double[] array) {
+    public static double[] copy(int n, double[] array) {
         double[] copy = new double[n];
         System.arraycopy(array, 0, copy, 0, n);
         return copy;
     }
 
-    static double[][] copy(int n, int m, double[][] matrix) {
+    public static void print(double[] array) {
+        for (double s : array) {
+            System.out.printf(Locale.ENGLISH, "%7.3f ", s);
+        }
+    }
+
+    public static void print(double[][] matrix) {
+        for (double[] array : matrix) {
+            print(array);
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static double[][] copy(int n, int m, double[][] matrix) {
         double[][] copy = new double[n][m];
         for (int i = 0; i < n; i++) {
             copy[i] = copy(m, matrix[i]);
@@ -111,4 +129,104 @@ public class MatrixUtils {
         return c;
     }
 
+    public static double[][] transpose(int n, int m, double[][] matrix) {
+        double[][] transpose = new double[m][n];
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                transpose[j][i] = matrix[i][j];
+            }
+        }
+
+        return transpose;
+    }
+
+    public static int width(double[][] matrix) {
+        int width = -1;
+
+        for (double[] array : matrix) {
+            if (width == -1) {
+                width = array.length;
+            }
+
+            if (width != array.length) {
+                throw new IllegalStateException("matrix not rectangular");
+            }
+        }
+
+        return Math.max(0, width);
+    }
+
+    public static double[][] transpose(int n, double[][] matrix) {
+        return transpose(n, n, matrix);
+    }
+
+    public static double[][] transpose(double[][] matrix) {
+        return transpose(matrix.length, width(matrix), matrix);
+    }
+
+    public static double[][] mul(double[][] a, double[][] b) {
+
+        int l = a.length;
+        int m = b.length;
+        int r = width(b);
+
+        if (width(a) != m) {
+            throw new IllegalStateException("matrixes dims not consistent");
+        }
+
+        return mul(l, m, r, a, b);
+    }
+
+    /**
+     * Computes the Cholesky decomposition of the current matrix \f$ matrix \f$.
+     * This method is taken from {@link jMEF.PMatrix#Cholesky}.
+     * 
+     * @author Vincent Garcia
+     * @author Frank Nielsen
+     * @return a lower triangular matrix
+     */
+    public static double[][] sqrt(int n, double[][] matrix) {
+        double[][] sqrt = new double[n][n];
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                double sum = 0.0d;
+                for (int k = 0; k < j; k++) {
+                    sum += sqrt[i][k] * sqrt[j][k];
+                }
+                if (i == j) {
+                    sqrt[i][i] = Math.sqrt(matrix[i][i] - sum);
+                } else {
+                    sqrt[i][j] = (matrix[i][j] - sum) / sqrt[j][j];
+                }
+            }
+            if (sqrt[i][i] <= 0.0d) {
+                throw new IllegalStateException("Matrix is not positive definite!");
+            }
+        }
+        return sqrt;
+    }
+
+    public static double[][] sqrt(double[][] matrix) {
+        return sqrt(matrix.length, matrix);
+    }
+
+    public static double[][] mul(int l, int m, int r, double[][] a, double[][] b) {
+        double[][] c = new double[l][r];
+
+        for (int i = 0; i < l; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int k = 0; k < r; k++) {
+                    c[i][k] += a[i][j] * b[j][k];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    public static double[][] mul(int n, double[][] a, double[][] b) {
+        return mul(n, n, n, a, b);
+    }
 }
