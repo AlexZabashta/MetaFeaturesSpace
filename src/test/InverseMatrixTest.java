@@ -1,9 +1,7 @@
 package test;
 
-import java.util.Locale;
 import java.util.Random;
 
-import Jama.Matrix;
 import tmp.MatrixUtils;
 
 public class InverseMatrixTest {

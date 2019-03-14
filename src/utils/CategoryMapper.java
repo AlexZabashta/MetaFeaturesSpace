@@ -46,7 +46,7 @@ public class CategoryMapper implements IntUnaryOperator {
     public static void main(String[] args) {
         Random random = new Random();
 
-        int n = 10, m = 20;
+        int n = 0, m = 20;
 
         int[] values = new int[n];
 

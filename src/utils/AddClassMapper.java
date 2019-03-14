@@ -27,7 +27,7 @@ public class AddClassMapper implements IntUnaryOperator {
 
     public static void main(String[] args) {
         Random random = new Random();
-        int n = 1, m = 3;
+        int n = 9, m = 7;
         AddClassMapper mapper = new AddClassMapper(n, m, random);
 
         for (int i = 0; i < n; i++) {
