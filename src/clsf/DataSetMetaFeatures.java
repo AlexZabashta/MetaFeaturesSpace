@@ -5,7 +5,7 @@ import com.ifmo.recommendersystem.metafeatures.MetaFeatureExtractor;
 import tmp.MetaFeaturesExtractor;
 import weka.core.Instances;
 
-public class DataSetMetaFeatures implements MetaFeaturesExtractor<Dataset> {
+public class DataSetMetaFeatures implements MetaFeaturesExtractor<aDataset> {
 
     private final MetaFeatureExtractor[] extractors;
 
@@ -14,7 +14,7 @@ public class DataSetMetaFeatures implements MetaFeaturesExtractor<Dataset> {
     }
 
     @Override
-    public double[] apply(Dataset dataset) {
+    public double[] apply(aDataset dataset) {
         int len = length();
 
         Instances instances = WekaConverter.convert(dataset);

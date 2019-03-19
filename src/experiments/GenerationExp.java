@@ -2,9 +2,11 @@ package experiments;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +35,8 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
-import clsf.Dataset;
-import clusterization.CMFExtractor;
+import clsf.CMFExtractor;
+import clsf.ClDataset;
 import clusterization.MetaFeaturesExtractor;
 import clusterization.direct.Crossover;
 import clusterization.direct.DataSetSolution;
@@ -53,7 +55,37 @@ import utils.MatrixUtils;
 import utils.StatUtils;
 import weka.core.Instances;
 
-public class RunExp {
+public class GenerationExp {
+
+    public static List<ClDataset> readData(File folder) {
+        List<ClDataset> datasets = new ArrayList<>();
+
+        for (File file : folder.listFiles()) {
+            try (Reader reader = new FileReader(file)) {
+                Instances instances = new Instances(reader);
+
+                int numObjects = instances.numInstances();
+                int numFeatures = instances.numAttributes() - 1;
+
+                // TODO SET CLASS
+
+                double[][] data = new double[numObjects][numFeatures];
+                int[] labels = new int[numObjects];
+
+                // TODO COPY DATA
+
+                datasets.add(new ClDataset(file.getName(), true, data, labels));
+
+                System.out.println(file.getName());
+                System.out.flush();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return datasets;
+    }
 
     public static void main(String[] args) {
 
@@ -74,37 +106,17 @@ public class RunExp {
         final int limit = paramLimit;
         final int cores = paramCores;
 
-        MetaFeaturesExtractor extractor = new CMFExtractor();
+        double[][] metaData = new double[1024][];
 
-        int numMF = extractor.lenght();
-        int numData = 0;
+        List<ClDataset> datasets = readData(new File("pdata"));
+        final int numData = datasets.size();
 
-        double[][] metaData = new double[512][];
-        List<Dataset> datasets = new ArrayList<>();
+        CMFExtractor extractor = new CMFExtractor();
+        int numMF = extractor.lenght;
 
-        Map<Dataset, String> fileNames = new HashMap<>();
-
-        for (File file : new File("pdata").listFiles()) {
-            try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file))) {
-                int n = objectInputStream.readInt();
-                int m = objectInputStream.readInt();
-                double[][] data = (double[][]) objectInputStream.readObject();
-
-                Dataset dataset = new Dataset(data, extractor);
-                double[] mf = dataset.metaFeatures();
-
-                if (mf != null && mf.length == numMF) {
-                    metaData[numData++] = mf;
-                    datasets.add(dataset);
-                    fileNames.put(dataset, file.getName());
-                }
-
-                System.out.println(file.getName() + " " + n + " " + m);
-                System.out.flush();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (int i = 0; i < numData; i++) {
+            ClDataset dataset = datasets.get(i);
+            metaData[i] = new double[-1]; // TODO copy MF dataset
         }
 
         double[][] cov = StatUtils.covarianceMatrix(numData, numMF, metaData);
@@ -123,14 +135,14 @@ public class RunExp {
         for (int targetIndex = 0; targetIndex < size; targetIndex++) {
             List<Experiment> exp = new ArrayList<>();
 
-            Dataset targetDataset = datasets.get(targetIndex);
-            final double[] target = targetDataset.metaFeatures();
+            ClDataset targetClDataset = datasets.get(targetIndex);
+            final double[] target = extractor.apply(targetClDataset);
 
-            ToDoubleFunction<Dataset> function = new ToDoubleFunction<Dataset>() {
+            ToDoubleFunction<ClDataset> function = new ToDoubleFunction<ClDataset>() {
                 @Override
-                public double applyAsDouble(Dataset value) {
+                public double applyAsDouble(ClDataset value) {
                     try {
-                        return distance.distance(target, value.metaFeatures());
+                        return distance.distance(target, extractor.apply(value));
                     } catch (Exception e) {
                         e.printStackTrace();
                         return 100;
@@ -138,15 +150,15 @@ public class RunExp {
                 }
             };
 
-            final List<Dataset> adatasets = new ArrayList<>();
+            final List<ClDataset> adatasets = new ArrayList<>();
 
-            for (Dataset dataset : datasets) {
+            for (ClDataset dataset : datasets) {
                 if (function.applyAsDouble(dataset) > 1) {
                     adatasets.add(dataset);
                 }
             }
 
-            final String fileName = fileNames.get(targetDataset).replace('_', '-');
+            final String fileName = fileNames.get(targetClDataset).replace('_', '-');
 
             try (PrintWriter writer = new PrintWriter(new File(res + fileName + ".txt"))) {
                 for (int i = 0; i < numMF; i++) {
@@ -158,7 +170,7 @@ public class RunExp {
                 e.printStackTrace();
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -172,7 +184,7 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -186,14 +198,14 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
+                    Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -209,7 +221,7 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -222,14 +234,14 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new NSGAIIBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new NSGAIIBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -245,7 +257,7 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -258,14 +270,14 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new PAESBuilder<DataSetSolution>(problem).setMutationOperator(new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
+                    Algorithm<?> algorithm = new PAESBuilder<DataSetSolution>(problem).setMutationOperator(new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -281,14 +293,14 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new PESA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new PESA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -304,7 +316,7 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -326,14 +338,14 @@ public class RunExp {
                 } catch (ClassCastException ifNotDouble) {
                 }
             }
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new SMSEMOABuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new SMSEMOABuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -349,14 +361,14 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxIterations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxIterations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -372,7 +384,7 @@ public class RunExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -415,7 +427,7 @@ public class RunExp {
                             }
                         }
 
-                        Dataset dataset = fun.dataset;
+                        ClDataset dataset = fun.dataset;
                         if (dataset != null) {
                             Instances instances = dataset.toInstances();
                             synchronized (res) {
@@ -451,7 +463,7 @@ public class RunExp {
         threads.shutdown();
     }
 
-    static List<Experiment> problems(int numObjects, int numFeatures, ToDoubleFunction<Dataset> ef, int limit, List<Dataset> datasets, MetaFeaturesExtractor extractor) {
+    static List<Experiment> problems(int numObjects, int numFeatures, ToDoubleFunction<ClDataset> ef, int limit, List<ClDataset> datasets, MetaFeaturesExtractor extractor) {
         final List<Experiment> problems = new ArrayList<Experiment>();
 
         {

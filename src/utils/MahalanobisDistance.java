@@ -1,6 +1,8 @@
 package utils;
 
-public class MahalanobisDistance {
+import java.util.function.ToDoubleBiFunction;
+
+public class MahalanobisDistance implements ToDoubleBiFunction<double[], double[]> {
     final double[][] invCov;
     final int d;
 
@@ -14,6 +16,13 @@ public class MahalanobisDistance {
     }
 
     public double distance(double[] u, double[] v) {
+        if (u.length != d) {
+            throw new IllegalArgumentException("u.length != d");
+        }
+        if (v.length != d) {
+            throw new IllegalArgumentException("v.length != d");
+        }
+
         double[] diff = new double[d];
 
         for (int i = 0; i < d; i++) {
@@ -29,6 +38,11 @@ public class MahalanobisDistance {
         }
 
         return Math.sqrt(sum);
+    }
+
+    @Override
+    public double applyAsDouble(double[] u, double[] v) {
+        return distance(u, v);
     }
 
 }

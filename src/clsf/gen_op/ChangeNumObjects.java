@@ -5,12 +5,12 @@ import java.util.Random;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
 
-import clsf.Dataset;
+import clsf.aDataset;
 import utils.AddClassMapper;
 import utils.RandomUtils;
 import utils.RemoveClassMapper;
 
-public class ChangeNumObjects implements UnaryOperator<Dataset> {
+public class ChangeNumObjects implements UnaryOperator<aDataset> {
 
     private final Random random;
 
@@ -18,12 +18,12 @@ public class ChangeNumObjects implements UnaryOperator<Dataset> {
         this.random = random;
     }
 
-    public static Dataset apply(Dataset dataset, Random random) {
+    public static aDataset apply(aDataset dataset, Random random) {
         int n = dataset.numObjects();
         return apply(dataset, random, random.nextInt(n * 2) + 2);
     }
 
-    public static Dataset apply(Dataset dataset, Random random, int newNumObjects) {
+    public static aDataset apply(aDataset dataset, Random random, int newNumObjects) {
         int oldNumObjects = dataset.numObjects();
 
         if (oldNumObjects == newNumObjects) {
@@ -56,11 +56,11 @@ public class ChangeNumObjects implements UnaryOperator<Dataset> {
             cat[i][c] = dataset.classValue(j);
         }
 
-        return new Dataset(newNumObjects, c, cat, r, rat);
+        return new aDataset(newNumObjects, c, cat, r, rat);
     }
 
     @Override
-    public Dataset apply(Dataset dataset) {
+    public aDataset apply(aDataset dataset) {
         return apply(dataset, random);
     }
 

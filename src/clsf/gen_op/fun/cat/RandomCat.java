@@ -2,8 +2,8 @@ package clsf.gen_op.fun.cat;
 
 import java.util.Random;
 
-import clsf.Dataset;
-import clsf.Dataset.Item;
+import clsf.aDataset;
+import clsf.aDataset.Item;
 
 public class RandomCat implements CatFunction {
 

@@ -4,6 +4,26 @@ import java.util.Locale;
 
 public class ArrayUtils {
 
+    public static double[][] merge(double[][]... arrays) {
+        int n = arrays.length;
+        int length = 0;
+
+        for (double[][] array : arrays) {
+            length += array.length;
+        }
+
+        double[][] union = new double[length][];
+
+        for (int p = 0, i = 0; i < n; i++) {
+            double[][] array = arrays[i];
+            for (int j = 0; j < array.length; j++, p++) {
+                union[p] = array[j];
+            }
+        }
+
+        return union;
+    }
+
     public static double[][] copy(double[][] array) {
         int length = array.length;
         double[][] clone = new double[length][];

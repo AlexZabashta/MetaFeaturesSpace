@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.uma.jmetal.solution.Solution;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 
 public class DataSetSolution implements Solution<Dataset> {
 

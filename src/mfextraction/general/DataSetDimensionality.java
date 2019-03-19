@@ -1,6 +1,6 @@
 package mfextraction.general;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 import mfextraction.CacheMF;
 import mfextraction.MetaFeatureExtractor;
 

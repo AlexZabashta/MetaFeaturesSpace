@@ -1,13 +1,13 @@
 package clsf.gen_op.fun.rat;
 
-import clsf.Dataset;
-import clsf.Dataset.Item;
+import clsf.aDataset;
+import clsf.aDataset.Item;
 
 public class RatValue implements RatFunction {
     public final int index;
     public final double min, max;
 
-    public RatValue(int index, Dataset dataset) {
+    public RatValue(int index, aDataset dataset) {
         this.index = index;
         this.min = dataset.min(index);
         this.max = dataset.max(index);

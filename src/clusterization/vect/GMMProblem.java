@@ -8,7 +8,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 import clusterization.MetaFeaturesExtractor;
 import clusterization.direct.RelationsGenerator;
 import utils.MatrixUtils;

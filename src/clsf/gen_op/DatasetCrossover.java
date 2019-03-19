@@ -8,10 +8,10 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import clsf.Dataset;
+import clsf.aDataset;
 import utils.BooleanArray;
 
-public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Dataset, Dataset>> {
+public class DatasetCrossover implements BiFunction<aDataset, aDataset, Pair<aDataset, aDataset>> {
 
     public final Random random;
 
@@ -19,7 +19,7 @@ public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Datas
         this.random = random;
     }
 
-    int[] classDistribution(Dataset dataset) {
+    int[] classDistribution(aDataset dataset) {
         int n = dataset.numClasses();
         int m = dataset.numObjects();
 
@@ -65,7 +65,7 @@ public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Datas
 
     }
 
-    int[][] indices(Dataset d) {
+    int[][] indices(aDataset d) {
         int[] s = classDistribution(d);
         int n = s.length;
 
@@ -87,7 +87,7 @@ public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Datas
     }
 
     @Override
-    public Pair<Dataset, Dataset> apply(Dataset d1, Dataset d2) {
+    public Pair<aDataset, aDataset> apply(aDataset d1, aDataset d2) {
 
         int k = mid(d1.numClasses(), d2.numClasses(), random);
 
@@ -205,13 +205,13 @@ public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Datas
             }
         }
 
-        Dataset c1 = new Dataset(numObjects, cd1, cv1, rd1, rv1);
-        Dataset c2 = new Dataset(numObjects, cd2, cv2, rd2, rv2);
+        aDataset c1 = new aDataset(numObjects, cd1, cv1, rd1, rv1);
+        aDataset c2 = new aDataset(numObjects, cd2, cv2, rd2, rv2);
 
         return Pair.of(c1, c2);
     }
 
-    static void print(Dataset dataset) {
+    static void print(aDataset dataset) {
         int n = dataset.numObjects();
         int c = dataset.numCatAttr();
         int r = dataset.numRatAttr();
@@ -257,7 +257,7 @@ public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Datas
             c1[i][nc1] = random.nextInt(7);
         }
 
-        Dataset d1 = new Dataset(n1, nc1, c1, nr1, r1);
+        aDataset d1 = new aDataset(n1, nc1, c1, nr1, r1);
         print(d1);
 
         int n2 = 9;
@@ -277,10 +277,10 @@ public class DatasetCrossover implements BiFunction<Dataset, Dataset, Pair<Datas
             c2[i][nc2] = random.nextInt(7);
         }
 
-        Dataset d2 = new Dataset(n2, nc2, c2, nr2, r2);
+        aDataset d2 = new aDataset(n2, nc2, c2, nr2, r2);
         print(d2);
 
-        Pair<Dataset, Dataset> p = dc.apply(d1, d2);
+        Pair<aDataset, aDataset> p = dc.apply(d1, d2);
         print(p.getLeft());
         print(p.getRight());
 

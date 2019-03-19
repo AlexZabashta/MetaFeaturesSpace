@@ -2,6 +2,8 @@ package clusterization;
 
 import java.util.function.Function;
 
+import clsf.Dataset;
+
 public interface MetaFeaturesExtractor extends Function<Dataset, double[]> {
     int lenght();
 

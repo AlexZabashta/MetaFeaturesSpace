@@ -5,14 +5,14 @@ import java.util.Random;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
 
-import clsf.Dataset;
+import clsf.aDataset;
 import clsf.gen_op.fun.cat.CatFunction;
 import clsf.gen_op.fun.rat.RatFunction;
 import utils.AddClassMapper;
 import utils.RandomUtils;
 import utils.RemoveClassMapper;
 
-public class ChangeNumAttributes implements UnaryOperator<Dataset> {
+public class ChangeNumAttributes implements UnaryOperator<aDataset> {
 
     private final Random random;
 
@@ -20,7 +20,7 @@ public class ChangeNumAttributes implements UnaryOperator<Dataset> {
         this.random = random;
     }
 
-    public static Dataset apply(Dataset dataset, Random random) {
+    public static aDataset apply(aDataset dataset, Random random) {
         if (random.nextBoolean()) {
 
         } else {
@@ -29,11 +29,11 @@ public class ChangeNumAttributes implements UnaryOperator<Dataset> {
         return null;
     }
 
-    public static Dataset changeNumCatAttr(Dataset dataset, Random random) {
+    public static aDataset changeNumCatAttr(aDataset dataset, Random random) {
         return null;
     }
 
-    public static Dataset addCatAttr(Dataset dataset, Random random, int newNumCatAttr) {
+    public static aDataset addCatAttr(aDataset dataset, Random random, int newNumCatAttr) {
         int oldNumCatAttr = dataset.numCatAttr();
 
         int numObjects = dataset.numObjects();
@@ -57,10 +57,10 @@ public class ChangeNumAttributes implements UnaryOperator<Dataset> {
                 catValues[i][j] = function.applyAsInt(dataset.item(i));
             }
         }
-        return new Dataset(numObjects, newNumCatAttr, catValues, numRatAttr, ratValues);
+        return new aDataset(numObjects, newNumCatAttr, catValues, numRatAttr, ratValues);
     }
 
-    public static Dataset addRatAttr(Dataset dataset, Random random, int newNumRatAttr) {
+    public static aDataset addRatAttr(aDataset dataset, Random random, int newNumRatAttr) {
         int oldNumRatAttr = dataset.numRatAttr();
 
         int numObjects = dataset.numObjects();
@@ -84,11 +84,11 @@ public class ChangeNumAttributes implements UnaryOperator<Dataset> {
 
         int numCatAttr = dataset.numCatAttr();
         int[][] catValues = dataset.catValues();
-        return new Dataset(numObjects, numCatAttr, catValues, newNumRatAttr, ratValues);
+        return new aDataset(numObjects, numCatAttr, catValues, newNumRatAttr, ratValues);
     }
 
     @Override
-    public Dataset apply(Dataset dataset) {
+    public aDataset apply(aDataset dataset) {
         return apply(dataset, random);
     }
 

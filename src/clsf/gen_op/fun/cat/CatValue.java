@@ -1,14 +1,14 @@
 package clsf.gen_op.fun.cat;
 
-import clsf.Dataset;
-import clsf.Dataset.Item;
+import clsf.aDataset;
+import clsf.aDataset.Item;
 
 public class CatValue implements CatFunction {
 
     public final int range;
     public final int index;
 
-    public CatValue(int index, Dataset dataset) {
+    public CatValue(int index, aDataset dataset) {
         this.index = index;
         this.range = dataset.categorySize(index);
     }

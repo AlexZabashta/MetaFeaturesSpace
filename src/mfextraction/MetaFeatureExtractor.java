@@ -1,6 +1,6 @@
 package mfextraction;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 
 public abstract class MetaFeatureExtractor {
     public abstract String getName();

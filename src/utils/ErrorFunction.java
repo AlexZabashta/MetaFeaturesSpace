@@ -1,6 +1,6 @@
 package utils;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 
 public interface ErrorFunction {
 

@@ -1,7 +1,7 @@
 package clsf.gen_op.fun.cat;
 
-import clsf.Dataset;
-import clsf.Dataset.Item;
+import clsf.aDataset;
+import clsf.aDataset.Item;
 
 public class CatConst implements CatFunction {
 

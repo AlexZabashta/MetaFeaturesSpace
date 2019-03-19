@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.uma.jmetal.operator.CrossoverOperator;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 import clusterization.MetaFeaturesExtractor;
 import utils.RandomUtils;
 

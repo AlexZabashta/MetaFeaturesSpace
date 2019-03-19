@@ -6,7 +6,7 @@ import java.util.function.ToDoubleFunction;
 
 import org.uma.jmetal.problem.Problem;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 import clusterization.MetaFeaturesExtractor;
 import clusterization.direct.fun.RandomFunction;
 

@@ -5,7 +5,7 @@ import java.util.Random;
 
 import org.uma.jmetal.operator.MutationOperator;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 import clusterization.MetaFeaturesExtractor;
 import clusterization.direct.fun.RandomFunction;
 import utils.ArrayUtils;

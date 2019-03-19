@@ -2,7 +2,7 @@ package utils;
 
 import java.util.function.ToDoubleFunction;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 
 public class Limited implements ToDoubleFunction<Dataset> {
 

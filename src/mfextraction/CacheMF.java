@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-import clusterization.Dataset;
+import clsf.Dataset;
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
 

@@ -2,7 +2,7 @@ package clsf.gen_op.fun.rat;
 
 import java.util.Random;
 
-import clsf.Dataset.Item;
+import clsf.aDataset.Item;
 
 public class NoiesValue implements RatFunction {
     public final Random random;

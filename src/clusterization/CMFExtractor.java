@@ -13,6 +13,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import clsf.Dataset;
 import mfextraction.CacheMF;
 import mfextraction.MetaFeatureExtractor;
 import mfextraction.distances.KurtosisD;

@@ -7,8 +7,8 @@ import java.io.ObjectInputStream;
 import java.util.Set;
 import java.util.TreeSet;
 
+import clsf.Dataset;
 import clusterization.CMFExtractor;
-import clusterization.Dataset;
 import clusterization.MetaFeaturesExtractor;
 import utils.ArrayUtils;
 import utils.MahalanobisDistance;

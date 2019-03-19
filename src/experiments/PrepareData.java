@@ -13,8 +13,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import clsf.Dataset;
 import clusterization.CMFExtractor;
-import clusterization.Dataset;
 import clusterization.MetaFeaturesExtractor;
 import weka.core.Instance;
 import weka.core.Instances;
