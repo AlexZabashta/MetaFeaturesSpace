@@ -2,33 +2,50 @@ package utils;
 
 import java.util.function.ToDoubleFunction;
 
+import clsf.ClDataset;
 import clsf.Dataset;
+import tmp.ToDoubleArrayFunction;
 
-public class Limited implements ToDoubleFunction<Dataset> {
+public class Limited implements ToDoubleArrayFunction<ClDataset> {
 
-    public final ToDoubleFunction<Dataset> function;
+    public final ToDoubleArrayFunction<ClDataset> baseFunction;
+    public final ToDoubleFunction<ClDataset> cmpFunction;
 
-    public Dataset dataset = null;
+    public ClDataset dataset = null;
     public double best = Double.POSITIVE_INFINITY;
     public final double[] log;
     public int qid = 0;
 
-    public Limited(ToDoubleFunction<Dataset> function, int limit) {
-        this.function = function;
+    public Limited(ToDoubleArrayFunction<ClDataset> baseFunction, ToDoubleFunction<ClDataset> cmpFunction, int limit) {
+        this.baseFunction = baseFunction;
+        this.cmpFunction = cmpFunction;
         log = new double[limit];
     }
 
     @Override
-    public double applyAsDouble(Dataset dataset) {
+    public double[] apply(ClDataset dataset) {
         if (qid >= log.length) {
             throw new EndSearch();
         }
-        double value = function.applyAsDouble(dataset);
-        if (value < best) {
-            best = value;
+
+        double cmpValue = cmpFunction.applyAsDouble(dataset);
+
+        if (cmpValue < best) {
+            best = cmpValue;
             this.dataset = dataset;
         }
-        log[qid++] = value;
-        return value;
+        log[qid++] = cmpValue;
+
+        return baseFunction.apply(dataset);
     }
+
+    public Limited clone() {
+        return new Limited(baseFunction, cmpFunction, log.length);
+    }
+
+    @Override
+    public int length() {
+        return baseFunction.length();
+    }
+
 }

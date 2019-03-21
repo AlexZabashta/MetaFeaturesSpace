@@ -1,11 +1,12 @@
 package utils;
 
 import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToDoubleFunction;
 
 import clsf.ClDataset;
 import tmp.ToDoubleArrayFunction;
 
-public class SingleObjectiveError implements ToDoubleArrayFunction<ClDataset> {
+public class SingleObjectiveError implements ToDoubleArrayFunction<ClDataset>, ToDoubleFunction<ClDataset> {
 
     final double[] target;
 
@@ -24,16 +25,21 @@ public class SingleObjectiveError implements ToDoubleArrayFunction<ClDataset> {
 
     @Override
     public double[] apply(ClDataset dataset) {
-        try {
-            return new double[] { distance.applyAsDouble(extractor.apply(dataset), target) };
-        } catch (RuntimeException exception) {
-            return new double[] { 100 };
-        }
+        return new double[] { applyAsDouble(dataset) };
     }
 
     @Override
     public int length() {
         return 1;
+    }
+
+    @Override
+    public double applyAsDouble(ClDataset dataset) {
+        try {
+            return distance.applyAsDouble(extractor.apply(dataset), target);
+        } catch (RuntimeException exception) {
+            return 100;
+        }
     }
 
 }

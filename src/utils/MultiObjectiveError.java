@@ -33,7 +33,7 @@ public class MultiObjectiveError implements ToDoubleArrayFunction<ClDataset> {
         try {
             double[] result = extractor.apply(dataset);
             for (int i = 0; i < length; i++) {
-                diffs[i] = Math.abs(target[i] - result[i]);
+                diffs[i] = Math.abs(target[i] - result[i]) * invSigma[i];
             }
         } catch (RuntimeException e) {
             e.printStackTrace();

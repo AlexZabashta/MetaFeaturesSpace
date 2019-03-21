@@ -74,7 +74,7 @@ public class GenerationExp {
 
                 // TODO COPY DATA
 
-                datasets.add(new ClDataset(file.getName(), true, data, labels));
+                datasets.add(new ClDataset(file.getName().replace('_', '-'), true, data, labels));
 
                 System.out.println(file.getName());
                 System.out.flush();
@@ -112,7 +112,7 @@ public class GenerationExp {
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
-        int numMF = extractor.lenght;
+        int numMF = extractor.length();
 
         for (int i = 0; i < numData; i++) {
             ClDataset dataset = datasets.get(i);
@@ -135,8 +135,8 @@ public class GenerationExp {
         for (int targetIndex = 0; targetIndex < size; targetIndex++) {
             List<Experiment> exp = new ArrayList<>();
 
-            ClDataset targetClDataset = datasets.get(targetIndex);
-            final double[] target = extractor.apply(targetClDataset);
+            ClDataset targetDataset = datasets.get(targetIndex);
+            final double[] target = extractor.apply(targetDataset);
 
             ToDoubleFunction<ClDataset> function = new ToDoubleFunction<ClDataset>() {
                 @Override
@@ -158,7 +158,7 @@ public class GenerationExp {
                 }
             }
 
-            final String fileName = fileNames.get(targetClDataset).replace('_', '-');
+            final String fileName = targetDataset.name;
 
             try (PrintWriter writer = new PrintWriter(new File(res + fileName + ".txt"))) {
                 for (int i = 0; i < numMF; i++) {
@@ -170,7 +170,7 @@ public class GenerationExp {
                 e.printStackTrace();
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -184,7 +184,7 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -198,14 +198,14 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
+                    Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -221,7 +221,7 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -234,14 +234,14 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new NSGAIIBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new NSGAIIBuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -257,7 +257,7 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -270,14 +270,14 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new PAESBuilder<DataSetSolution>(problem).setMutationOperator(new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
+                    Algorithm<?> algorithm = new PAESBuilder<DataSetSolution>(problem).setMutationOperator(new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -293,14 +293,14 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new PESA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new PESA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -316,7 +316,7 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -338,14 +338,14 @@ public class GenerationExp {
                 } catch (ClassCastException ifNotDouble) {
                 }
             }
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new SMSEMOABuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new SMSEMOABuilder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxEvaluations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -361,14 +361,14 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
                 try {
                     GDSProblem problem = (GDSProblem) prob;
 
-                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetClDataset.numObjects, targetClDataset.numFeatures, extractor)).setMaxIterations(10000000).setPopulationSize(32).build();
+                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>(problem, new Crossover(extractor), new Mutation(targetDataset.numObjects, targetDataset.numFeatures, extractor)).setMaxIterations(10000000).setPopulationSize(32).build();
                     probFunAlg.algorithm = algorithm;
                     exp.add(probFunAlg);
 
@@ -384,7 +384,7 @@ public class GenerationExp {
                 }
             }
 
-            for (Experiment probFunAlg : problems(targetClDataset.numObjects, targetClDataset.numFeatures, function, limit, adatasets, extractor)) {
+            for (Experiment probFunAlg : problems(targetDataset.numObjects, targetDataset.numFeatures, function, limit, adatasets, extractor)) {
                 Problem<?> prob = probFunAlg.problem;
                 probFunAlg.name = fileName;
 
@@ -463,6 +463,10 @@ public class GenerationExp {
         threads.shutdown();
     }
 
+    
+   
+    
+    
     static List<Experiment> problems(int numObjects, int numFeatures, ToDoubleFunction<ClDataset> ef, int limit, List<ClDataset> datasets, MetaFeaturesExtractor extractor) {
         final List<Experiment> problems = new ArrayList<Experiment>();
 
