@@ -13,25 +13,23 @@ import utils.RandomUtils;
 
 public class Mutation implements MutationOperator<DataSetSolution> {
     private static final long serialVersionUID = 1L;
-    final MetaFeaturesExtractor extractor;
     final long seed;
     final int minNumObjects, maxNumObjects;
     final int minNumFeatures, maxNumFeatures;
 
-    public Mutation(int minNumObjects, int maxNumObjects, int minNumFeatures, int maxNumFeatures, MetaFeaturesExtractor extractor) {
-        this(minNumObjects, maxNumObjects, minNumFeatures, maxNumFeatures, extractor, 0);
+    public Mutation(int minNumObjects, int maxNumObjects, int minNumFeatures, int maxNumFeatures) {
+        this(minNumObjects, maxNumObjects, minNumFeatures, maxNumFeatures, 0);
     }
 
-    public Mutation(int numObjects, int numFeatures, MetaFeaturesExtractor extractor) {
-        this(numObjects, numObjects, numFeatures, numFeatures, extractor, 0);
+    public Mutation(int numObjects, int numFeatures) {
+        this(numObjects, numObjects, numFeatures, numFeatures, 0);
     }
 
-    public Mutation(int numObjects, int numFeatures, MetaFeaturesExtractor extractor, long seed) {
-        this(numObjects, numObjects, numFeatures, numFeatures, extractor, seed);
+    public Mutation(int numObjects, int numFeatures, long seed) {
+        this(numObjects, numObjects, numFeatures, numFeatures, seed);
     }
 
-    public Mutation(int minNumObjects, int maxNumObjects, int minNumFeatures, int maxNumFeatures, MetaFeaturesExtractor extractor, long seed) {
-        this.extractor = extractor;
+    public Mutation(int minNumObjects, int maxNumObjects, int minNumFeatures, int maxNumFeatures, long seed) {
         this.seed = seed;
         this.minNumObjects = minNumObjects;
         this.maxNumObjects = maxNumObjects;

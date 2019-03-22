@@ -6,18 +6,13 @@ import java.util.Random;
 
 import org.uma.jmetal.operator.CrossoverOperator;
 
-import clsf.Dataset;
+import clsf.ClDataset;
 import clusterization.MetaFeaturesExtractor;
 import utils.RandomUtils;
 
 public class Crossover implements CrossoverOperator<DataSetSolution> {
 
     private static final long serialVersionUID = 1L;
-    final MetaFeaturesExtractor extractor;
-
-    public Crossover(MetaFeaturesExtractor extractor) {
-        this.extractor = extractor;
-    }
 
     @Override
     public List<DataSetSolution> execute(List<DataSetSolution> source) {
@@ -25,7 +20,7 @@ public class Crossover implements CrossoverOperator<DataSetSolution> {
             throw new IllegalArgumentException("Source should have two datasets.");
         }
 
-        Dataset objX = source.get(0).getDataset(), objY = source.get(1).getDataset();
+        ClDataset objX = source.get(0).getClDataset(), objY = source.get(1).getClDataset();
 
         Random random = new Random(objX.hashCode + objY.hashCode);
 
@@ -64,8 +59,8 @@ public class Crossover implements CrossoverOperator<DataSetSolution> {
             }
         }
 
-        DataSetSolution offspringA = new DataSetSolution(new Dataset(newDataA, extractor));
-        DataSetSolution offspringB = new DataSetSolution(new Dataset(newDataB, extractor));
+        DataSetSolution offspringA = new DataSetSolution(new ClDataset(newDataA, extractor));
+        DataSetSolution offspringB = new DataSetSolution(new ClDataset(newDataB, extractor));
 
         return Arrays.asList(offspringA, offspringB);
     }
