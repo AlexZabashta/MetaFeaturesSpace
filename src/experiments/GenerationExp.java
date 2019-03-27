@@ -17,8 +17,8 @@ import org.uma.jmetal.problem.Problem;
 
 import clsf.CMFExtractor;
 import clsf.ClDataset;
-import clusterization.direct.Crossover;
-import clusterization.direct.Mutation;
+import clsf.direct.Crossover;
+import clsf.direct.Mutation;
 import tmp.ToDoubleArrayFunction;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;

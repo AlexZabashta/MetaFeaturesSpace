@@ -6,8 +6,8 @@ import java.io.ObjectInputStream;
 import java.util.Random;
 
 import clsf.Dataset;
+import clsf.MetaFeaturesExtractor;
 import clusterization.CMFExtractor;
-import clusterization.MetaFeaturesExtractor;
 import utils.ArrayUtils;
 import utils.MahalanobisDistance;
 import utils.MatrixUtils;

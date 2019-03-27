@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Locale;
 
 public class ArrayUtils {
@@ -24,9 +26,40 @@ public class ArrayUtils {
         return union;
     }
 
+    public static int[] order(int[] array) {
+        int n = array.length;
+        Integer[] order = new Integer[n];
+
+        for (int i = 0; i < n; i++) {
+            order[i] = i;
+        }
+
+        Arrays.sort(order, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer i, Integer j) {
+                return Integer.compare(array[j], array[i]);
+            }
+        });
+
+        int[] p = new int[n];
+        for (int i = 0; i < n; i++) {
+            p[i] = order[i];
+        }
+        return p;
+    }
+
     public static double[][] copy(double[][] array) {
         int length = array.length;
         double[][] clone = new double[length][];
+        for (int i = 0; i < length; i++) {
+            clone[i] = array[i].clone();
+        }
+        return clone;
+    }
+
+    public static int[][] copy(int[][] array) {
+        int length = array.length;
+        int[][] clone = new int[length][];
         for (int i = 0; i < length; i++) {
             clone[i] = array[i].clone();
         }

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
-import utils.ArraysUtils;
+import utils.ArrayUtils;
 import utils.CategoryMapper;
 import utils.StatUtils;
 import weka.core.Attribute;
@@ -27,11 +27,11 @@ public class aDataset {
     private final double[] min, max;
 
     public int[][] catValues() {
-        return ArraysUtils.copy(catValues);
+        return ArrayUtils.copy(catValues);
     }
 
     public double[][] ratValues() {
-        return ArraysUtils.copy(ratValues);
+        return ArrayUtils.copy(ratValues);
     }
 
     public aDataset(int numObjects, int numCatAttr, int[][] catValues, int numRatAttr, double[][] ratValues) {

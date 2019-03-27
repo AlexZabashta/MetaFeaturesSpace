@@ -30,11 +30,11 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
-import clusterization.direct.Crossover;
-import clusterization.direct.DataSetSolution;
-import clusterization.direct.GDSProblem;
-import clusterization.direct.Mutation;
-import clusterization.vect.GMMProblem;
+import clsf.direct.Crossover;
+import clsf.direct.DataSetSolution;
+import clsf.direct.GDSProblem;
+import clsf.direct.Mutation;
+import clsf.vect.GMMProblem;
 
 public class Algorithms {
 

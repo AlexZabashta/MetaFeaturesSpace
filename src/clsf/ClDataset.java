@@ -1,5 +1,7 @@
 package clsf;
 
+import java.util.Arrays;
+
 import utils.ArrayUtils;
 import utils.CategoryMapper;
 
@@ -8,7 +10,41 @@ public class ClDataset extends Dataset {
     public final int numClasses;
     final int[] labels;
 
+    private final int hashCode;
+
     public final String name;
+
+    public int[] classDistribution() {
+        int[] distribution = new int[numClasses];
+        for (int oid = 0; oid < numObjects; oid++) {
+            ++distribution[labels[oid]];
+        }
+        return distribution;
+    }
+
+    public int[][] indices() {
+        int[] s = classDistribution().clone();
+
+        int[][] indices = new int[numClasses][];
+
+        for (int label = 0; label < numClasses; label++) {
+            indices[label] = new int[s[label]];
+            s[label] = 0;
+        }
+
+        for (int oid = 0; oid < numObjects; oid++) {
+            int c = labels[oid];
+            indices[c][s[c]++] = oid;
+        }
+
+        return indices;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
 
     public ClDataset(String name, boolean normalize, double[][] data, int[] labels) {
         super(normalize, data);
@@ -22,6 +58,7 @@ public class ClDataset extends Dataset {
         for (int oid = 0; oid < numObjects; oid++) {
             this.labels[oid] = mapper.applyAsInt(labels[oid]);
         }
+        this.hashCode = super.hashCode() ^ Arrays.hashCode(this.labels);
     }
 
     public ClDataset(String name, boolean normalize, double[][]... data) {
@@ -35,6 +72,7 @@ public class ClDataset extends Dataset {
                 labels[oid] = label;
             }
         }
+        this.hashCode = super.hashCode() ^ Arrays.hashCode(this.labels);
     }
 
     public Dataset[] splitByLabels(boolean normalize) {

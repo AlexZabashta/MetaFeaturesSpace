@@ -12,7 +12,7 @@ public class Dataset {
 
     public final int numObjects;
     public final int numFeatures;
-    public final int hashCode;
+    private final int hashCode;
 
     protected final double[][] data;
 
@@ -107,6 +107,10 @@ public class Dataset {
         }
 
         return instances;
+    }
+
+    public double get(int oid, int fid) {
+        return data[oid][fid];
     }
 
     public double[][] data() {
