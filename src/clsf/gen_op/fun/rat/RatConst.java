@@ -1,6 +1,6 @@
 package clsf.gen_op.fun.rat;
 
-import clsf.aDataset.Item;
+import clsf.ClDataset.Item;
 
 public class RatConst implements RatFunction {
 

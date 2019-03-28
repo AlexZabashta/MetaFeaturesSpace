@@ -1,25 +1,16 @@
 package clsf.gen_op;
 
-import java.util.List;
 import java.util.Random;
-import java.util.function.IntUnaryOperator;
-import java.util.function.UnaryOperator;
 
 import clsf.ClDataset;
-import utils.AddClassMapper;
-import utils.RandomUtils;
-import utils.RemoveClassMapper;
+import clsf.gen_op.fun.cat.CatFunction;
+import clsf.gen_op.fun.cat.ClassValue;
+import clsf.gen_op.fun.cat.SumMod;
 
-public class ChangeNumClasses implements UnaryOperator<ClDataset> {
-
-    private final Random random;
-
-    public ChangeNumClasses(Random random) {
-        this.random = random;
-    }
+public class ChangeNumClasses {
 
     public static ClDataset apply(ClDataset dataset, Random random) {
-        int n = dataset.numClasses();
+        int n = dataset.numClasses;
         if (n == 2) {
             return apply(dataset, random, 3);
         } else {
@@ -28,37 +19,25 @@ public class ChangeNumClasses implements UnaryOperator<ClDataset> {
     }
 
     public static ClDataset apply(ClDataset dataset, Random random, int newNumClasses) {
-        int oldNumClasses = dataset.numClasses();
+        int oldNumClasses = dataset.numClasses;
 
         if (oldNumClasses == newNumClasses) {
             return dataset;
         }
 
-        IntUnaryOperator maper;
-        if (oldNumClasses < newNumClasses) {
-            maper = new AddClassMapper(oldNumClasses, newNumClasses, random);
-        } else {
-            maper = new RemoveClassMapper(oldNumClasses, newNumClasses, random);
+        int numObjects = dataset.numObjects;
+        CatFunction randomFun = CatFunction.random(dataset, random, 2);
+        CatFunction classVal = new ClassValue(dataset);
+
+        CatFunction classMaper = new SumMod(randomFun, classVal, newNumClasses, random);
+
+        int[] labels = new int[numObjects];
+
+        for (int i = 0; i < numObjects; i++) {
+            labels[i] = classMaper.applyAsInt(dataset.item(i));
         }
 
-        int n = dataset.numObjects();
-
-        int c = dataset.numCatAttr();
-        int r = dataset.numRatAttr();
-
-        int[][] cat = dataset.catValues();
-        double[][] rat = dataset.ratValues();
-
-        for (int i = 0; i < n; i++) {
-            cat[i][c] = maper.applyAsInt(cat[i][c]);
-        }
-
-        return new ClDataset(n, c, cat, r, rat);
-    }
-
-    @Override
-    public ClDataset apply(ClDataset dataset) {
-        return apply(dataset, random);
+        return dataset.changeLabels(true, labels);
     }
 
     public static void main(String[] args) {

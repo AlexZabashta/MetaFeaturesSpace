@@ -94,4 +94,12 @@ public class ArrayUtils {
         System.out.println();
     }
 
+    public static int max(int[] array) {
+        int max = Integer.MIN_VALUE;
+        for (int value : array) {
+            max = Math.max(max, value);
+        }
+        return max;
+    }
+
 }

@@ -7,12 +7,56 @@ import utils.CategoryMapper;
 
 public class ClDataset extends Dataset {
 
-    public final int numClasses;
-    final int[] labels;
+    public class Item {
+        final int oid;
+
+        public Item(int oid) {
+            this.oid = oid;
+        }
+
+        public int classValue() {
+            return labels[oid];
+        }
+
+        public double value(int fid) {
+            return data[oid][fid];
+        }
+    }
 
     private final int hashCode;
 
+    public final int[] labels;
     public final String name;
+
+    public final int numClasses;
+
+    public ClDataset changeValues(boolean normValues, double[][] data) {
+        return new ClDataset(name, normValues, data, false, labels);
+    }
+
+    public ClDataset changeLabels(boolean normLabels, int[] labels) {
+        return new ClDataset(name, false, data, normLabels, labels);
+    }
+
+    public ClDataset(String name, boolean normValues, double[][] data, boolean normLabels, int[] labels) {
+        super(normValues, data);
+        this.name = name;
+        if (labels.length != numObjects) {
+            throw new IllegalArgumentException("Number of objects must be equal to labels length");
+        }
+        this.labels = labels;
+
+        if (normLabels) {
+            CategoryMapper mapper = new CategoryMapper(labels.clone());
+            this.numClasses = mapper.range();
+            for (int oid = 0; oid < numObjects; oid++) {
+                this.labels[oid] = mapper.applyAsInt(labels[oid]);
+            }
+        } else {
+            this.numClasses = ArrayUtils.max(labels);
+        }
+        this.hashCode = super.hashCode() ^ Arrays.hashCode(this.labels);
+    }
 
     public int[] classDistribution() {
         int[] distribution = new int[numClasses];
@@ -20,6 +64,11 @@ public class ClDataset extends Dataset {
             ++distribution[labels[oid]];
         }
         return distribution;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 
     public int[][] indices() {
@@ -41,38 +90,21 @@ public class ClDataset extends Dataset {
 
     }
 
-    @Override
-    public int hashCode() {
-        return hashCode;
+    public Item item(int index) {
+        if (index < 0 || numObjects <= index) {
+            throw new IllegalArgumentException("index < 0 || numObjects <= index");
+        }
+        return new Item(index);
     }
 
-    public ClDataset(String name, boolean normalize, double[][] data, int[] labels) {
-        super(normalize, data);
-        this.name = name;
-        if (labels.length != numObjects) {
-            throw new IllegalArgumentException("Number of objects must be equal to labels length");
-        }
-        this.labels = labels;
-        CategoryMapper mapper = new CategoryMapper(labels.clone());
-        this.numClasses = mapper.range();
-        for (int oid = 0; oid < numObjects; oid++) {
-            this.labels[oid] = mapper.applyAsInt(labels[oid]);
-        }
-        this.hashCode = super.hashCode() ^ Arrays.hashCode(this.labels);
+    public double max(int index) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
-    public ClDataset(String name, boolean normalize, double[][]... data) {
-        super(normalize, ArrayUtils.merge(data));
-        this.name = name;
-        this.labels = new int[numObjects];
-        this.numClasses = data.length;
-
-        for (int oid = 0, label = 0; label < numClasses; label++) {
-            for (int i = 0; i < data.length; i++, oid++) {
-                labels[oid] = label;
-            }
-        }
-        this.hashCode = super.hashCode() ^ Arrays.hashCode(this.labels);
+    public double min(int index) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     public Dataset[] splitByLabels(boolean normalize) {
@@ -98,6 +130,14 @@ public class ClDataset extends Dataset {
         }
 
         return datasets;
+    }
+
+    public int classValue(int oid) {
+        return labels[oid];
+    }
+
+    public double value(int oid, int fid) {
+        return data[oid][fid];
     }
 
 }

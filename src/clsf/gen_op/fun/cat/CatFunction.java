@@ -1,28 +1,23 @@
 package clsf.gen_op.fun.cat;
 
 import java.util.Random;
-import java.util.function.DoubleFunction;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
-import clsf.aDataset;
-import clsf.gen_op.fun.cat.*;
-import clsf.gen_op.fun.rat.FromCat;
+import clsf.ClDataset;
 import clsf.gen_op.fun.rat.RatFunction;
 
-public interface CatFunction extends ToIntFunction<aDataset.Item> {
+public interface CatFunction extends ToIntFunction<ClDataset.Item> {
     public int range();
 
     public static int randomRange(Random random) {
         return random.nextInt(10) + 1;
     }
 
-    public static CatFunction random(aDataset dataset, Random random, int maxDepth) {
+    public static CatFunction random(ClDataset dataset, Random random, int maxDepth) {
         return random(dataset, random, maxDepth, randomRange(random));
     }
 
-    public static CatFunction random(aDataset dataset, Random random, int maxDepth, int range) {
+    public static CatFunction random(ClDataset dataset, Random random, int maxDepth, int range) {
         if (maxDepth <= 0) {
             return randomLeaf(dataset, random, range);
         } else {
@@ -30,7 +25,7 @@ public interface CatFunction extends ToIntFunction<aDataset.Item> {
         }
     }
 
-    public static CatFunction randomNode(aDataset dataset, Random random, int maxDepth, int range) {
+    public static CatFunction randomNode(ClDataset dataset, Random random, int maxDepth, int range) {
         if (maxDepth <= 0) {
             throw new IllegalArgumentException("maxDepth <= 0");
         }
@@ -45,7 +40,7 @@ public interface CatFunction extends ToIntFunction<aDataset.Item> {
         }
     }
 
-    public static CatFunction randomLeaf(aDataset dataset, Random random, int range) {
+    public static CatFunction randomLeaf(ClDataset dataset, Random random, int range) {
         if (random.nextBoolean()) {
             if (random.nextBoolean()) {
                 return new CatConst();
@@ -53,12 +48,7 @@ public interface CatFunction extends ToIntFunction<aDataset.Item> {
                 return new RandomCat(range, random);
             }
         } else {
-            int n = dataset.numCatAttr();
-            if (n == 0 || random.nextBoolean()) {
-                return new ClassValue(dataset);
-            } else {
-                return new CatValue(random.nextInt(n), dataset);
-            }
+            return new ClassValue(dataset);
         }
     }
 }

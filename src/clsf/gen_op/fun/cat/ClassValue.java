@@ -1,14 +1,14 @@
 package clsf.gen_op.fun.cat;
 
-import clsf.aDataset;
-import clsf.aDataset.Item;
+import clsf.ClDataset;
+import clsf.ClDataset.Item;
 
 public class ClassValue implements CatFunction {
 
     public final int range;
 
-    public ClassValue(aDataset dataset) {
-        this.range = dataset.numClasses();
+    public ClassValue(ClDataset dataset) {
+        this.range = dataset.numClasses;
     }
 
     @Override

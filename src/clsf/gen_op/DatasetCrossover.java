@@ -72,8 +72,6 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
         int[][] indicesA = ancestorA.indices();
         int[][] indicesB = ancestorB.indices();
 
-        int numObjects = 0;
-
         for (int oid = 0, label = 0; label < numClasses; label++) {
             int labelA = orderA[label];
             int labelB = orderB[label];
@@ -104,8 +102,8 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
             }
         }
 
-        DataSetSolution offspringA = new DataSetSolution(new ClDataset(ancestorA.name, true, newDataA, labels));
-        DataSetSolution offspringB = new DataSetSolution(new ClDataset(ancestorB.name, true, newDataB, labels));
+        DataSetSolution offspringA = new DataSetSolution(new ClDataset(ancestorA.name, true, newDataA, false, labels));
+        DataSetSolution offspringB = new DataSetSolution(new ClDataset(ancestorB.name, true, newDataB, false, labels));
 
         return Arrays.asList(offspringA, offspringB);
     }

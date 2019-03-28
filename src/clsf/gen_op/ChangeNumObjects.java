@@ -1,67 +1,94 @@
 package clsf.gen_op;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
 
-import clsf.aDataset;
+import clsf.ClDataset;
 import utils.AddClassMapper;
+import utils.ArrayUtils;
+import utils.Permutation;
 import utils.RandomUtils;
 import utils.RemoveClassMapper;
 
-public class ChangeNumObjects implements UnaryOperator<aDataset> {
+public class ChangeNumObjects {
 
-    private final Random random;
-
-    public ChangeNumObjects(Random random) {
-        this.random = random;
+    public static ClDataset apply(ClDataset dataset, Random random) {
+        int numObjects = dataset.numObjects;
+        return apply(dataset, random, random.nextInt(numObjects * 2) + 2);
     }
 
-    public static aDataset apply(aDataset dataset, Random random) {
-        int n = dataset.numObjects();
-        return apply(dataset, random, random.nextInt(n * 2) + 2);
+    public static ClDataset addObjects(ClDataset dataset, Random random, int newNumObjects) {
+        int numFeatures = dataset.numFeatures;
+        int oldNumObjects = dataset.numObjects;
+
+        double[][] values = new double[newNumObjects][];
+        int[] labels = Arrays.copyOf(dataset.labels, newNumObjects);
+
+        for (int oid = 0; oid < oldNumObjects; oid++) {
+            values[oid] = dataset.data[oid].clone();
+        }
+
+        int[][] indices = dataset.indices();
+
+        for (int oid = oldNumObjects; oid < newNumObjects; oid++) {
+            values[oid] = new double[numFeatures];
+            int label = labels[random.nextInt(oldNumObjects)];
+            labels[oid] = label;
+            int[] p = Permutation.random(numFeatures, random);
+            int[] subsetIndices = indices[label];
+
+            int offset = 0;
+            while (offset < numFeatures) {
+                int srcObjId = subsetIndices[random.nextInt(subsetIndices.length)];
+                int len = random.nextInt(numFeatures - offset) + 1;
+
+                for (int k = 0; k < len; k++) {
+                    int fid = p[offset + k];
+                    values[oid][fid] = values[srcObjId][fid];
+                }
+
+                offset += len;
+            }
+        }
+
+        return new ClDataset(dataset.name, true, values, false, labels);
     }
 
-    public static aDataset apply(aDataset dataset, Random random, int newNumObjects) {
-        int oldNumObjects = dataset.numObjects();
+    public static ClDataset removeObjects(ClDataset dataset, Random random, int newNumObjects) {
+        int numFeatures = dataset.numFeatures;
+        int oldNumObjects = dataset.numObjects;
+
+        boolean[] selection = RandomUtils.randomSelection(oldNumObjects, newNumObjects, random);
+
+        double[][] values = new double[newNumObjects][numFeatures];
+        int[] labels = new int[newNumObjects];
+
+        for (int noid = 0, oid = 0; oid < oldNumObjects; oid++) {
+            if (selection[oid]) {
+                values[noid] = dataset.data[oid].clone();
+                labels[noid] = dataset.labels[oid];
+                ++noid;
+            }
+        }
+
+        return new ClDataset(dataset.name, true, values, true, labels);
+    }
+
+    public static ClDataset apply(ClDataset dataset, Random random, int newNumObjects) {
+        int oldNumObjects = dataset.numObjects;
 
         if (oldNumObjects == newNumObjects) {
             return dataset;
         }
 
-        IntUnaryOperator maper;
         if (oldNumObjects < newNumObjects) {
-            maper = new RemoveClassMapper(newNumObjects, oldNumObjects, random);
+            return addObjects(dataset, random, newNumObjects);
         } else {
-            maper = new AddClassMapper(newNumObjects, oldNumObjects, random);
+            return removeObjects(dataset, random, newNumObjects);
         }
-
-        int c = dataset.numCatAttr();
-        int r = dataset.numRatAttr();
-
-        int[][] cat = new int[newNumObjects][c + 1];
-        double[][] rat = new double[newNumObjects][r];
-
-        for (int i = 0; i < newNumObjects; i++) {
-            int j = maper.applyAsInt(i);
-
-            for (int cid = 0; cid < c; cid++) {
-                cat[i][cid] = dataset.catValue(j, cid);
-            }
-
-            for (int rid = 0; rid < r; rid++) {
-                rat[i][rid] = dataset.ratValue(j, rid);
-            }
-            cat[i][c] = dataset.classValue(j);
-        }
-
-        return new aDataset(newNumObjects, c, cat, r, rat);
-    }
-
-    @Override
-    public aDataset apply(aDataset dataset) {
-        return apply(dataset, random);
     }
 
 }

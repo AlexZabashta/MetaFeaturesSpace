@@ -14,7 +14,7 @@ public class Dataset {
     public final int numFeatures;
     private final int hashCode;
 
-    protected final double[][] data;
+    public final double[][] data;
 
     public static boolean normalize = true;
 
@@ -111,10 +111,6 @@ public class Dataset {
 
     public double get(int oid, int fid) {
         return data[oid][fid];
-    }
-
-    public double[][] data() {
-        return ArrayUtils.copy(data);
     }
 
 }
