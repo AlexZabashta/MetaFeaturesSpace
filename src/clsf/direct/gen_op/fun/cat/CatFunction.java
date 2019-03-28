@@ -1,10 +1,10 @@
-package clsf.gen_op.fun.cat;
+package clsf.direct.gen_op.fun.cat;
 
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
 import clsf.ClDataset;
-import clsf.gen_op.fun.rat.RatFunction;
+import clsf.direct.gen_op.fun.rat.RatFunction;
 
 public interface CatFunction extends ToIntFunction<ClDataset.Item> {
     public int range();

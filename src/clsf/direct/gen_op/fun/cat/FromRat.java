@@ -1,7 +1,7 @@
-package clsf.gen_op.fun.cat;
+package clsf.direct.gen_op.fun.cat;
 
 import clsf.ClDataset.Item;
-import clsf.gen_op.fun.rat.RatFunction;
+import clsf.direct.gen_op.fun.rat.RatFunction;
 
 public class FromRat implements CatFunction {
 

@@ -1,4 +1,4 @@
-package clsf.gen_op.fun.rat;
+package clsf.direct.gen_op.fun.rat;
 
 import clsf.ClDataset;
 import clsf.ClDataset.Item;

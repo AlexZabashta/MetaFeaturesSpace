@@ -1,4 +1,4 @@
-package clsf.direct;
+package clsf.direct.gen_op;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +8,8 @@ import org.uma.jmetal.operator.CrossoverOperator;
 
 import clsf.ClDataset;
 import clsf.MetaFeaturesExtractor;
+import clsf.direct.DataSetSolution;
+import clsf.direct.RelationsGenerator;
 import utils.RandomUtils;
 
 public class Crossover implements CrossoverOperator<DataSetSolution> {

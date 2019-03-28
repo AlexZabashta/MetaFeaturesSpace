@@ -1,11 +1,11 @@
-package clsf.gen_op;
+package clsf.direct.gen_op;
 
 import java.util.Random;
 
 import clsf.ClDataset;
-import clsf.gen_op.fun.cat.CatFunction;
-import clsf.gen_op.fun.cat.ClassValue;
-import clsf.gen_op.fun.cat.SumMod;
+import clsf.direct.gen_op.fun.cat.CatFunction;
+import clsf.direct.gen_op.fun.cat.ClassValue;
+import clsf.direct.gen_op.fun.cat.SumMod;
 
 public class ChangeNumClasses {
 

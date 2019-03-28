@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import clsf.gen_op.fun.AttributeFunction;
-import clsf.gen_op.fun.RandomFunction;
+import clsf.direct.gen_op.fun.AttributeFunction;
+import clsf.direct.gen_op.fun.RandomFunction;
 import features_inversion.util.BooleanArray;
 import features_inversion.util.FeaturePoint;
 import features_inversion.util.MetaFeaturesExtractor;

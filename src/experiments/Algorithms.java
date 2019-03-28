@@ -30,10 +30,10 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
-import clsf.direct.Crossover;
 import clsf.direct.DataSetSolution;
 import clsf.direct.GDSProblem;
-import clsf.direct.Mutation;
+import clsf.direct.gen_op.Crossover;
+import clsf.direct.gen_op.Mutation;
 import clsf.vect.GMMProblem;
 
 public class Algorithms {

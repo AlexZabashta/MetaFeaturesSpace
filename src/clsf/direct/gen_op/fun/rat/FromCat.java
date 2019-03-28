@@ -1,11 +1,11 @@
-package clsf.gen_op.fun.rat;
+package clsf.direct.gen_op.fun.rat;
 
 import java.util.Random;
 
 import org.apache.commons.math3.stat.StatUtils;
 
 import clsf.ClDataset.Item;
-import clsf.gen_op.fun.cat.CatFunction;
+import clsf.direct.gen_op.fun.cat.CatFunction;
 
 public class FromCat implements RatFunction {
 

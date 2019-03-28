@@ -1,4 +1,4 @@
-package clsf.gen_op.fun;
+package clsf.direct.gen_op.fun;
 
 public interface AttributeFunction {
     public abstract double evaluate(double[] attributes, boolean clazz);

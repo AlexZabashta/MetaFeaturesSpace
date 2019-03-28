@@ -1,10 +1,10 @@
-package clsf.gen_op.fun.rat;
+package clsf.direct.gen_op.fun.rat;
 
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
 import clsf.ClDataset;
-import clsf.gen_op.fun.cat.CatFunction;
+import clsf.direct.gen_op.fun.cat.CatFunction;
 
 public interface RatFunction extends ToDoubleFunction<ClDataset.Item> {
     public double min();

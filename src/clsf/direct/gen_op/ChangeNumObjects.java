@@ -1,4 +1,4 @@
-package clsf.gen_op;
+package clsf.direct.gen_op;
 
 import java.util.Arrays;
 import java.util.List;

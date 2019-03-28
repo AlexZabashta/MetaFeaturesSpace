@@ -1,4 +1,4 @@
-package clsf.direct;
+package clsf.direct.gen_op;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -7,6 +7,8 @@ import org.uma.jmetal.operator.MutationOperator;
 
 import clsf.Dataset;
 import clsf.MetaFeaturesExtractor;
+import clsf.direct.DataSetSolution;
+import clsf.direct.RelationsGenerator;
 import clsf.direct.fun.RandomFunction;
 import utils.ArrayUtils;
 import utils.RandomUtils;

@@ -1,9 +1,9 @@
-package clsf.gen_op;
+package clsf.direct.gen_op;
 
 import java.util.Random;
 
 import clsf.ClDataset;
-import clsf.gen_op.fun.rat.RatFunction;
+import clsf.direct.gen_op.fun.rat.RatFunction;
 import utils.RandomUtils;
 
 public class ChangeNumAttributes {

@@ -1,4 +1,4 @@
-package clsf.gen_op.fun.cat;
+package clsf.direct.gen_op.fun.cat;
 
 import clsf.ClDataset.Item;
 
