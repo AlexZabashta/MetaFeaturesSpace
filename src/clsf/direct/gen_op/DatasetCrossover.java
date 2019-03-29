@@ -21,7 +21,9 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
             throw new IllegalArgumentException("Source should have two datasets.");
         }
 
-        ClDataset ancestorA = source.get(0).getClDataset(), ancestorB = source.get(1).getClDataset();
+        ClDataset realAncestA = source.get(0).getClDataset(), realAncestB = source.get(1).getClDataset();
+
+        ClDataset ancestorA = realAncestA, ancestorB = realAncestB;
 
         long seed = 1L * ancestorA.hashCode() * ancestorB.hashCode();
 
@@ -39,7 +41,7 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
         }
 
         if (ancestorA.numClasses != numClasses || ancestorB.numClasses != numClasses) {
-            return Arrays.asList(new DataSetSolution(ancestorA), new DataSetSolution(ancestorB));
+            return Arrays.asList(new DataSetSolution(realAncestA), new DataSetSolution(realAncestB));
         }
 
         int[] classDistrA = ancestorA.classDistribution();
@@ -102,10 +104,24 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
             }
         }
 
-        DataSetSolution offspringA = new DataSetSolution(new ClDataset(ancestorA.name, true, newDataA, false, labels));
-        DataSetSolution offspringB = new DataSetSolution(new ClDataset(ancestorB.name, true, newDataB, false, labels));
+        ClDataset offspringA = (new ClDataset(ancestorA.name, true, newDataA, false, labels));
+        if (offspringA.numObjects < Math.min(ancestorA.numObjects, ancestorB.numObjects)) {
+            offspringA = ancestorA;
+        }
+        if (offspringA.numObjects > Math.max(ancestorA.numObjects, ancestorB.numObjects)) {
+            offspringA = ancestorA;
+        }
 
-        return Arrays.asList(offspringA, offspringB);
+        ClDataset offspringB = (new ClDataset(ancestorB.name, true, newDataB, false, labels));
+        if (offspringB.numObjects < Math.min(ancestorA.numObjects, ancestorB.numObjects)) {
+            offspringB = ancestorB;
+        }
+
+        if (offspringB.numObjects > Math.max(ancestorA.numObjects, ancestorB.numObjects)) {
+            offspringB = ancestorB;
+        }
+
+        return Arrays.asList(new DataSetSolution(offspringA), new DataSetSolution(offspringB));
     }
 
     @Override

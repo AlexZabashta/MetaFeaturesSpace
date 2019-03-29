@@ -3,7 +3,6 @@ package clsf;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import utils.ArrayUtils;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -16,11 +15,15 @@ public class Dataset {
 
     public final double[][] data;
 
-    public static boolean normalize = true;
+    public static boolean defaultNormalize = true;
 
     @Override
     public int hashCode() {
         return hashCode;
+    }
+
+    public Dataset(double[]... data) {
+        this(defaultNormalize, data);
     }
 
     public Dataset(boolean normalize, double[]... data) {

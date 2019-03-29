@@ -1,21 +1,30 @@
 package clsf.direct.gen_op.fun.rat;
 
 import java.util.Random;
-import java.util.function.ToDoubleFunction;
+import java.util.function.IntToDoubleFunction;
 
 import clsf.ClDataset;
 import clsf.direct.gen_op.fun.cat.CatFunction;
 
-public interface RatFunction extends ToDoubleFunction<ClDataset.Item> {
-    public double min();
-
-    public double max();
-
+public interface RatFunction extends IntToDoubleFunction {
     public static RatFunction random(ClDataset dataset, Random random, int maxDepth) {
         if (maxDepth <= 0) {
             return randomLeaf(dataset, random);
         } else {
             return randomNode(dataset, random, maxDepth);
+        }
+    }
+
+    public static RatFunction randomLeaf(ClDataset dataset, Random random) {
+        int n = dataset.numFeatures;
+        if (n == 0 || random.nextBoolean()) {
+            if (random.nextBoolean()) {
+                return new NoiesValue(random);
+            } else {
+                return new RatConst(random.nextGaussian());
+            }
+        } else {
+            return new RatValue(random.nextInt(n), dataset);
         }
     }
 
@@ -49,17 +58,8 @@ public interface RatFunction extends ToDoubleFunction<ClDataset.Item> {
         }
     }
 
-    public static RatFunction randomLeaf(ClDataset dataset, Random random) {
-        int n = dataset.numFeatures;
-        if (n == 0 || random.nextBoolean()) {
-            if (random.nextBoolean()) {
-                return new NoiesValue(random);
-            } else {
-                return new RatConst(random.nextGaussian());
-            }
-        } else {
-            return new RatValue(random.nextInt(n), dataset);
-        }
-    }
+    public double max();
+
+    public double min();
 
 }

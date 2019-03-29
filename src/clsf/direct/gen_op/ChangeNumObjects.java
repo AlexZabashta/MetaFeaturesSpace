@@ -1,17 +1,11 @@
 package clsf.direct.gen_op;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
-import java.util.function.IntUnaryOperator;
-import java.util.function.UnaryOperator;
 
 import clsf.ClDataset;
-import utils.AddClassMapper;
-import utils.ArrayUtils;
 import utils.Permutation;
 import utils.RandomUtils;
-import utils.RemoveClassMapper;
 
 public class ChangeNumObjects {
 

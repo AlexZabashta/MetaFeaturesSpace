@@ -48,7 +48,7 @@ public class DataSetSolution implements Solution<ClDataset> {
 
     @Override
     public String getVariableValueString(int index) {
-        return dataset.hashCode() + "";
+        return dataset.name + "_" + dataset.hashCode();
     }
 
     @Override

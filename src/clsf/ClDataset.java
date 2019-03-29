@@ -7,21 +7,8 @@ import utils.CategoryMapper;
 
 public class ClDataset extends Dataset {
 
-    public class Item {
-        final int oid;
-
-        public Item(int oid) {
-            this.oid = oid;
-        }
-
-        public int classValue() {
-            return labels[oid];
-        }
-
-        public double value(int fid) {
-            return data[oid][fid];
-        }
-    }
+    public static boolean defaultNormValues = Dataset.defaultNormalize;
+    public static boolean defaultNormLabels = true;
 
     private final int hashCode;
 
@@ -88,13 +75,6 @@ public class ClDataset extends Dataset {
 
         return indices;
 
-    }
-
-    public Item item(int index) {
-        if (index < 0 || numObjects <= index) {
-            throw new IllegalArgumentException("index < 0 || numObjects <= index");
-        }
-        return new Item(index);
     }
 
     public double max(int index) {

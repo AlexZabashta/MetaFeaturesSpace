@@ -1,7 +1,5 @@
 package clsf.direct.gen_op.fun.rat;
 
-import clsf.ClDataset.Item;
-
 public class Sin implements RatFunction {
     public final RatFunction node;
 
@@ -10,18 +8,18 @@ public class Sin implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(Item item) {
-        return Math.sin(node.applyAsDouble(item));
-    }
-
-    @Override
-    public double min() {
-        return -1.0;
+    public double applyAsDouble(int objectId) {
+        return Math.sin(node.applyAsDouble(objectId));
     }
 
     @Override
     public double max() {
         return +1.0;
+    }
+
+    @Override
+    public double min() {
+        return -1.0;
     }
 
 }

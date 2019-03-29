@@ -33,8 +33,8 @@ public class ChangeNumClasses {
 
         int[] labels = new int[numObjects];
 
-        for (int i = 0; i < numObjects; i++) {
-            labels[i] = classMaper.applyAsInt(dataset.item(i));
+        for (int oid = 0; oid < numObjects; oid++) {
+            labels[oid] = classMaper.applyAsInt(oid);
         }
 
         return dataset.changeLabels(true, labels);

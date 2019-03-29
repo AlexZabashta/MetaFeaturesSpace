@@ -6,7 +6,20 @@ import clsf.ClDataset;
 import clsf.direct.gen_op.fun.rat.RatFunction;
 import utils.RandomUtils;
 
-public class ChangeNumAttributes {
+public class ChangeNumFeatures {
+
+    public static ClDataset apply(ClDataset dataset, Random random, int newNumFeatures) {
+        if (dataset.numFeatures == newNumFeatures) {
+            return dataset;
+        }
+
+        if (dataset.numFeatures < newNumFeatures) {
+            return addFeatures(dataset, random, newNumFeatures);
+        } else {
+            return removeFeatures(dataset, random, newNumFeatures);
+        }
+
+    }
 
     public static ClDataset addFeatures(ClDataset dataset, Random random, int newNumFeatures) {
         int oldNumFeatures = dataset.numFeatures;
@@ -15,18 +28,18 @@ public class ChangeNumAttributes {
 
         double[][] values = new double[numObjects][newNumFeatures];
 
-        for (int i = 0; i < numObjects; i++) {
-            for (int j = 0; j < oldNumFeatures; j++) {
-                values[i][j] = dataset.value(i, j);
+        for (int oid = 0; oid < numObjects; oid++) {
+            for (int fid = 0; fid < oldNumFeatures; fid++) {
+                values[oid][fid] = dataset.value(oid, fid);
             }
         }
 
-        for (int j = oldNumFeatures; j < newNumFeatures; j++) {
+        for (int fid = oldNumFeatures; fid < newNumFeatures; fid++) {
             int d = random.nextInt(3) + 1;
             RatFunction function = RatFunction.random(dataset, random, d);
 
-            for (int i = 0; i < numObjects; i++) {
-                values[i][j] = function.applyAsDouble(dataset.item(i));
+            for (int oid = 0; oid < numObjects; oid++) {
+                values[oid][fid] = function.applyAsDouble(oid);
             }
         }
 

@@ -2,12 +2,10 @@ package clsf.direct.gen_op.fun.cat;
 
 import java.util.Random;
 
-import clsf.ClDataset.Item;
-
 public class RandomCat implements CatFunction {
 
-    public final int range;
     public final Random random;
+    public final int range;
 
     public RandomCat(int range, Random random) {
         if (range < 1) {
@@ -18,8 +16,8 @@ public class RandomCat implements CatFunction {
     }
 
     @Override
-    public int applyAsInt(Item item) {
-        return random.nextInt(range);
+    public int applyAsInt(int objectId) {
+        return 0;
     }
 
     @Override

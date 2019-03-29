@@ -1,12 +1,11 @@
 package clsf.direct.gen_op.fun.cat;
 
-import clsf.ClDataset.Item;
 import clsf.direct.gen_op.fun.rat.RatFunction;
 
 public class FromRat implements CatFunction {
 
-    public final int range;
     public final RatFunction node;
+    public final int range;
     public final double scale, offset;
 
     public FromRat(RatFunction node, int range) {
@@ -21,8 +20,8 @@ public class FromRat implements CatFunction {
     }
 
     @Override
-    public int applyAsInt(Item item) {
-        int catValue = (int) (((node.applyAsDouble(item) - offset) / scale) * range);
+    public int applyAsInt(int objectId) {
+        int catValue = (int) (((node.applyAsDouble(objectId) - offset) / scale) * range);
         return Math.max(0, Math.min(range - 1, catValue));
     }
 

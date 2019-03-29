@@ -1,11 +1,9 @@
 package clsf.direct.gen_op.fun.cat;
 
-import clsf.ClDataset.Item;
-
 public class CatConst implements CatFunction {
 
     @Override
-    public int applyAsInt(Item item) {
+    public int applyAsInt(int objectId) {
         return 0;
     }
 

@@ -13,7 +13,7 @@ import features_inversion.util.MetaFeaturesExtractor;
 import optimization.Crossover;
 import optimization.Mutation;
 
-public class BinDataMutation implements Mutation<FeaturePoint<BinDataset>> {
+public class BinDataMutation implements DatasetMutation<FeaturePoint<BinDataset>> {
     public final MetaFeaturesExtractor<BinDataset> extractor;
 
     public BinDataMutation(MetaFeaturesExtractor<BinDataset> extractor) {

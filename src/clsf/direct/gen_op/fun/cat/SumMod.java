@@ -2,13 +2,12 @@ package clsf.direct.gen_op.fun.cat;
 
 import java.util.Random;
 
-import clsf.ClDataset.Item;
 import utils.RandomUtils;
 
 public class SumMod implements CatFunction {
 
-    private final int[] p, q, r;
     public final CatFunction lft, rgt;
+    private final int[] p, q, r;
 
     public SumMod(CatFunction lft, CatFunction rgt, int range, Random random) {
         this.lft = lft;
@@ -20,9 +19,9 @@ public class SumMod implements CatFunction {
     }
 
     @Override
-    public int applyAsInt(Item item) {
-        int x = p[lft.applyAsInt(item)];
-        int y = q[rgt.applyAsInt(item)];        
+    public int applyAsInt(int objectId) {
+        int x = p[lft.applyAsInt(objectId)];
+        int y = q[rgt.applyAsInt(objectId)];
         return r[(x + y) % range()];
     }
 

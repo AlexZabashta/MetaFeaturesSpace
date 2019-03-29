@@ -18,7 +18,7 @@ import org.uma.jmetal.problem.Problem;
 import clsf.CMFExtractor;
 import clsf.ClDataset;
 import clsf.direct.gen_op.Crossover;
-import clsf.direct.gen_op.Mutation;
+import clsf.direct.gen_op.DatasetMutation;
 import tmp.ToDoubleArrayFunction;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
@@ -153,7 +153,7 @@ public class GenerationExp {
                     boolean realInitialPopulation = initPopulation != null;
 
                     Crossover crossover = new Crossover();
-                    Mutation mutation = new Mutation(-1, -1, -1, -1); // TODO set limits
+                    DatasetMutation mutation = new DatasetMutation(-1, -1, -1, -1); // TODO set limits
 
                     for (Function<Limited, Problem<?>> problemBuilder : Problems.list(errorFunction, initPopulation)) {
                         for (Function<Problem<?>, Algorithm<?>> algorithmBuilder : Algorithms.list(singleObjective, crossover, mutation)) {

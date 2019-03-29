@@ -1,7 +1,5 @@
 package clsf.direct.gen_op.fun.rat;
 
-import clsf.ClDataset.Item;
-
 public class RatConst implements RatFunction {
 
     public final double value;
@@ -11,7 +9,12 @@ public class RatConst implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(Item item) {
+    public double applyAsDouble(int objectId) {
+        return value;
+    }
+
+    @Override
+    public double max() {
         return value;
     }
 
@@ -20,8 +23,4 @@ public class RatConst implements RatFunction {
         return value;
     }
 
-    @Override
-    public double max() {
-        return value;
-    }
 }

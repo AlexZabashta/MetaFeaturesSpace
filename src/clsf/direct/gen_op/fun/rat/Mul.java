@@ -1,20 +1,8 @@
 package clsf.direct.gen_op.fun.rat;
 
-import clsf.ClDataset.Item;
-
 public class Mul implements RatFunction {
     public final RatFunction left, right;
     public final double min, max;
-
-    @Override
-    public double min() {
-        return min;
-    }
-
-    @Override
-    public double max() {
-        return max;
-    }
 
     public Mul(RatFunction left, RatFunction right) {
         this.left = left;
@@ -30,8 +18,18 @@ public class Mul implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(Item item) {
-        return left.applyAsDouble(item) * right.applyAsDouble(item);
+    public double applyAsDouble(int objectId) {
+        return left.applyAsDouble(objectId) * right.applyAsDouble(objectId);
+    }
+
+    @Override
+    public double max() {
+        return max;
+    }
+
+    @Override
+    public double min() {
+        return min;
     }
 
 }

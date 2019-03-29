@@ -1,11 +1,9 @@
 package clsf.direct.gen_op.fun.rat;
 
-import clsf.ClDataset.Item;
-
 public class Abs implements RatFunction {
-    public final RatFunction node;
-
     public final double max;
+
+    public final RatFunction node;
 
     public Abs(RatFunction node) {
         this.node = node;
@@ -13,18 +11,18 @@ public class Abs implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(Item item) {
-        return Math.abs(node.applyAsDouble(item));
-    }
-
-    @Override
-    public double min() {
-        return 0;
+    public double applyAsDouble(int objectId) {
+        return Math.abs(node.applyAsDouble(objectId));
     }
 
     @Override
     public double max() {
         return max;
+    }
+
+    @Override
+    public double min() {
+        return 0;
     }
 
 }

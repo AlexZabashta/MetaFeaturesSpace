@@ -2,8 +2,6 @@ package clsf.direct.gen_op.fun.rat;
 
 import java.util.Random;
 
-import clsf.ClDataset.Item;
-
 public class NoiesValue implements RatFunction {
     public final Random random;
 
@@ -12,18 +10,18 @@ public class NoiesValue implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(Item value) {
+    public double applyAsDouble(int objectId) {
         return Math.max(-10, Math.min(+10, random.nextGaussian()));
-    }
-
-    @Override
-    public double min() {
-        return -10.0;
     }
 
     @Override
     public double max() {
         return +10.0;
+    }
+
+    @Override
+    public double min() {
+        return -10.0;
     }
 
 }

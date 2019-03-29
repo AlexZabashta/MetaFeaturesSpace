@@ -8,7 +8,7 @@ public class RandomUtils {
         return Math.min(min, max) + random.nextInt(Math.abs(min - max) + 1);
     }
 
-    public static int randomLocal(Random random, int value, int delta, int min, int max) {
+    public static int randomLocal(Random random, int value, int delta, int min, int max) {        
         for (int rep = 0; rep < 10; rep++) {
             int local = randomFromSegment(random, Math.max(min, value - delta), Math.min(max, value + delta));
             if (local != value) {

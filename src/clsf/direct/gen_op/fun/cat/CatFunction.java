@@ -1,18 +1,12 @@
 package clsf.direct.gen_op.fun.cat;
 
 import java.util.Random;
-import java.util.function.ToIntFunction;
+import java.util.function.IntUnaryOperator;
 
 import clsf.ClDataset;
 import clsf.direct.gen_op.fun.rat.RatFunction;
 
-public interface CatFunction extends ToIntFunction<ClDataset.Item> {
-    public int range();
-
-    public static int randomRange(Random random) {
-        return random.nextInt(10) + 1;
-    }
-
+public interface CatFunction extends IntUnaryOperator {
     public static CatFunction random(ClDataset dataset, Random random, int maxDepth) {
         return random(dataset, random, maxDepth, randomRange(random));
     }
@@ -22,6 +16,18 @@ public interface CatFunction extends ToIntFunction<ClDataset.Item> {
             return randomLeaf(dataset, random, range);
         } else {
             return randomNode(dataset, random, maxDepth, range);
+        }
+    }
+
+    public static CatFunction randomLeaf(ClDataset dataset, Random random, int range) {
+        if (random.nextBoolean()) {
+            if (random.nextBoolean()) {
+                return new CatConst();
+            } else {
+                return new RandomCat(range, random);
+            }
+        } else {
+            return new ClassValue(dataset);
         }
     }
 
@@ -40,15 +46,9 @@ public interface CatFunction extends ToIntFunction<ClDataset.Item> {
         }
     }
 
-    public static CatFunction randomLeaf(ClDataset dataset, Random random, int range) {
-        if (random.nextBoolean()) {
-            if (random.nextBoolean()) {
-                return new CatConst();
-            } else {
-                return new RandomCat(range, random);
-            }
-        } else {
-            return new ClassValue(dataset);
-        }
+    public static int randomRange(Random random) {
+        return random.nextInt(10) + 1;
     }
+
+    public int range();
 }
