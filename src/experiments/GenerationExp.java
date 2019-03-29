@@ -17,7 +17,7 @@ import org.uma.jmetal.problem.Problem;
 
 import clsf.CMFExtractor;
 import clsf.ClDataset;
-import clsf.direct.gen_op.Crossover;
+import clsf.direct.gen_op.DatasetCrossover;
 import clsf.direct.gen_op.DatasetMutation;
 import tmp.ToDoubleArrayFunction;
 import utils.ArrayUtils;
@@ -51,7 +51,7 @@ public class GenerationExp {
 
                 // TODO COPY DATA
 
-                datasets.add(new ClDataset(file.getName(), true, data, labels));
+                datasets.add(new ClDataset(file.getName(), ClDataset.defaultNormValues, data, ClDataset.defaultNormLabels, labels));
 
                 System.out.println(file.getName());
                 System.out.flush();
@@ -152,8 +152,14 @@ public class GenerationExp {
 
                     boolean realInitialPopulation = initPopulation != null;
 
-                    Crossover crossover = new Crossover();
-                    DatasetMutation mutation = new DatasetMutation(-1, -1, -1, -1); // TODO set limits
+                    DatasetCrossover crossover = new DatasetCrossover();
+                    int minNumObjects = 0; // TODO set value
+                    int maxNumObjects = 0;// TODO set value
+                    int minNumFeatures = 0;// TODO set value
+                    int maxNumFeatures = 0;// TODO set value
+                    int minNumClasses = 0;// TODO set value
+                    int maxNumClasses = 0;// TODO set value
+                    DatasetMutation mutation = new DatasetMutation(minNumObjects, maxNumObjects, minNumFeatures, maxNumFeatures, minNumClasses, maxNumClasses);
 
                     for (Function<Limited, Problem<?>> problemBuilder : Problems.list(errorFunction, initPopulation)) {
                         for (Function<Problem<?>, Algorithm<?>> algorithmBuilder : Algorithms.list(singleObjective, crossover, mutation)) {

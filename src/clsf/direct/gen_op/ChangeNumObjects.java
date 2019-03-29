@@ -9,11 +9,6 @@ import utils.RandomUtils;
 
 public class ChangeNumObjects {
 
-    public static ClDataset apply(ClDataset dataset, Random random) {
-        int numObjects = dataset.numObjects;
-        return apply(dataset, random, random.nextInt(numObjects * 2) + 2);
-    }
-
     public static ClDataset addObjects(ClDataset dataset, Random random, int newNumObjects) {
         int numFeatures = dataset.numFeatures;
         int oldNumObjects = dataset.numObjects;
@@ -51,6 +46,25 @@ public class ChangeNumObjects {
         return new ClDataset(dataset.name, true, values, false, labels);
     }
 
+    public static ClDataset apply(ClDataset dataset, Random random) {
+        int numObjects = dataset.numObjects;
+        return apply(dataset, random, random.nextInt(numObjects * 2) + 2);
+    }
+
+    public static ClDataset apply(ClDataset dataset, Random random, int newNumObjects) {
+        int oldNumObjects = dataset.numObjects;
+
+        if (oldNumObjects == newNumObjects) {
+            return dataset;
+        }
+
+        if (oldNumObjects < newNumObjects) {
+            return addObjects(dataset, random, newNumObjects);
+        } else {
+            return removeObjects(dataset, random, newNumObjects);
+        }
+    }
+
     public static ClDataset removeObjects(ClDataset dataset, Random random, int newNumObjects) {
         int numFeatures = dataset.numFeatures;
         int oldNumObjects = dataset.numObjects;
@@ -69,20 +83,6 @@ public class ChangeNumObjects {
         }
 
         return new ClDataset(dataset.name, true, values, true, labels);
-    }
-
-    public static ClDataset apply(ClDataset dataset, Random random, int newNumObjects) {
-        int oldNumObjects = dataset.numObjects;
-
-        if (oldNumObjects == newNumObjects) {
-            return dataset;
-        }
-
-        if (oldNumObjects < newNumObjects) {
-            return addObjects(dataset, random, newNumObjects);
-        } else {
-            return removeObjects(dataset, random, newNumObjects);
-        }
     }
 
 }

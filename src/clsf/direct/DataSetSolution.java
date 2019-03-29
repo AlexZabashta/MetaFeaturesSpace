@@ -11,49 +11,31 @@ public class DataSetSolution implements Solution<ClDataset> {
 
     private static final long serialVersionUID = 1L;
     private ClDataset dataset;
-    private double ef;
+    private double[] error;
+
+    final Map<Object, Object> map = new HashMap<>();
 
     public DataSetSolution(ClDataset dataset) {
         this.dataset = dataset;
     }
 
-    public DataSetSolution(ClDataset dataset, double ef) {
+    public DataSetSolution(ClDataset dataset, double[] error) {
         this.dataset = dataset;
-        this.ef = ef;
+        this.error = error;
+    }
+
+    @Override
+    public Solution<ClDataset> copy() {
+        return new DataSetSolution(dataset, error);
+    }
+
+    @Override
+    public Object getAttribute(Object id) {
+        return map.get(id);
     }
 
     public ClDataset getClDataset() {
         return dataset;
-    }
-
-    @Override
-    public void setObjective(int index, double value) {
-        ef = value;
-    }
-
-    @Override
-    public double getObjective(int index) {
-        return ef;
-    }
-
-    @Override
-    public ClDataset getVariableValue(int index) {
-        return dataset;
-    }
-
-    @Override
-    public void setVariableValue(int index, ClDataset value) {
-        dataset = value;
-    }
-
-    @Override
-    public String getVariableValueString(int index) {
-        return dataset.name + "_" + dataset.hashCode();
-    }
-
-    @Override
-    public int getNumberOfVariables() {
-        return 1;
     }
 
     @Override
@@ -62,8 +44,28 @@ public class DataSetSolution implements Solution<ClDataset> {
     }
 
     @Override
-    public Solution<ClDataset> copy() {
-        return new DataSetSolution(dataset, ef);
+    public int getNumberOfVariables() {
+        return 1;
+    }
+
+    @Override
+    public double getObjective(int index) {
+        return error[index];
+    }
+
+    @Override
+    public double[] getObjectives() {
+        return error.clone();
+    }
+
+    @Override
+    public ClDataset getVariableValue(int index) {
+        return dataset;
+    }
+
+    @Override
+    public String getVariableValueString(int index) {
+        return dataset.name + "_" + dataset.hashCode();
     }
 
     @Override
@@ -71,16 +73,18 @@ public class DataSetSolution implements Solution<ClDataset> {
         map.put(id, value);
     }
 
-    final Map<Object, Object> map = new HashMap<>();
-
     @Override
-    public Object getAttribute(Object id) {
-        return map.get(id);
+    public void setObjective(int index, double value) {
+        error[index] = value;
+    }
+
+    public void setObjectives(double[] error) {
+        this.error = error;
     }
 
     @Override
-    public double[] getObjectives() {
-        return new double[] { ef };
+    public void setVariableValue(int index, ClDataset value) {
+        dataset = value;
     }
 
 }

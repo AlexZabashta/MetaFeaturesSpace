@@ -2,28 +2,28 @@ package clsf.vect;
 
 import java.util.List;
 import java.util.Random;
-import java.util.function.ToDoubleFunction;
 
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
-import clsf.Dataset;
+import clsf.ClDataset;
 import clsf.MetaFeaturesExtractor;
-import clsf.direct.RelationsGenerator;
+import features_inversion.classification.dataset.RelationsGenerator;
+import tmp.ToDoubleArrayFunction;
 import utils.MatrixUtils;
 import utils.StatUtils;
 
 public class GMMProblem implements DoubleProblem {
 
     private static final long serialVersionUID = 1L;
-    final ToDoubleFunction<Dataset> errorFunction;
-    final List<Dataset> datasets;
+    final ToDoubleArrayFunction<ClDataset> errorFunction;
+    final List<ClDataset> datasets;
     final Random random = new Random();
     final int numFeatures, numObjects;
     public final MetaFeaturesExtractor extractor;
 
-    public GMMProblem(int numObjects, int numFeatures, ToDoubleFunction<Dataset> errorFunction, List<Dataset> datasets, MetaFeaturesExtractor extractor) {
+    public GMMProblem(int numObjects, int numFeatures, ToDoubleArrayFunction<ClDataset> errorFunction, List<ClDataset> datasets, MetaFeaturesExtractor extractor) {
         this.numObjects = numObjects;
         this.numFeatures = numFeatures;
         this.errorFunction = errorFunction;
@@ -41,7 +41,7 @@ public class GMMProblem implements DoubleProblem {
 
     @Override
     public int getNumberOfObjectives() {
-        return 1;
+        return errorFunction.length();
     }
 
     @Override
@@ -51,10 +51,10 @@ public class GMMProblem implements DoubleProblem {
 
     @Override
     public String getName() {
-        return getClass().getSimpleName() + (datasets == null);
+        return getClass().getSimpleName();
     }
 
-    public DoubleSolution build(Dataset dataset) {
+    public DoubleSolution build(ClDataset dataset) {
         DoubleSolution solution = new DefaultDoubleSolution(this);
 
         double[][] data = dataset.data();
@@ -79,7 +79,7 @@ public class GMMProblem implements DoubleProblem {
         return solution;
     }
 
-    public Dataset build(DoubleSolution solution) {
+    public ClDataset build(DoubleSolution solution) {
         double[][] sqrt = new double[numFeatures][numFeatures];
         for (int index = 0, i = 0; i < numFeatures; i++) {
             for (int j = 0; j <= i; j++) {
@@ -96,16 +96,16 @@ public class GMMProblem implements DoubleProblem {
         }
         double[][] data = MatrixUtils.mul(numObjects, numFeatures, numFeatures, rand, sqrt);
 
-        return new Dataset(data, extractor);
+        return new ClDataset(data, extractor);
     }
 
     @Override
     public void evaluate(DoubleSolution solution) {
-        double avg = 0;
-        for (int rep = 0; rep < 5; rep++) {
-            avg += errorFunction.applyAsDouble(build(solution));
+        int length = errorFunction.length();
+        double[] error = errorFunction.apply(build(solution));
+        for (int i = 0; i < length; i++) {
+            solution.setObjective(i, error[i]);
         }
-        solution.setObjective(0, avg / 5);
     }
 
     @Override

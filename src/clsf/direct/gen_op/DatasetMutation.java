@@ -10,9 +10,26 @@ import utils.RandomUtils;
 
 public class DatasetMutation implements MutationOperator<DataSetSolution> {
     private static final long serialVersionUID = 1L;
-    final int minNumObjects, maxNumObjects;
-    final int minNumFeatures, maxNumFeatures;
-    final int minNumClasses, maxNumClasses;
+    public static void main(String[] args) {
+        ClDataset.defaultNormalize = false;
+
+        Random random = new Random();
+
+        int numObjects = random.nextInt(10) + 1;
+        int numFeatures = random.nextInt(10) + 1;
+
+        double[][] data = new double[numObjects][numFeatures];
+
+        for (int i = 0; i < numObjects; i++) {
+            for (int j = 0; j < numFeatures; j++) {
+                data[i][j] = i + j / 10.0;
+            }
+        }
+    }
+    public final int minNumClasses, maxNumClasses;
+    public final int minNumFeatures, maxNumFeatures;
+
+    public final int minNumObjects, maxNumObjects;
 
     public DatasetMutation(int minNumObjects, int maxNumObjects, int minNumFeatures, int maxNumFeatures, int minNumClasses, int maxNumClasses) {
         this.minNumObjects = minNumObjects;
@@ -38,6 +55,11 @@ public class DatasetMutation implements MutationOperator<DataSetSolution> {
         return mutant;
     }
 
+    @Override
+    public DataSetSolution execute(DataSetSolution source) {
+        return new DataSetSolution(execute(source.getClDataset()));
+    }
+
     public ClDataset executeAny(ClDataset dataset, Random random) {
 
         if (random.nextBoolean()) {
@@ -54,25 +76,7 @@ public class DatasetMutation implements MutationOperator<DataSetSolution> {
         }
     }
 
-    @Override
-    public DataSetSolution execute(DataSetSolution source) {
-        return new DataSetSolution(execute(source.getClDataset()));
-    }
-
-    public static void main(String[] args) {
-        ClDataset.defaultNormalize = false;
-
-        Random random = new Random();
-
-        int numObjects = random.nextInt(10) + 1;
-        int numFeatures = random.nextInt(10) + 1;
-
-        double[][] data = new double[numObjects][numFeatures];
-
-        for (int i = 0; i < numObjects; i++) {
-            for (int j = 0; j < numFeatures; j++) {
-                data[i][j] = i + j / 10.0;
-            }
-        }
+    public ClDataset generate(Random random) {
+        return null; // TODO
     }
 }

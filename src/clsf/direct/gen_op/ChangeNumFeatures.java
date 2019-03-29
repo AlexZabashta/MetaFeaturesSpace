@@ -8,19 +8,6 @@ import utils.RandomUtils;
 
 public class ChangeNumFeatures {
 
-    public static ClDataset apply(ClDataset dataset, Random random, int newNumFeatures) {
-        if (dataset.numFeatures == newNumFeatures) {
-            return dataset;
-        }
-
-        if (dataset.numFeatures < newNumFeatures) {
-            return addFeatures(dataset, random, newNumFeatures);
-        } else {
-            return removeFeatures(dataset, random, newNumFeatures);
-        }
-
-    }
-
     public static ClDataset addFeatures(ClDataset dataset, Random random, int newNumFeatures) {
         int oldNumFeatures = dataset.numFeatures;
 
@@ -44,6 +31,19 @@ public class ChangeNumFeatures {
         }
 
         return dataset.changeValues(true, values);
+    }
+
+    public static ClDataset apply(ClDataset dataset, Random random, int newNumFeatures) {
+        if (dataset.numFeatures == newNumFeatures) {
+            return dataset;
+        }
+
+        if (dataset.numFeatures < newNumFeatures) {
+            return addFeatures(dataset, random, newNumFeatures);
+        } else {
+            return removeFeatures(dataset, random, newNumFeatures);
+        }
+
     }
 
     public static ClDataset removeFeatures(ClDataset dataset, Random random, int newNumFeatures) {

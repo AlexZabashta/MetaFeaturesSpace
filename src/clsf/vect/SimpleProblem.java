@@ -2,45 +2,49 @@ package clsf.vect;
 
 import java.util.List;
 import java.util.Random;
-import java.util.function.ToDoubleFunction;
 
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
-import clsf.Dataset;
+import clsf.ClDataset;
 import clsf.MetaFeaturesExtractor;
-import clsf.direct.RelationsGenerator;
+import features_inversion.classification.dataset.RelationsGenerator;
+import tmp.ToDoubleArrayFunction;
 import utils.EndSearch;
 
 public class SimpleProblem implements DoubleProblem {
 
     private static final long serialVersionUID = 1L;
-    final ToDoubleFunction<Dataset> errorFunction;
-    final List<Dataset> datasets;
+    final ToDoubleArrayFunction<ClDataset> errorFunction;
+    final List<ClDataset> datasets;
     final Random random = new Random();
-    final int numFeatures, numObjects;
-    public final MetaFeaturesExtractor extractor;
+    final int numObjectsPerClass;
+    final int numClasses;
+    final int numFeatures;
 
-    public SimpleProblem(int numObjects, int numFeatures, ToDoubleFunction<Dataset> errorFunction, List<Dataset> datasets, MetaFeaturesExtractor extractor) {
-        this.numObjects = numObjects;
+    final int[] numFeaturesDistribution = new int[123];
+    final int[] numObjectsDistribution = new int[123];
+
+    public SimpleProblem(int numObjectsPerClass, int numFeatures, int numClasses, ToDoubleArrayFunction<ClDataset> errorFunction, List<ClDataset> datasets) {
+        this.numObjectsPerClass = numObjectsPerClass;
         this.numFeatures = numFeatures;
+        this.numClasses = numClasses;
         this.errorFunction = errorFunction;
         this.datasets = datasets;
-        this.extractor = extractor;
     }
 
     final static double lowerBound = -10;
-    final static double upperBound = +10;
+    final static double upperBound = 10;
 
     @Override
     public int getNumberOfVariables() {
-        return numFeatures * numObjects;
+        return numFeatures * numObjectsPerClass * numClasses + numClasses + 2;
     }
 
     @Override
     public int getNumberOfObjectives() {
-        return 1;
+        return errorFunction.length();
     }
 
     @Override
@@ -50,10 +54,10 @@ public class SimpleProblem implements DoubleProblem {
 
     @Override
     public String getName() {
-        return getClass().getSimpleName() + (datasets == null);
+        return getClass().getSimpleName();
     }
 
-    public DoubleSolution build(Dataset dataset) {
+    public DoubleSolution build(ClDataset dataset) {
         DoubleSolution solution = new DefaultDoubleSolution(this);
 
         double[][] data = dataset.data();
@@ -69,25 +73,33 @@ public class SimpleProblem implements DoubleProblem {
         return solution;
     }
 
-    public Dataset build(DoubleSolution solution) {
+    public ClDataset build(DoubleSolution solution) {
+
+        // [numObjects] * numClasses
+        //
+
+        // numObjectsPerClass;
+        // numClasses;
+        // numFeatures;
+
+        // numFeaturesDistribution
+        // numObjectsDistribution
+
         double[][] data = new double[numObjects][numFeatures];
         for (int index = 0, i = 0; i < numObjects; i++) {
             for (int j = 0; j < numFeatures; j++) {
                 data[i][j] = solution.getVariableValue(index++);
             }
         }
-        return new Dataset(data, extractor);
+        return new ClDataset(data, extractor);
     }
 
     @Override
     public void evaluate(DoubleSolution solution) {
-        try {
-            solution.setObjective(0, errorFunction.applyAsDouble(build(solution)));
-        } catch (Exception e) {
-            if (e instanceof EndSearch) {
-                throw e;
-            }
-            solution.setObjective(0, 100);
+        int length = errorFunction.length();
+        double[] error = errorFunction.apply(build(solution));
+        for (int i = 0; i < length; i++) {
+            solution.setObjective(i, error[i]);
         }
     }
 

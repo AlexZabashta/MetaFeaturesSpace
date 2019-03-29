@@ -32,13 +32,13 @@ import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
 import clsf.direct.DataSetSolution;
 import clsf.direct.GDSProblem;
-import clsf.direct.gen_op.Crossover;
+import clsf.direct.gen_op.DatasetCrossover;
 import clsf.direct.gen_op.DatasetMutation;
 import clsf.vect.GMMProblem;
 
 public class Algorithms {
 
-    public static List<Function<Problem<?>, Algorithm<?>>> list(boolean singleObjective, Crossover crossover, DatasetMutation mutation) {
+    public static List<Function<Problem<?>, Algorithm<?>>> list(boolean singleObjective, DatasetCrossover crossover, DatasetMutation mutation) {
         List<Function<Problem<?>, Algorithm<?>>> list = new ArrayList<>();
         list.add(getCMAES(singleObjective));
         list.add(getCR(singleObjective, crossover, mutation));
@@ -74,7 +74,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getCR(boolean singleObjective, Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getCR(boolean singleObjective, DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -108,7 +108,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getGA(boolean singleObjective, Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getGA(boolean singleObjective, DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -153,7 +153,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getMOCell(Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getMOCell(DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -183,7 +183,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getNSGAII(Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getNSGAII(DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -213,7 +213,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getPAES(Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getPAES(DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -230,7 +230,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getPSO(boolean singleObjective, Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getPSO(boolean singleObjective, DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -245,7 +245,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getRAND(Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getRAND(DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -262,7 +262,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getSMSEMOA(Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getSMSEMOA(DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
@@ -279,7 +279,7 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getSPEA2(Crossover crossover, DatasetMutation mutation) {
+    public static Function<Problem<?>, Algorithm<?>> getSPEA2(DatasetCrossover crossover, DatasetMutation mutation) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
