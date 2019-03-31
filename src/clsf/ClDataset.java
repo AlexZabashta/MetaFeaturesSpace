@@ -87,6 +87,16 @@ public class ClDataset extends Dataset {
         return 0;
     }
 
+    public double[] max() {
+        // TODO Auto-generated method stub
+        return new double[0];
+    }
+
+    public double[] min() {
+        // TODO Auto-generated method stub
+        return new double[0];
+    }
+
     public Dataset[] splitByLabels(boolean normalize) {
         int[] p = new int[numClasses];
         for (int oid = 0; oid < numObjects; oid++) {

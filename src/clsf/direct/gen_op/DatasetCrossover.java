@@ -55,7 +55,7 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
         int numFeaturesA = RandomUtils.randomFromSegment(random, ancestorA.numFeatures, ancestorB.numFeatures);
         int numFeaturesB = sumNumFeatures - numFeaturesA;
 
-        boolean[] featuresDistr = RandomUtils.randomSelection(sumNumFeatures, numFeaturesA, random);
+        boolean[] featuresDistr = RandomUtils.randomBinarySelection(sumNumFeatures, numFeaturesA, random);
 
         int newNumObjects = 0;
 

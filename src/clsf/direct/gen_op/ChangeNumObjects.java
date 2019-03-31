@@ -69,7 +69,7 @@ public class ChangeNumObjects {
         int numFeatures = dataset.numFeatures;
         int oldNumObjects = dataset.numObjects;
 
-        boolean[] selection = RandomUtils.randomSelection(oldNumObjects, newNumObjects, random);
+        boolean[] selection = RandomUtils.randomBinarySelection(oldNumObjects, newNumObjects, random);
 
         double[][] values = new double[newNumObjects][numFeatures];
         int[] labels = new int[newNumObjects];

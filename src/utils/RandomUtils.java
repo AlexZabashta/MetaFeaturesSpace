@@ -8,7 +8,7 @@ public class RandomUtils {
         return Math.min(min, max) + random.nextInt(Math.abs(min - max) + 1);
     }
 
-    public static int randomLocal(Random random, int value, int delta, int min, int max) {        
+    public static int randomLocal(Random random, int value, int delta, int min, int max) {
         for (int rep = 0; rep < 10; rep++) {
             int local = randomFromSegment(random, Math.max(min, value - delta), Math.min(max, value + delta));
             if (local != value) {
@@ -40,7 +40,22 @@ public class RandomUtils {
         return p;
     }
 
-    public static boolean[] randomSelection(int length, int selected, Random random) {
+    public static int[] randomSelection(int length, int selected, Random random) {
+        int[] array = new int[selected];
+
+        int offset = 0;
+
+        while (offset < selected) {
+            int[] p = randomPermutation(length, random);
+            int delta = Math.min(length, selected - offset);
+            System.arraycopy(p, 0, array, offset, delta);
+            offset += delta;
+        }
+        
+        return array;
+    }
+
+    public static boolean[] randomBinarySelection(int length, int selected, Random random) {
         if (selected < 0 || selected > length) {
             throw new IllegalArgumentException("'m' must be in [0, n]");
         }

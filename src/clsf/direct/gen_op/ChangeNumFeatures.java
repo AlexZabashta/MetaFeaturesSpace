@@ -52,7 +52,7 @@ public class ChangeNumFeatures {
 
         double[][] values = new double[numObjects][newNumFeatures];
 
-        boolean[] selection = RandomUtils.randomSelection(oldNumFeatures, newNumFeatures, random);
+        boolean[] selection = RandomUtils.randomBinarySelection(oldNumFeatures, newNumFeatures, random);
 
         for (int oid = 0; oid < numObjects; oid++) {
             for (int nfid = 0, fid = 0; fid < oldNumFeatures; fid++) {
