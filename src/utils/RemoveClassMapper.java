@@ -5,22 +5,6 @@ import java.util.function.IntUnaryOperator;
 
 public class RemoveClassMapper implements IntUnaryOperator {
 
-    final Random random;
-    final int oldNumClasses, newNumClasses;
-    final int[] p;
-
-    @Override
-    public int applyAsInt(int value) {
-        return p[value] % newNumClasses;
-    }
-
-    public RemoveClassMapper(int oldNumClasses, int newNumClasses, Random random) {
-        this.random = random;
-        this.oldNumClasses = oldNumClasses;
-        this.newNumClasses = newNumClasses;
-        this.p = RandomUtils.randomPermutation(oldNumClasses, random);
-    }
-
     public static void main(String[] args) {
         Random random = new Random();
         int n = 15, m = 4;
@@ -34,6 +18,22 @@ public class RemoveClassMapper implements IntUnaryOperator {
             System.out.println();
         }
 
+    }
+    final int oldNumClasses, newNumClasses;
+    final int[] p;
+
+    final Random random;
+
+    public RemoveClassMapper(int oldNumClasses, int newNumClasses, Random random) {
+        this.random = random;
+        this.oldNumClasses = oldNumClasses;
+        this.newNumClasses = newNumClasses;
+        this.p = RandomUtils.randomPermutation(oldNumClasses, random);
+    }
+
+    @Override
+    public int applyAsInt(int value) {
+        return p[value] % newNumClasses;
     }
 
 }

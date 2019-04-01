@@ -5,26 +5,6 @@ import java.util.function.IntUnaryOperator;
 
 public class AddClassMapper implements IntUnaryOperator {
 
-    final Random random;
-    final int oldNumClasses, newNumClasses;
-    final int[] p, q;
-
-    @Override
-    public int applyAsInt(int value) {
-        int x = p[value];
-        int t = (newNumClasses - x - 1) / oldNumClasses;
-        int y = x + random.nextInt(t + 1) * oldNumClasses;
-        return q[y];
-    }
-
-    public AddClassMapper(int oldNumClasses, int newNumClasses, Random random) {
-        this.random = random;
-        this.oldNumClasses = oldNumClasses;
-        this.newNumClasses = newNumClasses;
-        this.p = RandomUtils.randomPermutation(oldNumClasses, random);
-        this.q = RandomUtils.randomPermutation(newNumClasses, random);
-    }
-
     public static void main(String[] args) {
         Random random = new Random();
         int n = 9, m = 7;
@@ -38,6 +18,26 @@ public class AddClassMapper implements IntUnaryOperator {
             System.out.println();
         }
 
+    }
+    final int oldNumClasses, newNumClasses;
+    final int[] p, q;
+
+    final Random random;
+
+    public AddClassMapper(int oldNumClasses, int newNumClasses, Random random) {
+        this.random = random;
+        this.oldNumClasses = oldNumClasses;
+        this.newNumClasses = newNumClasses;
+        this.p = RandomUtils.randomPermutation(oldNumClasses, random);
+        this.q = RandomUtils.randomPermutation(newNumClasses, random);
+    }
+
+    @Override
+    public int applyAsInt(int value) {
+        int x = p[value];
+        int t = (newNumClasses - x - 1) / oldNumClasses;
+        int y = x + random.nextInt(t + 1) * oldNumClasses;
+        return q[y];
     }
 
 }

@@ -4,15 +4,14 @@ import java.util.function.ToDoubleFunction;
 
 import clsf.ClDataset;
 import clsf.Dataset;
-import tmp.ToDoubleArrayFunction;
 
 public class Limited implements ToDoubleArrayFunction<ClDataset> {
 
     public final ToDoubleArrayFunction<ClDataset> baseFunction;
-    public final ToDoubleFunction<ClDataset> cmpFunction;
-
-    public ClDataset dataset = null;
     public double best = Double.POSITIVE_INFINITY;
+
+    public final ToDoubleFunction<ClDataset> cmpFunction;
+    public ClDataset dataset = null;
     public final double[] log;
     public int qid = 0;
 

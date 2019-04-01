@@ -3,16 +3,21 @@ package utils;
 import java.util.function.ToDoubleBiFunction;
 
 public class MahalanobisDistance implements ToDoubleBiFunction<double[], double[]> {
-    final double[][] invCov;
     final int d;
+    final double[][] invCov;
+
+    public MahalanobisDistance(int d, double[][] invCov) {
+        this.d = d;
+        this.invCov = invCov;
+    }
 
     public MahalanobisDistance(int n, int m, double[][] data) {
         this(m, MatrixUtils.inv(m, StatUtils.covarianceMatrix(n, m, data)));
     }
 
-    public MahalanobisDistance(int d, double[][] invCov) {
-        this.d = d;
-        this.invCov = invCov;
+    @Override
+    public double applyAsDouble(double[] u, double[] v) {
+        return distance(u, v);
     }
 
     public double distance(double[] u, double[] v) {
@@ -38,11 +43,6 @@ public class MahalanobisDistance implements ToDoubleBiFunction<double[], double[
         }
 
         return Math.sqrt(sum);
-    }
-
-    @Override
-    public double applyAsDouble(double[] u, double[] v) {
-        return distance(u, v);
     }
 
 }

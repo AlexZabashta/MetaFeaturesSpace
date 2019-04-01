@@ -3,15 +3,14 @@ package utils;
 import java.util.Arrays;
 
 import clsf.ClDataset;
-import tmp.ToDoubleArrayFunction;
 
 public class MultiObjectiveError implements ToDoubleArrayFunction<ClDataset> {
+
+    final ToDoubleArrayFunction<ClDataset> extractor;
 
     final int length;
 
     final double[] target, invSigma;
-
-    final ToDoubleArrayFunction<ClDataset> extractor;
 
     public MultiObjectiveError(ToDoubleArrayFunction<ClDataset> extractor, double[] target, double[] invSigma) {
         this.length = extractor.length();

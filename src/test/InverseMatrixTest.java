@@ -2,7 +2,8 @@ package test;
 
 import java.util.Random;
 
-import tmp.MatrixUtils;
+import utils.ArrayUtils;
+import utils.MatrixUtils;
 
 public class InverseMatrixTest {
 
@@ -84,8 +85,8 @@ public class InverseMatrixTest {
 
         // find(n, a, b);
 
-        MatrixUtils.print(a);
-        MatrixUtils.print(b);
-        MatrixUtils.print(MatrixUtils.mul(n, a, b));
+        ArrayUtils.print(a);
+        ArrayUtils.print(b);
+        ArrayUtils.print(MatrixUtils.mul(n, a, b));
     }
 }

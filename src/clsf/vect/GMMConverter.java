@@ -1,14 +1,16 @@
 package clsf.vect;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
 import clsf.ClDataset;
+import utils.MatrixUtils;
 import utils.RandomUtils;
-import weka.core.Debug.Random;
+import utils.StatUtils;
 
 public class GMMConverter implements Converter {
 
@@ -54,6 +56,12 @@ public class GMMConverter implements Converter {
     }
 
     public double denormalize(double value, double min, double max) {
+        if (value < min) {
+            return -10;
+        }
+        if (value > max) {
+            return +10;
+        }
         return (2.0 * (value - min) / (max - min) - 1) * 9.99;
     }
 
@@ -76,20 +84,29 @@ public class GMMConverter implements Converter {
             solution.setVariableValue(sp++, toDouble(indices[label].length, numObjectsDistribution));
         }
 
-        double[] min = dataset.min();
-        double[] max = dataset.max();
-
-        double[][] data = dataset.data;
 
         for (int label : selClass) {
-            int[] selObjects = RandomUtils.randomSelection(indices[label].length, maxObjectsPerClass, random);
+            double[][] data = dataset.subData[label];
 
-            for (int id : selObjects) {
-                int oid = indices[label][id];
+            double[] offset = StatUtils.mean(data.length, dataset.numFeatures, data);
+            double[][] cov = StatUtils.covarianceMatrix(data.length, dataset.numFeatures, data, offset);
+            for (int i = 0; i < dataset.numFeatures; i++) {
+                cov[i][i] += 1e-3;
+            }
 
-                for (int fid : selFeatures) {
-                    solution.setVariableValue(sp++, denormalize(data[oid][fid], min[fid], max[fid]));
+            double[][] scale = MatrixUtils.sqrt(cov);
+
+            for (int i = 0; i < maxFeatures; i++) {
+                int fid1 = selFeatures[i];
+                for (int j = 0; j < i; j++) {
+                    int fid2 = selFeatures[j];
+                    solution.setVariableValue(sp++, denormalize(scale[fid1][fid2], -10, +10));
                 }
+            }
+
+            for (int i = 0; i < maxFeatures; i++) {
+                int fid1 = selFeatures[i];
+                solution.setVariableValue(sp++, denormalize(offset[fid1], -10, +10));
             }
         }
 
@@ -98,6 +115,9 @@ public class GMMConverter implements Converter {
 
     @Override
     public ClDataset convert(DoubleSolution solution) {
+
+        Random random = new Random();
+
         int sp = 0;
         int numFeatures = toInt(solution.getVariableValue(sp++), numFeaturesDistribution);
         int numClasses = toInt(solution.getVariableValue(sp++), numClassesDistribution);
@@ -114,27 +134,48 @@ public class GMMConverter implements Converter {
             }
         }
 
-        double[][] data = new double[numObjects][numFeatures];
+        double[][] data = new double[numObjects][];
         int[] labels = new int[numObjects];
         int oid = 0;
 
-        for (int label = 0; label < numClasses; label++) {
-            for (int object = 0; object < maxObjectsPerClass; object++) {
-                for (int feature = 0; feature < maxFeatures; feature++) {
-                    double value = solution.getVariableValue(sp++);
+        double[][] rvec = new double[1][numFeatures];
+        double[][] scale = new double[numFeatures][numFeatures];
+        double[] offset = new double[numFeatures];
 
-                    if (object < numObjectsPerClass[label] && feature < numFeatures) {
-                        data[oid][feature] = value;
+        for (int label = 0; label < numClasses; label++) {
+
+            for (int i = 0; i < maxFeatures; i++) {
+                for (int j = 0; j <= i; j++) {
+                    double value = solution.getVariableValue(sp++);
+                    if (i < numFeatures) {
+                        scale[i][j] = value;
                     }
                 }
+            }
 
-                if (object < numObjectsPerClass[label]) {
-                    labels[oid++] = label;
+            for (int i = 0; i < maxFeatures; i++) {
+                double value = solution.getVariableValue(sp++);
+                if (i < numFeatures) {
+                    offset[i] = value;
                 }
+            }
+
+            for (int object = 0; object < numObjectsPerClass[label]; object++) {
+                for (int i = 0; i < numFeatures; i++) {
+                    rvec[0][i] = random.nextGaussian();
+                }
+
+                double[] vector = MatrixUtils.mul(1, numFeatures, numFeatures, rvec, scale)[0];
+                for (int i = 0; i < numFeatures; i++) {
+                    vector[i] += offset[i];
+                }
+
+                data[oid] = vector;
+                labels[oid++] = label;
             }
         }
 
-        return new ClDataset("synthetic", true, data, false, labels);
+        return new ClDataset("synthetic_gmm", true, data, false, labels);
     }
 
     @Override
@@ -144,7 +185,7 @@ public class GMMConverter implements Converter {
 
     @Override
     public int getNumberOfVariables() {
-        return 2 + maxClasses * (1 + maxFeatures * maxObjectsPerClass);
+        return 2 + maxClasses * (1 + maxFeatures * (maxFeatures + 3) / 2);
     }
 
     @Override

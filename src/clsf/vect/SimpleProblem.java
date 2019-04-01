@@ -8,13 +8,13 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
 import clsf.ClDataset;
-import tmp.ToDoubleArrayFunction;
+import utils.ToDoubleArrayFunction;
 
 public class SimpleProblem implements DoubleProblem {
 
     private static final long serialVersionUID = 1L;
 
-    final Converter converter;
+    public final Converter converter;
     final List<ClDataset> datasets;
     final ToDoubleArrayFunction<ClDataset> errorFunction;
 

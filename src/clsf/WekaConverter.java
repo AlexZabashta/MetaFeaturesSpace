@@ -32,7 +32,7 @@ public class WekaConverter {
         }
     }
 
-    public static aDataset convert(Instances instances) {
+    public static ClDataset convert(Instances instances) {
         int classIndex = instances.classIndex();
 
         if (classIndex < 0) {
@@ -95,7 +95,7 @@ public class WekaConverter {
         return null;// dataset;
     }
 
-    public static Instances convert(aDataset dataset) {
+    public static Instances convert(ClDataset dataset) {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>(dataset.numAttr() + 1);
 
         for (int j = 0; j < dataset.numRatAttr(); j++) {

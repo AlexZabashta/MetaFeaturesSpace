@@ -4,55 +4,12 @@ import java.util.Random;
 
 public class RandomUtils {
 
-    public static int randomFromSegment(Random random, int min, int max) {
-        return Math.min(min, max) + random.nextInt(Math.abs(min - max) + 1);
-    }
-
-    public static int randomLocal(Random random, int value, int delta, int min, int max) {
-        for (int rep = 0; rep < 10; rep++) {
-            int local = randomFromSegment(random, Math.max(min, value - delta), Math.min(max, value + delta));
-            if (local != value) {
-                return local;
-            }
-        }
-        return value;
-    }
-
-    public static int randomInt(Random random, int x, int y) {
-        return Math.min(x, y) + random.nextInt(Math.abs(x - y) + 1);
-    }
-
     public static void main(String[] args) {
         Random random = new Random();
 
         for (int n = 0; n < 10; n++) {
             System.out.println(randomLocal(random, 5, 3, 5, 6));
         }
-    }
-
-    public static int[] randomPermutation(int length, Random random) {
-        int[] p = new int[length];
-        for (int i = 0; i < length; i++) {
-            int j = random.nextInt(i + 1);
-            p[i] = p[j];
-            p[j] = i;
-        }
-        return p;
-    }
-
-    public static int[] randomSelection(int length, int selected, Random random) {
-        int[] array = new int[selected];
-
-        int offset = 0;
-
-        while (offset < selected) {
-            int[] p = randomPermutation(length, random);
-            int delta = Math.min(length, selected - offset);
-            System.arraycopy(p, 0, array, offset, delta);
-            offset += delta;
-        }
-        
-        return array;
     }
 
     public static boolean[] randomBinarySelection(int length, int selected, Random random) {
@@ -75,6 +32,49 @@ public class RandomUtils {
 
         for (int i = 0; i < n; i++) {
             array[i] = random.nextBoolean();
+        }
+
+        return array;
+    }
+
+    public static int randomFromSegment(Random random, int min, int max) {
+        return Math.min(min, max) + random.nextInt(Math.abs(min - max) + 1);
+    }
+
+    public static int randomInt(Random random, int x, int y) {
+        return Math.min(x, y) + random.nextInt(Math.abs(x - y) + 1);
+    }
+
+    public static int randomLocal(Random random, int value, int delta, int min, int max) {
+        for (int rep = 0; rep < 10; rep++) {
+            int local = randomFromSegment(random, Math.max(min, value - delta), Math.min(max, value + delta));
+            if (local != value) {
+                return local;
+            }
+        }
+        return value;
+    }
+
+    public static int[] randomPermutation(int length, Random random) {
+        int[] p = new int[length];
+        for (int i = 0; i < length; i++) {
+            int j = random.nextInt(i + 1);
+            p[i] = p[j];
+            p[j] = i;
+        }
+        return p;
+    }
+
+    public static int[] randomSelection(int range, int length, Random random) {
+        int[] array = new int[length];
+
+        int offset = 0;
+
+        while (offset < length) {
+            int[] p = randomPermutation(range, random);
+            int delta = Math.min(range, length - offset);
+            System.arraycopy(p, 0, array, offset, delta);
+            offset += delta;
         }
 
         return array;

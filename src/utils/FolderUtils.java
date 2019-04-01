@@ -51,6 +51,27 @@ public class FolderUtils {
         return resultPath;
     }
 
+    public static String clearOrCreate(String... path) {
+        return buildPath(true, path);
+    }
+
+    public static void createFolder(File folder) {
+        if (!folder.mkdirs()) {
+            throw new RuntimeException("Can't create folder " + folder);
+        }
+    }
+
+    public static String getClassName() {
+        StackTraceElement[] elements = Thread.getAllStackTraces().get(Thread.currentThread());
+        return elements[elements.length - 1].getClassName();
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        System.out.println(buildPath(true, "test"));
+        System.out.println(openData("cos.png"));
+        System.out.println(new File(openData("cos.png")).length());
+    }
+
     public static String openData(String... path) throws FileNotFoundException {
         int len = path.length;
         int last = len - 1;
@@ -85,18 +106,8 @@ public class FolderUtils {
         return dataPath;
     }
 
-    public static String clearOrCreate(String... path) {
-        return buildPath(true, path);
-    }
-
     public static String openOrCreate(String... path) {
         return buildPath(false, path);
-    }
-
-    public static void createFolder(File folder) {
-        if (!folder.mkdirs()) {
-            throw new RuntimeException("Can't create folder " + folder);
-        }
     }
 
     public static void removeFile(File file) {
@@ -117,16 +128,5 @@ public class FolderUtils {
         if (!folder.delete()) {
             throw new RuntimeException("Can't remove folder " + folder);
         }
-    }
-
-    public static String getClassName() {
-        StackTraceElement[] elements = Thread.getAllStackTraces().get(Thread.currentThread());
-        return elements[elements.length - 1].getClassName();
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        System.out.println(buildPath(true, "test"));
-        System.out.println(openData("cos.png"));
-        System.out.println(new File(openData("cos.png")).length());
     }
 }

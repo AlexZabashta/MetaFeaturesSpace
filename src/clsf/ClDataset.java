@@ -17,6 +17,8 @@ public class ClDataset extends Dataset {
 
     public final int numClasses;
 
+    public final double[][][] subData;
+
     public ClDataset changeValues(boolean normValues, double[][] data) {
         return new ClDataset(name, normValues, data, false, labels);
     }
@@ -42,6 +44,9 @@ public class ClDataset extends Dataset {
         } else {
             this.numClasses = ArrayUtils.max(labels);
         }
+
+        this.subData = new double[numClasses][][];
+        // TODO fill subData
         this.hashCode = super.hashCode() ^ Arrays.hashCode(this.labels);
     }
 

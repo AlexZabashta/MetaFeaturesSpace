@@ -4,29 +4,6 @@ import java.util.Random;
 
 public class MatrixUtils {
 
-    public static void main(String[] args) {
-        Random random = new Random();
-
-        int n = 4;
-
-        double[][] matrix = new double[n][n];
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                matrix[i][j] = random.nextGaussian();
-            }
-        }
-
-        double[][] inv = inv(n, ArrayUtils.copy(matrix));
-
-        ArrayUtils.print(matrix);
-        ArrayUtils.print(inv);
-
-        ArrayUtils.print(mul(matrix, inv));
-        ArrayUtils.print(mul(inv, matrix));
-
-    }
-
     public static double[][] inv(int n, double[][] matrix) {
         double[][] inverse = new double[n][n];
 
@@ -122,40 +99,27 @@ public class MatrixUtils {
         return c;
     }
 
-    public static double[][] transpose(int n, int m, double[][] matrix) {
-        double[][] transpose = new double[m][n];
+    public static void main(String[] args) {
+        Random random = new Random();
+
+        int n = 4;
+
+        double[][] matrix = new double[n][n];
 
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                transpose[j][i] = matrix[i][j];
+            for (int j = 0; j < n; j++) {
+                matrix[i][j] = random.nextGaussian();
             }
         }
 
-        return transpose;
-    }
+        double[][] inv = inv(n, ArrayUtils.copy(matrix));
 
-    public static int width(double[][] matrix) {
-        int width = -1;
+        ArrayUtils.print(matrix);
+        ArrayUtils.print(inv);
 
-        for (double[] array : matrix) {
-            if (width == -1) {
-                width = array.length;
-            }
+        ArrayUtils.print(mul(matrix, inv));
+        ArrayUtils.print(mul(inv, matrix));
 
-            if (width != array.length) {
-                throw new IllegalStateException("matrix not rectangular");
-            }
-        }
-
-        return Math.max(0, width);
-    }
-
-    public static double[][] transpose(int n, double[][] matrix) {
-        return transpose(n, n, matrix);
-    }
-
-    public static double[][] transpose(double[][] matrix) {
-        return transpose(matrix.length, width(matrix), matrix);
     }
 
     public static double[][] mul(double[][] a, double[][] b) {
@@ -171,8 +135,31 @@ public class MatrixUtils {
         return mul(l, m, r, a, b);
     }
 
+    public static double[][] mul(int n, double[][] a, double[][] b) {
+        return mul(n, n, n, a, b);
+    }
+
+    public static double[][] mul(int l, int m, int r, double[][] a, double[][] b) {
+        double[][] c = new double[l][r];
+
+        for (int i = 0; i < l; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int k = 0; k < r; k++) {
+                    c[i][k] += a[i][j] * b[j][k];
+                }
+            }
+        }
+
+        return c;
+    }
+
+    public static double[][] sqrt(double[][] matrix) {
+        return sqrt(matrix.length, matrix);
+    }
+
     /**
-     * Computes the Cholesky decomposition of the current matrix \f$ matrix \f$. This method is taken from {@link jMEF.PMatrix#Cholesky}.
+     * Computes the Cholesky decomposition of the current matrix \f$ matrix \f$.
+     * This method is taken from {@link jMEF.PMatrix#Cholesky}.
      * 
      * @author Vincent Garcia
      * @author Frank Nielsen
@@ -200,25 +187,39 @@ public class MatrixUtils {
         return sqrt;
     }
 
-    public static double[][] sqrt(double[][] matrix) {
-        return sqrt(matrix.length, matrix);
+    public static double[][] transpose(double[][] matrix) {
+        return transpose(matrix.length, width(matrix), matrix);
     }
 
-    public static double[][] mul(int l, int m, int r, double[][] a, double[][] b) {
-        double[][] c = new double[l][r];
+    public static double[][] transpose(int n, double[][] matrix) {
+        return transpose(n, n, matrix);
+    }
 
-        for (int i = 0; i < l; i++) {
+    public static double[][] transpose(int n, int m, double[][] matrix) {
+        double[][] transpose = new double[m][n];
+
+        for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                for (int k = 0; k < r; k++) {
-                    c[i][k] += a[i][j] * b[j][k];
-                }
+                transpose[j][i] = matrix[i][j];
             }
         }
 
-        return c;
+        return transpose;
     }
 
-    public static double[][] mul(int n, double[][] a, double[][] b) {
-        return mul(n, n, n, a, b);
+    public static int width(double[][] matrix) {
+        int width = -1;
+
+        for (double[] array : matrix) {
+            if (width == -1) {
+                width = array.length;
+            }
+
+            if (width != array.length) {
+                throw new IllegalStateException("matrix not rectangular");
+            }
+        }
+
+        return Math.max(0, width);
     }
 }

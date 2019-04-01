@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 public class BlockingThreadPoolExecutor extends AbstractExecutorService {
 
+    private boolean isShutdown;
     private final SynchronousQueue<Runnable> queue;
     private final Thread[] threads;
-    private boolean isShutdown;
 
     public BlockingThreadPoolExecutor(int n, boolean fair) {
         this.threads = new Thread[n];
@@ -41,12 +41,6 @@ public class BlockingThreadPoolExecutor extends AbstractExecutorService {
         }
     }
 
-    public Thread thread(int index) {
-        synchronized (threads) {
-            return threads[index];
-        }
-    }
-
     @Override
     public boolean awaitTermination(long duration, TimeUnit timeUnit) throws InterruptedException {
         synchronized (threads) {
@@ -65,6 +59,19 @@ public class BlockingThreadPoolExecutor extends AbstractExecutorService {
             }
 
             return millis > 0;
+        }
+    }
+
+    @Override
+    public void execute(Runnable runnable) {
+        Objects.requireNonNull(runnable);
+        if (isShutdown()) {
+            throw new IllegalStateException("Executor service is shutdown");
+        }
+        try {
+            queue.put(runnable);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -108,16 +115,9 @@ public class BlockingThreadPoolExecutor extends AbstractExecutorService {
         return list;
     }
 
-    @Override
-    public void execute(Runnable runnable) {
-        Objects.requireNonNull(runnable);
-        if (isShutdown()) {
-            throw new IllegalStateException("Executor service is shutdown");
-        }
-        try {
-            queue.put(runnable);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public Thread thread(int index) {
+        synchronized (threads) {
+            return threads[index];
         }
     }
 }

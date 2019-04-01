@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class BooleanArray {
+    public static void main(String[] args) {
+        System.out.println(Arrays.toString(random(10, 2, new Random())));
+    }
+
     public static boolean[] random(int n, int m, Random random) {
         if (m < 0 || m > n) {
             throw new IllegalArgumentException("'m' must be in [0, n]");
@@ -28,9 +32,5 @@ public class BooleanArray {
         }
 
         return array;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Arrays.toString(random(10, 2, new Random())));
     }
 }

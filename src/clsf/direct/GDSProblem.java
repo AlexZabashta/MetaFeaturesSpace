@@ -7,7 +7,7 @@ import org.uma.jmetal.problem.Problem;
 
 import clsf.ClDataset;
 import clsf.direct.gen_op.DatasetMutation;
-import tmp.ToDoubleArrayFunction;
+import utils.ToDoubleArrayFunction;
 
 public class GDSProblem implements Problem<DataSetSolution> {
 

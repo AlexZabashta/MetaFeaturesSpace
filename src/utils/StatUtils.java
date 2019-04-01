@@ -4,22 +4,12 @@ import java.util.Random;
 
 public class StatUtils {
 
-    public static double[] mean(int n, int m, double[][] data) {
-        double[] mu = new double[m];
-        for (int i = 0; i < n; i++) {
-            double[] vector = data[i];
-            for (int j = 0; j < m; j++) {
-                mu[j] += vector[j];
-            }
-        }
-        for (int j = 0; j < m; j++) {
-            mu[j] /= n;
-        }
-        return mu;
+    public static double[][] covarianceMatrix(int n, int m, double[][] data) {
+        return covarianceMatrix(n, m, data, mean(n, m, data));
+
     }
 
-    public static double[][] covarianceMatrix(int n, int m, double[][] data) {
-        double[] mean = mean(n, m, data);
+    public static double[][] covarianceMatrix(int n, int m, double[][] data, double[] mean) {
         double[][] covariance = new double[m][m];
 
         for (int i = 0; i < n; i++) {
@@ -36,22 +26,6 @@ public class StatUtils {
         }
 
         return covariance;
-    }
-
-    public static double mean(double sum0, double sum1) {
-        if (sum0 < 1e-9) {
-            return 0;
-        } else {
-            return sum1 / sum0;
-        }
-    }
-
-    public static double std(double sum0, double mean, double sum2) {
-        if (sum0 < 1e-9) {
-            return 1;
-        } else {
-            return Math.sqrt(Math.max(0, sum2 / sum0 - mean * mean));
-        }
     }
 
     public static void main(String[] args) {
@@ -77,5 +51,35 @@ public class StatUtils {
         System.out.println(mean);
         System.out.println(std);
 
+    }
+
+    public static double mean(double sum0, double sum1) {
+        if (sum0 < 1e-9) {
+            return 0;
+        } else {
+            return sum1 / sum0;
+        }
+    }
+
+    public static double[] mean(int n, int m, double[][] data) {
+        double[] mean = new double[m];
+        for (int i = 0; i < n; i++) {
+            double[] vector = data[i];
+            for (int j = 0; j < m; j++) {
+                mean[j] += vector[j];
+            }
+        }
+        for (int j = 0; j < m; j++) {
+            mean[j] /= n;
+        }
+        return mean;
+    }
+
+    public static double std(double sum0, double mean, double sum2) {
+        if (sum0 < 1e-9) {
+            return 1;
+        } else {
+            return Math.sqrt(Math.max(0, sum2 / sum0 - mean * mean));
+        }
     }
 }

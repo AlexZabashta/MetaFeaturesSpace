@@ -6,12 +6,27 @@ import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 
 public class CategoryMapper implements IntUnaryOperator {
-    private final int[] domain, codomain;
-    private final int range;
+    public static void main(String[] args) {
+        Random random = new Random();
 
-    public int range() {
-        return range;
+        int n = 0, m = 20;
+
+        int[] values = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            values[i] = random.nextInt(m);
+        }
+        CategoryMapper mapper = new CategoryMapper(values.clone());
+
+        System.out.println(mapper.range());
+        for (int i = 0; i < n; i++) {
+            System.out.printf("%2d  %2d -> %2d%n", i, values[i], mapper.applyAsInt(values[i]));
+        }
+
     }
+    private final int[] domain, codomain;
+
+    private final int range;
 
     public CategoryMapper(int[] values) {
         domain = values;
@@ -43,23 +58,8 @@ public class CategoryMapper implements IntUnaryOperator {
         }
     }
 
-    public static void main(String[] args) {
-        Random random = new Random();
-
-        int n = 0, m = 20;
-
-        int[] values = new int[n];
-
-        for (int i = 0; i < n; i++) {
-            values[i] = random.nextInt(m);
-        }
-        CategoryMapper mapper = new CategoryMapper(values.clone());
-
-        System.out.println(mapper.range());
-        for (int i = 0; i < n; i++) {
-            System.out.printf("%2d  %2d -> %2d%n", i, values[i], mapper.applyAsInt(values[i]));
-        }
-
+    public int range() {
+        return range;
     }
 
 }

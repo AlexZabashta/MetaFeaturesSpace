@@ -7,8 +7,8 @@ import java.util.function.Function;
 import org.uma.jmetal.problem.Problem;
 
 import clsf.ClDataset;
-import tmp.ToDoubleArrayFunction;
 import utils.Limited;
+import utils.ToDoubleArrayFunction;
 
 public class Problems {
 

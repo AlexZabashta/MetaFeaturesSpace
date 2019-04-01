@@ -1,6 +1,6 @@
 package clsf;
 
-import tmp.ToDoubleArrayFunction;
+import utils.ToDoubleArrayFunction;
 
 public class CMFExtractor implements ToDoubleArrayFunction<ClDataset> {
     final int lenght = 0;

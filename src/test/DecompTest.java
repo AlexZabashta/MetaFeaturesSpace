@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
-import static tmp.MatrixUtils.*;
+import static utils.MatrixUtils.*;
+import static utils.ArrayUtils.*;
 
 public class DecompTest {
 

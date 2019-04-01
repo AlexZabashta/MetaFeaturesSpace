@@ -54,6 +54,12 @@ public class DirectConverter implements Converter {
     }
 
     public double denormalize(double value, double min, double max) {
+        if (value < min) {
+            return -10;
+        }
+        if (value > max) {
+            return +10;
+        }
         return (2.0 * (value - min) / (max - min) - 1) * 9.99;
     }
 
@@ -134,7 +140,7 @@ public class DirectConverter implements Converter {
             }
         }
 
-        return new ClDataset("synthetic", true, data, false, labels);
+        return new ClDataset("synthetic_direct", true, data, false, labels);
     }
 
     @Override

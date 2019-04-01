@@ -34,7 +34,8 @@ import clsf.direct.DataSetSolution;
 import clsf.direct.GDSProblem;
 import clsf.direct.gen_op.DatasetCrossover;
 import clsf.direct.gen_op.DatasetMutation;
-import clsf.vect.GMMProblem;
+import clsf.vect.GMMConverter;
+import clsf.vect.SimpleProblem;
 
 public class Algorithms {
 
@@ -65,7 +66,10 @@ public class Algorithms {
             public Algorithm<?> apply(Problem<?> problem) {
                 if (singleObjective) {
                     try {
-                        return new CovarianceMatrixAdaptationEvolutionStrategy.Builder((GMMProblem) problem).setMaxEvaluations(10000000).build();
+                        SimpleProblem simpleProblem = (SimpleProblem) problem;
+                        if (simpleProblem.converter instanceof GMMConverter) {
+                            return new CovarianceMatrixAdaptationEvolutionStrategy.Builder(simpleProblem).setMaxEvaluations(10000000).build();
+                        }
                     } catch (ClassCastException cce) {
                     }
                 }

@@ -19,7 +19,6 @@ import clsf.CMFExtractor;
 import clsf.ClDataset;
 import clsf.direct.gen_op.DatasetCrossover;
 import clsf.direct.gen_op.DatasetMutation;
-import tmp.ToDoubleArrayFunction;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
 import utils.EndSearch;
@@ -30,6 +29,7 @@ import utils.MatrixUtils;
 import utils.MultiObjectiveError;
 import utils.SingleObjectiveError;
 import utils.StatUtils;
+import utils.ToDoubleArrayFunction;
 import weka.core.Instances;
 
 public class GenerationExp {
@@ -165,7 +165,14 @@ public class GenerationExp {
                         for (Function<Problem<?>, Algorithm<?>> algorithmBuilder : Algorithms.list(singleObjective, crossover, mutation)) {
                             Limited limited = new Limited(errorFunction, sError, limit);
                             Problem<?> problem = problemBuilder.apply(limited);
+                            if (problem == null) {
+                                continue;
+                            }
+
                             Algorithm<?> algorithm = algorithmBuilder.apply(problem);
+                            if (algorithm == null) {
+                                continue;
+                            }
 
                             int eid = currentExperimentId++;
 
