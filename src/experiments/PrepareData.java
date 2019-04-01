@@ -13,9 +13,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import clsf.CMFExtractor;
 import clsf.Dataset;
-import clsf.MetaFeaturesExtractor;
-import clusterization.CMFExtractor;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
@@ -38,7 +37,7 @@ public class PrepareData {
             }
         }
 
-        MetaFeaturesExtractor extractor = new CMFExtractor();
+        CMFExtractor extractor = new CMFExtractor();
 
         for (File file : new File("data").listFiles()) {
             try (FileReader reader = new FileReader(file)) {
@@ -80,15 +79,17 @@ public class PrepareData {
                         data[i][j] = instance.value(j);
                     }
                 }
-                Dataset dataset = new Dataset(data, extractor);
 
-                double[] mf = dataset.metaFeatures();
-                if (mf == null) {
-                    continue;
-                }
+                // TODO precalc
+                // ClDataset dataset = new ClDataset(data, extractor);
+                //
+                // double[] mf = dataset.metaFeatures();
+                // if (mf == null) {
+                // continue;
+                // }
 
                 System.out.println(file.getName());
-                System.out.println(Arrays.toString(mf));
+                // System.out.println(Arrays.toString(mf));
                 System.out.flush();
 
                 try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream("pdata" + File.separator + file.getName() + ".obj"))) {

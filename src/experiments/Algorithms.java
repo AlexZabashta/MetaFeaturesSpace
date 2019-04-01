@@ -30,10 +30,10 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
-import clsf.direct.DataSetSolution;
-import clsf.direct.GDSProblem;
-import clsf.direct.gen_op.DatasetCrossover;
-import clsf.direct.gen_op.DatasetMutation;
+import clsf.ndse.DataSetSolution;
+import clsf.ndse.GDSProblem;
+import clsf.ndse.gen_op.DatasetCrossover;
+import clsf.ndse.gen_op.DatasetMutation;
 import clsf.vect.GMMConverter;
 import clsf.vect.SimpleProblem;
 

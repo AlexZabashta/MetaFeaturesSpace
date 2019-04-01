@@ -3,16 +3,16 @@ package utils;
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
 
-import clsf.ClDataset;
+import clsf.Dataset;
 
-public class SingleObjectiveError implements ToDoubleArrayFunction<ClDataset>, ToDoubleFunction<ClDataset> {
+public class SingleObjectiveError implements ToDoubleArrayFunction<Dataset>, ToDoubleFunction<Dataset> {
 
     final ToDoubleBiFunction<double[], double[]> distance;
 
-    final ToDoubleArrayFunction<ClDataset> extractor;
+    final ToDoubleArrayFunction<Dataset> extractor;
     final double[] target;
 
-    public SingleObjectiveError(ToDoubleBiFunction<double[], double[]> distance, ToDoubleArrayFunction<ClDataset> extractor, double[] target) {
+    public SingleObjectiveError(ToDoubleBiFunction<double[], double[]> distance, ToDoubleArrayFunction<Dataset> extractor, double[] target) {
         if (target.length != extractor.length()) {
             throw new IllegalArgumentException("target.length != extractor.length()");
         }
@@ -23,12 +23,12 @@ public class SingleObjectiveError implements ToDoubleArrayFunction<ClDataset>, T
     }
 
     @Override
-    public double[] apply(ClDataset dataset) {
+    public double[] apply(Dataset dataset) {
         return new double[] { applyAsDouble(dataset) };
     }
 
     @Override
-    public double applyAsDouble(ClDataset dataset) {
+    public double applyAsDouble(Dataset dataset) {
         try {
             return distance.applyAsDouble(extractor.apply(dataset), target);
         } catch (RuntimeException exception) {

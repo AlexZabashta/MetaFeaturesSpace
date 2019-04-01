@@ -16,9 +16,9 @@ import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.problem.Problem;
 
 import clsf.CMFExtractor;
-import clsf.ClDataset;
-import clsf.direct.gen_op.DatasetCrossover;
-import clsf.direct.gen_op.DatasetMutation;
+import clsf.Dataset;
+import clsf.ndse.gen_op.DatasetCrossover;
+import clsf.ndse.gen_op.DatasetMutation;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
 import utils.EndSearch;
@@ -34,8 +34,8 @@ import weka.core.Instances;
 
 public class GenerationExp {
 
-    public static List<ClDataset> readData(File folder) {
-        List<ClDataset> datasets = new ArrayList<>();
+    public static List<Dataset> readData(File folder) {
+        List<Dataset> datasets = new ArrayList<>();
 
         for (File file : folder.listFiles()) {
             try (Reader reader = new FileReader(file)) {
@@ -51,7 +51,7 @@ public class GenerationExp {
 
                 // TODO COPY DATA
 
-                datasets.add(new ClDataset(file.getName(), ClDataset.defaultNormValues, data, ClDataset.defaultNormLabels, labels));
+                datasets.add(new Dataset(file.getName(), Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels));
 
                 System.out.println(file.getName());
                 System.out.flush();
@@ -85,7 +85,7 @@ public class GenerationExp {
 
         double[][] metaData = new double[1024][];
 
-        List<ClDataset> datasets = readData(new File("pdata"));
+        List<Dataset> datasets = readData(new File("pdata"));
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
@@ -117,7 +117,7 @@ public class GenerationExp {
         int currentExperimentId = 0;
 
         for (int targetIndex = 0; targetIndex < size; targetIndex++) {
-            ClDataset targetDataset = datasets.get(targetIndex);
+            Dataset targetDataset = datasets.get(targetIndex);
             final String targetName = targetDataset.name;
 
             final double[] target = extractor.apply(targetDataset);
@@ -137,18 +137,18 @@ public class GenerationExp {
             SingleObjectiveError sError = new SingleObjectiveError(distance, extractor, target);
             MultiObjectiveError mError = new MultiObjectiveError(extractor, target, invSigma);
 
-            List<ClDataset> realPopulation = new ArrayList<>();
-            for (ClDataset dataset : datasets) {
+            List<Dataset> realPopulation = new ArrayList<>();
+            for (Dataset dataset : datasets) {
                 if (sError.applyAsDouble(dataset) > 1) {
                     realPopulation.add(dataset);
                 }
             }
-            List<ClDataset> nullPopulation = null;
+            List<Dataset> nullPopulation = null;
 
-            for (ToDoubleArrayFunction<ClDataset> errorFunction : Arrays.asList(sError, mError)) {
+            for (ToDoubleArrayFunction<Dataset> errorFunction : Arrays.asList(sError, mError)) {
                 boolean singleObjective = errorFunction instanceof ToDoubleFunction;
 
-                for (List<ClDataset> initPopulation : Arrays.asList(realPopulation, nullPopulation)) {
+                for (List<Dataset> initPopulation : Arrays.asList(realPopulation, nullPopulation)) {
 
                     boolean realInitialPopulation = initPopulation != null;
 
@@ -187,7 +187,7 @@ public class GenerationExp {
                                             exception.printStackTrace();
                                         }
                                     }
-                                    ClDataset result = limited.dataset;
+                                    Dataset result = limited.dataset;
 
                                     if (result == null) {
                                         return;
@@ -210,7 +210,7 @@ public class GenerationExp {
                                                 writer.print(mf[i]);
                                             }
                                             writer.println();
-                                            writer.println(result.toInstances());
+                                            // TODO writer.println(result.toInstances());
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }

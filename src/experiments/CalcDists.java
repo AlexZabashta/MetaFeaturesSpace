@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.Random;
 
-import clsf.Dataset;
-import clsf.MetaFeaturesExtractor;
-import clusterization.CMFExtractor;
+import clsf.CMFExtractor;
 import utils.ArrayUtils;
 import utils.MahalanobisDistance;
 import utils.MatrixUtils;
@@ -16,9 +14,9 @@ import utils.StatUtils;
 public class CalcDists {
 
     public static void main(String[] args) {
-        MetaFeaturesExtractor extractor = new CMFExtractor();
+        CMFExtractor extractor = new CMFExtractor();
 
-        int numMF = extractor.lenght();
+        int numMF = extractor.length();
         int numData = 0;
 
         double[][] metaData = new double[512][];
@@ -29,12 +27,13 @@ public class CalcDists {
                 int m = objectInputStream.readInt();
                 double[][] data = (double[][]) objectInputStream.readObject();
 
-                Dataset dataset = new Dataset(data, extractor);
-                double[] mf = dataset.metaFeatures();
-
-                if (mf != null && mf.length == numMF) {
-                    metaData[numData++] = mf;
-                }
+                // TODO calc and print MF
+                // ClDataset dataset = new ClDataset(data, extractor);
+                // double[] mf = dataset.metaFeatures();
+                extractor.extract(null);
+                // if (mf != null && mf.length == numMF) {
+                // metaData[numData++] = mf;
+                // }
 
                 System.out.println(file.getName() + " " + n + " " + m);
                 System.out.flush();

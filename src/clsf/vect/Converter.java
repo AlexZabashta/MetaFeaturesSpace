@@ -3,15 +3,15 @@ package clsf.vect;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 
-import clsf.ClDataset;
+import clsf.Dataset;
 
 public interface Converter {
 
     public int getNumberOfVariables();
 
-    public DoubleSolution convert(DoubleProblem problem, ClDataset dataset);
+    public DoubleSolution convert(DoubleProblem problem, Dataset dataset);
 
-    public ClDataset convert(DoubleSolution solution);
+    public Dataset convert(DoubleSolution solution);
 
     public Double getLowerBound();
 

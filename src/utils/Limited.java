@@ -2,27 +2,26 @@ package utils;
 
 import java.util.function.ToDoubleFunction;
 
-import clsf.ClDataset;
 import clsf.Dataset;
 
-public class Limited implements ToDoubleArrayFunction<ClDataset> {
+public class Limited implements ToDoubleArrayFunction<Dataset> {
 
-    public final ToDoubleArrayFunction<ClDataset> baseFunction;
+    public final ToDoubleArrayFunction<Dataset> baseFunction;
     public double best = Double.POSITIVE_INFINITY;
 
-    public final ToDoubleFunction<ClDataset> cmpFunction;
-    public ClDataset dataset = null;
+    public final ToDoubleFunction<Dataset> cmpFunction;
+    public Dataset dataset = null;
     public final double[] log;
     public int qid = 0;
 
-    public Limited(ToDoubleArrayFunction<ClDataset> baseFunction, ToDoubleFunction<ClDataset> cmpFunction, int limit) {
+    public Limited(ToDoubleArrayFunction<Dataset> baseFunction, ToDoubleFunction<Dataset> cmpFunction, int limit) {
         this.baseFunction = baseFunction;
         this.cmpFunction = cmpFunction;
         log = new double[limit];
     }
 
     @Override
-    public double[] apply(ClDataset dataset) {
+    public double[] apply(Dataset dataset) {
         if (qid >= log.length) {
             throw new EndSearch();
         }

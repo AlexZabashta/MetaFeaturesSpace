@@ -7,7 +7,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
-import clsf.ClDataset;
+import clsf.Dataset;
 import utils.MatrixUtils;
 import utils.RandomUtils;
 import utils.StatUtils;
@@ -66,7 +66,7 @@ public class GMMConverter implements Converter {
     }
 
     @Override
-    public DoubleSolution convert(DoubleProblem problem, ClDataset dataset) {
+    public DoubleSolution convert(DoubleProblem problem, Dataset dataset) {
         DoubleSolution solution = new DefaultDoubleSolution(problem);
         int sp = 0;
 
@@ -78,15 +78,12 @@ public class GMMConverter implements Converter {
         int[] selClass = RandomUtils.randomSelection(dataset.numClasses, maxClasses, random);
         int[] selFeatures = RandomUtils.randomSelection(dataset.numFeatures, maxFeatures, random);
 
-        int[][] indices = dataset.indices();
-
         for (int label : selClass) {
-            solution.setVariableValue(sp++, toDouble(indices[label].length, numObjectsDistribution));
+            solution.setVariableValue(sp++, toDouble(dataset.classDistribution[label], numObjectsDistribution));
         }
 
-
         for (int label : selClass) {
-            double[][] data = dataset.subData[label];
+            double[][] data = dataset.dataPerClass[label];
 
             double[] offset = StatUtils.mean(data.length, dataset.numFeatures, data);
             double[][] cov = StatUtils.covarianceMatrix(data.length, dataset.numFeatures, data, offset);
@@ -114,7 +111,7 @@ public class GMMConverter implements Converter {
     }
 
     @Override
-    public ClDataset convert(DoubleSolution solution) {
+    public Dataset convert(DoubleSolution solution) {
 
         Random random = new Random();
 
@@ -175,7 +172,7 @@ public class GMMConverter implements Converter {
             }
         }
 
-        return new ClDataset("synthetic_gmm", true, data, false, labels);
+        return new Dataset("synthetic_gmm", true, data, false, labels);
     }
 
     @Override

@@ -1,62 +1,60 @@
 package clsf;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instances;
+import utils.ArrayUtils;
+import utils.CategoryMapper;
 
 public class Dataset {
 
-    public final int numObjects;
-    public final int numFeatures;
+    public static boolean defaultNormLabels = true;
+    public static boolean defaultNormValues = true;
+
     private final int hashCode;
 
+    public final String name;
+    public final int numClasses;
+    public final int numFeatures;
+    public final int numObjects;
+
     public final double[][] data;
+    public final double[] min;
+    public final double[] max;
 
-    public static boolean defaultNormalize = true;
+    public final int[] labels;
+    public final int[] classDistribution;
+    public final int[][] indices;
+    public final double[][][] dataPerClass;
 
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-
-    public Dataset(double[]... data) {
-        this(defaultNormalize, data);
-    }
-
-    public Dataset(boolean normalize, double[]... data) {
+    public Dataset(String name, boolean normValues, double[][] data, boolean normLabels, int[] labels) {
+        this.name = name;
         this.data = data;
         this.numObjects = data.length;
-
-        if (numObjects <= 0) {
-            throw new IllegalArgumentException("data.length == 0");
+        if (numObjects <= 1) {
+            throw new IllegalArgumentException("data.length <= 1");
         }
+        {
+            int numFeatures = -1;
+            for (double[] object : data) {
+                if (numFeatures == -1) {
+                    numFeatures = object.length;
+                }
+                if (object.length != numFeatures) {
+                    throw new IllegalArgumentException("All objects length must be equal");
+                }
 
-        int numFeatures = -1;
-
-        for (double[] object : data) {
-            if (numFeatures == -1) {
-                numFeatures = object.length;
-            }
-            if (object.length != numFeatures) {
-                throw new IllegalArgumentException("All objects length must be equal");
-            }
-
-            for (double value : object) {
-                if (!Double.isFinite(value)) {
-                    throw new IllegalArgumentException("All values must be finite, value = " + value);
+                for (double value : object) {
+                    if (!Double.isFinite(value)) {
+                        throw new IllegalArgumentException("All values must be finite, value = " + value);
+                    }
                 }
             }
+            if (numFeatures <= 0) {
+                throw new IllegalArgumentException("Number of features must be positive");
+            }
+            this.numFeatures = numFeatures;
         }
-        this.numFeatures = numFeatures;
-
-        if (numFeatures <= 0) {
-            throw new IllegalArgumentException("Number of features must be positive");
-        }
-
-        if (normalize) {
+        if (normValues) {
             for (int fid = 0; fid < numFeatures; fid++) {
                 double mean = 0;
                 for (int oid = 0; oid < numObjects; oid++) {
@@ -68,9 +66,7 @@ public class Dataset {
                 }
 
                 double var = 0;
-
                 double asymm = 0;
-
                 for (int oid = 0; oid < numObjects; oid++) {
                     double value = data[oid][fid];
                     double value2 = value * value;
@@ -87,33 +83,83 @@ public class Dataset {
                         data[oid][fid] *= scale;
                     }
                 }
-
             }
         }
 
-        this.hashCode = Arrays.deepHashCode(data);
-    }
+        if (labels.length != numObjects) {
+            throw new IllegalArgumentException("Number of objects must be equal to labels length");
+        }
+        this.labels = labels;
 
-    public Instances toInstances() {
-        ArrayList<Attribute> attributes = new ArrayList<>();
+        if (normLabels) {
+            CategoryMapper mapper = new CategoryMapper(labels.clone());
+            this.numClasses = mapper.range();
+            for (int oid = 0; oid < numObjects; oid++) {
+                this.labels[oid] = mapper.applyAsInt(labels[oid]);
+            }
+        } else {
+            this.numClasses = ArrayUtils.max(labels);
+        }
+        this.hashCode = Arrays.deepHashCode(data) ^ Arrays.hashCode(this.labels);
 
-        for (int fid = 0; fid < numFeatures; fid++) {
-            attributes.add(new Attribute("f" + fid));
+        {
+            this.classDistribution = new int[numClasses];
+            for (int oid = 0; oid < numObjects; oid++) {
+                ++classDistribution[labels[oid]];
+            }
+        }
+        {
+            this.indices = new int[numClasses][];
+            int[] s = classDistribution.clone();
+            for (int label = 0; label < numClasses; label++) {
+                indices[label] = new int[s[label]];
+                s[label] = 0;
+            }
+            for (int oid = 0; oid < numObjects; oid++) {
+                int c = labels[oid];
+                indices[c][s[c]++] = oid;
+            }
         }
 
-        Instances instances = new Instances("rel", attributes, numObjects);
+        {
+            this.min = new double[numFeatures];
+            this.max = new double[numFeatures];
+            Arrays.fill(min, Double.POSITIVE_INFINITY);
+            Arrays.fill(max, Double.NEGATIVE_INFINITY);
 
-        for (int oid = 0; oid < numObjects; oid++) {
-            DenseInstance instance = new DenseInstance(1.0, data[oid].clone());
-            instance.setDataset(instances);
-            instances.add(instance);
+            for (int oid = 0; oid < numObjects; oid++) {
+                for (int fid = 0; fid < numFeatures; fid++) {
+                    min[fid] = Math.min(min[fid], data[oid][fid]);
+                    max[fid] = Math.max(max[fid], data[oid][fid]);
+                }
+            }
         }
 
-        return instances;
+        {
+            this.dataPerClass = new double[numClasses][][];
+            int[] s = classDistribution.clone();
+            for (int label = 0; label < numClasses; label++) {
+                dataPerClass[label] = new double[s[label]][];
+                s[label] = 0;
+            }
+            for (int oid = 0; oid < numObjects; oid++) {
+                int c = labels[oid];
+                dataPerClass[c][s[c]++] = data[oid];
+            }
+        }
+
     }
 
-    public double get(int oid, int fid) {
-        return data[oid][fid];
+    public Dataset changeLabels(boolean normLabels, int[] labels) {
+        return new Dataset(name, false, data, normLabels, labels);
     }
 
+    public Dataset changeValues(boolean normValues, double[][] data) {
+        return new Dataset(name, normValues, data, false, labels);
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
 }

@@ -2,17 +2,17 @@ package utils;
 
 import java.util.Arrays;
 
-import clsf.ClDataset;
+import clsf.Dataset;
 
-public class MultiObjectiveError implements ToDoubleArrayFunction<ClDataset> {
+public class MultiObjectiveError implements ToDoubleArrayFunction<Dataset> {
 
-    final ToDoubleArrayFunction<ClDataset> extractor;
+    final ToDoubleArrayFunction<Dataset> extractor;
 
     final int length;
 
     final double[] target, invSigma;
 
-    public MultiObjectiveError(ToDoubleArrayFunction<ClDataset> extractor, double[] target, double[] invSigma) {
+    public MultiObjectiveError(ToDoubleArrayFunction<Dataset> extractor, double[] target, double[] invSigma) {
         this.length = extractor.length();
         if (target.length != this.length) {
             throw new IllegalArgumentException("target.length != extractor.length()");
@@ -26,7 +26,7 @@ public class MultiObjectiveError implements ToDoubleArrayFunction<ClDataset> {
     }
 
     @Override
-    public double[] apply(ClDataset dataset) {
+    public double[] apply(Dataset dataset) {
         double[] diffs = new double[length];
         Arrays.fill(diffs, 100);
         try {

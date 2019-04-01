@@ -7,7 +7,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
-import clsf.ClDataset;
+import clsf.Dataset;
 import utils.ToDoubleArrayFunction;
 
 public class SimpleProblem implements DoubleProblem {
@@ -15,12 +15,12 @@ public class SimpleProblem implements DoubleProblem {
     private static final long serialVersionUID = 1L;
 
     public final Converter converter;
-    final List<ClDataset> datasets;
-    final ToDoubleArrayFunction<ClDataset> errorFunction;
+    final List<Dataset> datasets;
+    final ToDoubleArrayFunction<Dataset> errorFunction;
 
     final Random random = new Random();
 
-    public SimpleProblem(Converter converter, ToDoubleArrayFunction<ClDataset> errorFunction, List<ClDataset> datasets) {
+    public SimpleProblem(Converter converter, ToDoubleArrayFunction<Dataset> errorFunction, List<Dataset> datasets) {
         this.converter = converter;
         this.errorFunction = errorFunction;
         this.datasets = datasets;

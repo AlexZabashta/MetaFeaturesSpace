@@ -6,7 +6,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 
-import clsf.ClDataset;
+import clsf.Dataset;
 import utils.RandomUtils;
 import weka.core.Debug.Random;
 
@@ -64,7 +64,7 @@ public class DirectConverter implements Converter {
     }
 
     @Override
-    public DoubleSolution convert(DoubleProblem problem, ClDataset dataset) {
+    public DoubleSolution convert(DoubleProblem problem, Dataset dataset) {
         DoubleSolution solution = new DefaultDoubleSolution(problem);
         int sp = 0;
 
@@ -76,25 +76,18 @@ public class DirectConverter implements Converter {
         int[] selClass = RandomUtils.randomSelection(dataset.numClasses, maxClasses, random);
         int[] selFeatures = RandomUtils.randomSelection(dataset.numFeatures, maxFeatures, random);
 
-        int[][] indices = dataset.indices();
+        double[][][] dpc = dataset.dataPerClass;
 
         for (int label : selClass) {
-            solution.setVariableValue(sp++, toDouble(indices[label].length, numObjectsDistribution));
+            solution.setVariableValue(sp++, toDouble(dpc[label].length, numObjectsDistribution));
         }
 
-        double[] min = dataset.min();
-        double[] max = dataset.max();
-
-        double[][] data = dataset.data;
-
         for (int label : selClass) {
-            int[] selObjects = RandomUtils.randomSelection(indices[label].length, maxObjectsPerClass, random);
+            int[] selObjects = RandomUtils.randomSelection(dpc[label].length, maxObjectsPerClass, random);
 
-            for (int id : selObjects) {
-                int oid = indices[label][id];
-
+            for (int oid : selObjects) {
                 for (int fid : selFeatures) {
-                    solution.setVariableValue(sp++, denormalize(data[oid][fid], min[fid], max[fid]));
+                    solution.setVariableValue(sp++, denormalize(dpc[label][oid][fid], dataset.min[fid], dataset.max[fid]));
                 }
             }
         }
@@ -103,7 +96,7 @@ public class DirectConverter implements Converter {
     }
 
     @Override
-    public ClDataset convert(DoubleSolution solution) {
+    public Dataset convert(DoubleSolution solution) {
         int sp = 0;
         int numFeatures = toInt(solution.getVariableValue(sp++), numFeaturesDistribution);
         int numClasses = toInt(solution.getVariableValue(sp++), numClassesDistribution);
@@ -140,7 +133,7 @@ public class DirectConverter implements Converter {
             }
         }
 
-        return new ClDataset("synthetic_direct", true, data, false, labels);
+        return new Dataset("synthetic_direct", true, data, false, labels);
     }
 
     @Override

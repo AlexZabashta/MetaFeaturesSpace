@@ -32,7 +32,7 @@ public class WekaConverter {
         }
     }
 
-    public static ClDataset convert(Instances instances) {
+    public static Dataset convert(Instances instances) {
         int classIndex = instances.classIndex();
 
         if (classIndex < 0) {
@@ -95,48 +95,35 @@ public class WekaConverter {
         return null;// dataset;
     }
 
-    public static Instances convert(ClDataset dataset) {
-        ArrayList<Attribute> attributes = new ArrayList<Attribute>(dataset.numAttr() + 1);
+    public static Instances convert(Dataset dataset) {
+        ArrayList<Attribute> attributes = new ArrayList<Attribute>(dataset.numFeatures + 1);
 
-        for (int j = 0; j < dataset.numRatAttr(); j++) {
+        for (int j = 0; j < dataset.numFeatures; j++) {
             attributes.add(new Attribute("r" + j));
         }
 
-        for (int j = 0; j < dataset.numCatAttr(); j++) {
-            int size = dataset.categorySize(j);
-            ArrayList<String> values = new ArrayList<>(size);
-            for (int k = 0; k < size; k++) {
-                values.add("v" + k);
-            }
-            attributes.add(new Attribute("c" + j, values));
-        }
+        ArrayList<String> classNames = new ArrayList<String>(dataset.numClasses);
 
-        ArrayList<String> classNames = new ArrayList<String>(dataset.numClasses());
-
-        for (int k = 0; k < dataset.numClasses(); k++) {
+        for (int k = 0; k < dataset.numClasses; k++) {
             classNames.add("t" + k);
         }
 
         attributes.add(new Attribute("class", classNames));
 
-        Instances instances = new Instances("name", attributes, dataset.numObjects());
+        Instances instances = new Instances("name", attributes, dataset.numObjects);
 
-        instances.setClassIndex(dataset.numAttr());
+        instances.setClassIndex(dataset.numFeatures);
 
-        for (int i = 0; i < dataset.numObjects(); i++) {
-            Instance instance = new DenseInstance(dataset.numAttr() + 1);
+        for (int oid = 0; oid < dataset.numObjects; oid++) {
+            Instance instance = new DenseInstance(dataset.numFeatures + 1);
             instance.setDataset(instances);
 
             int aid = 0;
-            for (int j = 0; j < dataset.numRatAttr(); j++) {
-                instance.setValue(aid++, dataset.ratValue(i, j));
+            for (int j = 0; j < dataset.numFeatures; j++) {
+                instance.setValue(aid++, dataset.data[oid][j]);
             }
 
-            for (int j = 0; j < dataset.numCatAttr(); j++) {
-                instance.setValue(aid++, dataset.catValue(i, j));
-            }
-
-            instance.setClassValue(dataset.classValue(i));
+            instance.setClassValue(dataset.labels[oid]);
             instances.add(instance);
         }
 
