@@ -51,7 +51,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
-public class GenerationExp {
+public class MetaExp {
 
     public static final int MAX_FEATURES = 16;
     public static final int MAX_OBJECTS = 256;
