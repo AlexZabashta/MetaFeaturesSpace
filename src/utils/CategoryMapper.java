@@ -2,7 +2,6 @@ package utils;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 
 public class CategoryMapper implements IntUnaryOperator {

@@ -89,10 +89,10 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
                 for (int fid = 0; fid < sumNumFeatures; fid++) {
                     double value;
 
-                    if (fid < numFeaturesA) {
+                    if (fid < ancestorA.numFeatures) {
                         value = vectA[fid];
                     } else {
-                        value = vectB[fid - numFeaturesA];
+                        value = vectB[fid - ancestorA.numFeatures];
                     }
 
                     if (featuresDistr[fid]) {

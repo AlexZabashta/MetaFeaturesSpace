@@ -4,21 +4,35 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.problem.Problem;
 
 import clsf.CMFExtractor;
 import clsf.Dataset;
+import clsf.WekaConverter;
+import clsf.ndse.gen_op.ChangeNumClasses;
+import clsf.ndse.gen_op.ChangeNumFeatures;
+import clsf.ndse.gen_op.ChangeNumObjects;
 import clsf.ndse.gen_op.DatasetCrossover;
 import clsf.ndse.gen_op.DatasetMutation;
+import clsf.vect.Converter;
+import clsf.vect.DirectConverter;
+import clsf.vect.GMMConverter;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
 import utils.EndSearch;
@@ -30,33 +44,119 @@ import utils.MultiObjectiveError;
 import utils.SingleObjectiveError;
 import utils.StatUtils;
 import utils.ToDoubleArrayFunction;
+import weka.core.Instance;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 public class GenerationExp {
 
-    public static List<Dataset> readData(File folder) {
+    public static final int MAX_FEATURES = 16;
+    public static final int MAX_OBJECTS = 256;
+    public static final int MAX_CLASSES = 5;
+
+    public static List<Dataset> readData(String description, File folder) throws IOException {
+
+        Map<String, String> target = new HashMap<>();
+
+        try (CSVParser parser = new CSVParser(new FileReader(description), CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+            for (CSVRecord record : parser) {
+                target.put(record.get("id") + ".arff", record.get("target"));
+            }
+        }
+
         List<Dataset> datasets = new ArrayList<>();
 
         for (File file : folder.listFiles()) {
-            try (Reader reader = new FileReader(file)) {
+
+            String className = target.get(file.getName());
+            if (className == null) {
+                continue;
+            }
+            className = className.toLowerCase();
+
+            try (FileReader reader = new FileReader(file)) {
                 Instances instances = new Instances(reader);
+
+                for (int i = 0; i < instances.numAttributes(); i++) {
+                    if (instances.attribute(i).name().toLowerCase().equals(className)) {
+                        instances.setClassIndex(i);
+                    }
+                }
+
+                if (instances.classIndex() < 0) {
+                    continue;
+                }
+
+                if (instances.numClasses() < 2 || instances.numInstances() < 20 || instances.numAttributes() < 2) {
+                    continue;
+                }
+
+                if (instances.numAttributes() > MAX_FEATURES * 10 || instances.numInstances() > MAX_OBJECTS * 10) {
+                    continue;
+                }
+
+                Filter rmv = new ReplaceMissingValues();
+                rmv.setInputFormat(instances);
+                instances = Filter.useFilter(instances, rmv);
+
+                Filter ntb = new NominalToBinary();
+                ntb.setInputFormat(instances);
+                instances = Filter.useFilter(instances, ntb);
+
+                if (instances.numAttributes() > MAX_FEATURES * 10 || instances.numInstances() > MAX_OBJECTS * 10) {
+                    continue;
+                }
 
                 int numObjects = instances.numInstances();
                 int numFeatures = instances.numAttributes() - 1;
 
-                // TODO SET CLASS
-
                 double[][] data = new double[numObjects][numFeatures];
                 int[] labels = new int[numObjects];
 
-                // TODO COPY DATA
+                for (int oid = 0; oid < numObjects; oid++) {
+                    Instance instance = instances.get(oid);
+                    for (int fid = 0, aid = 0; aid < instances.numAttributes(); aid++) {
+                        if (aid == instances.classIndex()) {
+                            continue;
+                        }
+                        data[oid][fid++] = instance.value(aid);
+                    }
 
-                datasets.add(new Dataset(file.getName(), Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels));
+                    labels[oid] = (int) instance.classValue();
+                }
+
+                Dataset dataset = new Dataset(file.getName(), Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels);
+
+                if (dataset.numObjects > MAX_OBJECTS) {
+                    dataset = ChangeNumObjects.apply(dataset, new Random(dataset.hashCode()), MAX_OBJECTS);
+                }
+
+                if (dataset.numFeatures > MAX_FEATURES) {
+                    dataset = ChangeNumFeatures.apply(dataset, new Random(dataset.hashCode()), MAX_FEATURES);
+                }
+
+                if (dataset.numClasses > MAX_CLASSES) {
+                    dataset = ChangeNumClasses.apply(dataset, new Random(dataset.hashCode()), MAX_CLASSES);
+                }
+
+                boolean cnt = false;
+                for (int sub : dataset.classDistribution) {
+                    cnt |= sub < 5;
+                }
+                if (cnt) {
+                    continue;
+                }
+
+                datasets.add(dataset);
 
                 System.out.println(file.getName());
+                // System.out.println(Arrays.toString(mf));
                 System.out.flush();
 
             } catch (Exception e) {
+                System.err.println(file.getName());
                 e.printStackTrace();
             }
         }
@@ -64,9 +164,9 @@ public class GenerationExp {
         return datasets;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        int paramLimit = 100;
+        int paramLimit = 300;
         int paramCores = 4;
 
         try {
@@ -85,14 +185,14 @@ public class GenerationExp {
 
         double[][] metaData = new double[1024][];
 
-        List<Dataset> datasets = readData(new File("pdata"));
+        List<Dataset> datasets = readData("data.csv", new File("data"));
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
         int numMF = extractor.length();
 
         for (int i = 0; i < numData; i++) {
-            metaData[i] = extractor.extract(datasets.get(i));
+            metaData[i] = extractor.apply(datasets.get(i));
         }
 
         double[][] cov = StatUtils.covarianceMatrix(numData, numMF, metaData);
@@ -115,6 +215,47 @@ public class GenerationExp {
         ExecutorService executor = new BlockingThreadPoolExecutor(cores, false);
 
         int currentExperimentId = 0;
+
+        DatasetCrossover crossover = new DatasetCrossover();
+        int minNumObjects = Integer.MAX_VALUE;
+        int maxNumObjects = 0;
+        int minNumFeatures = Integer.MAX_VALUE;
+        int maxNumFeatures = 0;
+        int minNumClasses = Integer.MAX_VALUE;
+        int maxNumClasses = 0;
+
+        Set<Integer> numObjectsDistributionList = new TreeSet<>();
+        Set<Integer> numFeaturesDistributionList = new TreeSet<>();
+        Set<Integer> numClassesDistributionList = new TreeSet<>();
+
+        for (Dataset dataset : datasets) {
+            minNumObjects = Math.min(minNumObjects, dataset.numObjects);
+            maxNumObjects = Math.max(maxNumObjects, dataset.numObjects);
+
+            minNumFeatures = Math.min(minNumFeatures, dataset.numFeatures);
+            maxNumFeatures = Math.max(maxNumFeatures, dataset.numFeatures);
+
+            minNumClasses = Math.min(minNumClasses, dataset.numClasses);
+            maxNumClasses = Math.max(maxNumClasses, dataset.numClasses);
+
+            for (int sub : dataset.classDistribution) {
+                numObjectsDistributionList.add(sub);
+            }
+            numFeaturesDistributionList.add(dataset.numFeatures);
+            numClassesDistributionList.add(dataset.numClasses);
+        }
+
+        int[] numObjectsDistribution = numObjectsDistributionList.stream().mapToInt(x -> x.intValue()).toArray();
+        int[] numFeaturesDistribution = numFeaturesDistributionList.stream().mapToInt(x -> x.intValue()).toArray();
+        int[] numClassesDistribution = numClassesDistributionList.stream().mapToInt(x -> x.intValue()).toArray();
+
+        System.out.println(Arrays.toString(numObjectsDistribution));
+        System.out.println(Arrays.toString(numFeaturesDistribution));
+        System.out.println(Arrays.toString(numClassesDistribution));
+
+        DatasetMutation mutation = new DatasetMutation(minNumObjects, maxNumObjects, minNumFeatures, maxNumFeatures, minNumClasses, maxNumClasses);
+        Converter direct = new DirectConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
+        Converter gmmcon = new GMMConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
 
         for (int targetIndex = 0; targetIndex < size; targetIndex++) {
             Dataset targetDataset = datasets.get(targetIndex);
@@ -152,16 +293,7 @@ public class GenerationExp {
 
                     boolean realInitialPopulation = initPopulation != null;
 
-                    DatasetCrossover crossover = new DatasetCrossover();
-                    int minNumObjects = 0; // TODO set value
-                    int maxNumObjects = 0;// TODO set value
-                    int minNumFeatures = 0;// TODO set value
-                    int maxNumFeatures = 0;// TODO set value
-                    int minNumClasses = 0;// TODO set value
-                    int maxNumClasses = 0;// TODO set value
-                    DatasetMutation mutation = new DatasetMutation(minNumObjects, maxNumObjects, minNumFeatures, maxNumFeatures, minNumClasses, maxNumClasses);
-
-                    for (Function<Limited, Problem<?>> problemBuilder : Problems.list(errorFunction, initPopulation)) {
+                    for (Function<Limited, Problem<?>> problemBuilder : Problems.list(direct, gmmcon, mutation, initPopulation)) {
                         for (Function<Problem<?>, Algorithm<?>> algorithmBuilder : Algorithms.list(singleObjective, crossover, mutation)) {
                             Limited limited = new Limited(errorFunction, sError, limit);
                             Problem<?> problem = problemBuilder.apply(limited);
@@ -210,7 +342,7 @@ public class GenerationExp {
                                                 writer.print(mf[i]);
                                             }
                                             writer.println();
-                                            // TODO writer.println(result.toInstances());
+                                            writer.println(WekaConverter.convert(result));
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }

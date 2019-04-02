@@ -32,17 +32,20 @@ import weka.core.Instances;
 public class MetaFeatures {
 
     public static void evaluate(Dataset dataset) {
-        int numFeatures = dataset.numFeatures;
-        int numObjects = dataset.numObjects;
+        synchronized (dataset.metaFeatures) {
+            int numFeatures = dataset.numFeatures;
+            int numObjects = dataset.numObjects;
 
-        double[] mean = new double[numFeatures];
-        double[][] tdata = MatrixUtils.transpose(numObjects, numFeatures, dataset.data);
+            double[] mean = new double[numFeatures];
+            double[][] tdata = MatrixUtils.transpose(numObjects, numFeatures, dataset.data);
 
-        calcCov(dataset, mean);
-        calcStat(dataset, tdata, mean);
-        calcClassVar(dataset);
-        calcClassDist(dataset, tdata);
-        calcTreeMF(dataset);
+            calcCov(dataset, mean);
+            calcStat(dataset, tdata, mean);
+            calcClassVar(dataset);
+            calcClassDist(dataset, tdata);
+            calcTreeMF(dataset);
+            dataset.emptyMF = false;
+        }
     }
 
     private static void calcCov(Dataset dataset, double[] mean) {
@@ -206,9 +209,6 @@ public class MetaFeatures {
             dataset.metaFeatures[mfid++] = (new PrunedTreeMaxClass()).extractValue(tree);
             dataset.metaFeatures[mfid++] = (new PrunedTreeMinClass()).extractValue(tree);
             dataset.metaFeatures[mfid++] = (new PrunedTreeMeanClass()).extractValue(tree);
-
-            System.out.println(mfid); // TODO remove
-
         } catch (Exception e) {
             e.printStackTrace();
         }

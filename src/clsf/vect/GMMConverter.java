@@ -126,7 +126,7 @@ public class GMMConverter implements Converter {
             int value = toInt(solution.getVariableValue(sp++), numObjectsDistribution);
 
             if (label < numClasses) {
-                numObjectsPerClass[label] = value;
+                numObjectsPerClass[label] = Math.max(value, 10);
                 numObjects += numObjectsPerClass[label];
             }
         }

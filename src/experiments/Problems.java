@@ -7,17 +7,39 @@ import java.util.function.Function;
 import org.uma.jmetal.problem.Problem;
 
 import clsf.Dataset;
+import clsf.ndse.GDSProblem;
+import clsf.ndse.gen_op.DatasetMutation;
+import clsf.vect.Converter;
+import clsf.vect.SimpleProblem;
 import utils.Limited;
-import utils.ToDoubleArrayFunction;
 
 public class Problems {
 
-    static List<Function<Limited, Problem<?>>> list(ToDoubleArrayFunction<Dataset> errorFunction, List<Dataset> initPopulation) {
-        List<Function<Limited, Problem<?>>> problems = new ArrayList<>();
+    public static List<Function<Limited, Problem<?>>> list(Converter dir, Converter gmm, DatasetMutation mutation, List<Dataset> initPopulation) {
+        List<Function<Limited, Problem<?>>> list = new ArrayList<>();
 
-        // throw new RuntimeException("NOT YET");
+        list.add(new Function<Limited, Problem<?>>() {
+            @Override
+            public Problem<?> apply(Limited limited) {
+                return new GDSProblem(mutation, limited, initPopulation);
+            }
+        });
 
-        // TODO
-        return problems;
+        list.add(new Function<Limited, Problem<?>>() {
+            @Override
+            public Problem<?> apply(Limited limited) {
+                return new SimpleProblem(dir, limited, initPopulation);
+            }
+        });
+
+        list.add(new Function<Limited, Problem<?>>() {
+            @Override
+            public Problem<?> apply(Limited limited) {
+                return new SimpleProblem(gmm, limited, initPopulation);
+            }
+        });
+
+        return list;
     }
+
 }

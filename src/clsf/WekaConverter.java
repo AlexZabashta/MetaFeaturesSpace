@@ -1,7 +1,6 @@
 package clsf;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -39,78 +38,43 @@ public class WekaConverter {
             throw new IllegalArgumentException("classIndex not set");
         }
 
-        // instances = normalize(instances);
-
-        int numAttr = instances.numAttributes() - 1;
-
-        if (numAttr <= 0) {
-            throw new IllegalArgumentException("numAttr <= 0");
-        }
-
-        int numCatAttr = 0;
-
-        boolean[] isCat = new boolean[numAttr + 1];
-
-        for (int j = 0; j <= numAttr; j++) {
-            Attribute attribute = instances.attribute(j);
-            isCat[j] = attribute.isNominal();
-
-            if (j == classIndex) {
-                if (!isCat[j]) {
-                    throw new IllegalArgumentException("class not nominal");
-                }
-            } else {
-                if (isCat[j]) {
-                    ++numCatAttr;
-                }
-            }
-
-        }
-
         int numObjects = instances.numInstances();
-        int numRatAttr = numAttr - numCatAttr;
-        int numClasses = instances.numClasses();
-        // MutableDataset dataset = new MutableDataset(numObjects, numRatAttr, numCatAttr, numClasses);
+        int numFeatures = instances.numAttributes() - 1;
 
-        for (int i = 0; i < numObjects; i++) {
-            Instance instance = instances.instance(i);
+        double[][] data = new double[numObjects][numFeatures];
+        int[] labels = new int[numObjects];
 
-            int cid = 0, rid = 0;
-
-            for (int j = 0; j <= numAttr; j++) {
-                if (j == classIndex) {
+        for (int oid = 0; oid < numObjects; oid++) {
+            Instance instance = instances.get(oid);
+            for (int fid = 0, aid = 0; aid < instances.numAttributes(); aid++) {
+                if (aid == instances.classIndex()) {
                     continue;
                 }
-
-                if (isCat[j]) {
-                    // dataset.setCatValue(i, cid++, (int) instance.value(j));
-                } else {
-                    // dataset.setRatValue(i, rid++, instance.value(j));
-                }
+                data[oid][fid++] = instance.value(aid);
             }
 
-            // dataset.setClassValue(i, (int) instance.classValue());
+            labels[oid] = (int) instance.classValue();
         }
 
-        return null;// dataset;
+        return new Dataset(instances.relationName(), Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels);
     }
 
     public static Instances convert(Dataset dataset) {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>(dataset.numFeatures + 1);
 
         for (int j = 0; j < dataset.numFeatures; j++) {
-            attributes.add(new Attribute("r" + j));
+            attributes.add(new Attribute("x" + j));
         }
 
         ArrayList<String> classNames = new ArrayList<String>(dataset.numClasses);
 
         for (int k = 0; k < dataset.numClasses; k++) {
-            classNames.add("t" + k);
+            classNames.add("c" + k);
         }
 
         attributes.add(new Attribute("class", classNames));
 
-        Instances instances = new Instances("name", attributes, dataset.numObjects);
+        Instances instances = new Instances(dataset.name, attributes, dataset.numObjects);
 
         instances.setClassIndex(dataset.numFeatures);
 
@@ -118,9 +82,8 @@ public class WekaConverter {
             Instance instance = new DenseInstance(dataset.numFeatures + 1);
             instance.setDataset(instances);
 
-            int aid = 0;
-            for (int j = 0; j < dataset.numFeatures; j++) {
-                instance.setValue(aid++, dataset.data[oid][j]);
+            for (int fid = 0; fid < dataset.numFeatures; fid++) {
+                instance.setValue(fid, dataset.data[oid][fid]);
             }
 
             instance.setClassValue(dataset.labels[oid]);

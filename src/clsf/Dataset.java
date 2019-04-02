@@ -21,6 +21,7 @@ public class Dataset {
     public final double[] min;
     public final String name;
 
+    public boolean emptyMF = true;
     public final double[] metaFeatures = new double[64];
 
     public final int numClasses;
@@ -32,7 +33,7 @@ public class Dataset {
         this.data = data;
 
         this.numObjects = data.length;
-        if (numObjects <= 10) {
+        if (numObjects <= 3) {
             throw new IllegalArgumentException("numObjects <= 10");
         }
 
@@ -54,7 +55,7 @@ public class Dataset {
             normLabels();
         }
 
-        this.numClasses = ArrayUtils.max(labels);
+        this.numClasses = ArrayUtils.max(labels) + 1;
 
         this.hashCode = Arrays.deepHashCode(data) ^ Arrays.hashCode(this.labels);
 

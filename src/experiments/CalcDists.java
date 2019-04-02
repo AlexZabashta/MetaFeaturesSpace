@@ -30,7 +30,7 @@ public class CalcDists {
                 // TODO calc and print MF
                 // ClDataset dataset = new ClDataset(data, extractor);
                 // double[] mf = dataset.metaFeatures();
-                extractor.extract(null);
+                extractor.apply(null);
                 // if (mf != null && mf.length == numMF) {
                 // metaData[numData++] = mf;
                 // }
