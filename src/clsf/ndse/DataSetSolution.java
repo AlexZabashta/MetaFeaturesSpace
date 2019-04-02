@@ -34,7 +34,7 @@ public class DataSetSolution implements Solution<Dataset> {
         return map.get(id);
     }
 
-    public Dataset getClDataset() {
+    public Dataset getDataset() {
         return dataset;
     }
 

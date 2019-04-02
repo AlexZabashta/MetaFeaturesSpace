@@ -9,15 +9,6 @@ import clsf.ndse.gen_op.fun.cat.SumMod;
 
 public class ChangeNumClasses {
 
-    public static Dataset apply(Dataset dataset, Random random) {
-        int n = dataset.numClasses;
-        if (n == 2) {
-            return apply(dataset, random, 3);
-        } else {
-            return apply(dataset, random, n + random.nextInt(2) * 2 - 1);
-        }
-    }
-
     public static Dataset apply(Dataset dataset, Random random, int newNumClasses) {
         int oldNumClasses = dataset.numClasses;
 
@@ -26,7 +17,7 @@ public class ChangeNumClasses {
         }
 
         int numObjects = dataset.numObjects;
-        CatFunction randomFun = CatFunction.random(dataset, random, 2);
+        CatFunction randomFun = CatFunction.random(dataset, random, 3, newNumClasses);
         CatFunction classVal = new ClassValue(dataset);
 
         CatFunction classMaper = new SumMod(randomFun, classVal, newNumClasses, random);

@@ -11,8 +11,8 @@ public class Abs implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(int objectId) {
-        return Math.abs(node.applyAsDouble(objectId));
+    public double applyAsDouble(int object) {
+        return Math.abs(node.applyAsDouble(object));
     }
 
     @Override

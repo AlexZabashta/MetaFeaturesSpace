@@ -39,7 +39,7 @@ public class GDSProblem implements Problem<DataSetSolution> {
 
     @Override
     public String getName() {
-        return getClass().getSimpleName();
+        return "NDSE";
     }
 
     @Override

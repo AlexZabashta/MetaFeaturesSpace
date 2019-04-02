@@ -8,6 +8,7 @@ public class SumMod implements CatFunction {
 
     public final CatFunction lft, rgt;
     private final int[] p, q, r;
+    private final int range;
 
     public SumMod(CatFunction lft, CatFunction rgt, int range, Random random) {
         this.lft = lft;
@@ -16,13 +17,14 @@ public class SumMod implements CatFunction {
         this.p = RandomUtils.randomPermutation(lft.range(), random);
         this.q = RandomUtils.randomPermutation(rgt.range(), random);
         this.r = RandomUtils.randomPermutation(range, random);
+        this.range = range;
     }
 
     @Override
-    public int applyAsInt(int objectId) {
-        int x = p[lft.applyAsInt(objectId)];
-        int y = q[rgt.applyAsInt(objectId)];
-        return r[(x + y) % range()];
+    public int applyAsInt(int object) {
+        int x = p[lft.applyAsInt(object)];
+        int y = q[rgt.applyAsInt(object)];
+        return r[(x + y) % range];
     }
 
     @Override

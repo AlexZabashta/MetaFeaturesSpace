@@ -14,8 +14,8 @@ public class Sum implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(int objectId) {
-        return left.applyAsDouble(objectId) + right.applyAsDouble(objectId);
+    public double applyAsDouble(int object) {
+        return left.applyAsDouble(object) + right.applyAsDouble(object);
     }
 
     @Override

@@ -4,26 +4,26 @@ import clsf.Dataset;
 
 public class RatValue implements RatFunction {
     public final Dataset dataset;
-    public final int index;
+    public final int feature;
 
-    public RatValue(int index, Dataset dataset) {
-        this.index = index;
+    public RatValue(int feature, Dataset dataset) {
+        this.feature = feature;
         this.dataset = dataset;
     }
 
     @Override
-    public double applyAsDouble(int objectId) {
-        return dataset.data[objectId][index];
+    public double applyAsDouble(int object) {
+        return dataset.data[object][feature];
     }
 
     @Override
     public double max() {
-        return dataset.max[index];
+        return dataset.max[feature];
     }
 
     @Override
     public double min() {
-        return dataset.min[index];
+        return dataset.min[feature];
     }
 
 }

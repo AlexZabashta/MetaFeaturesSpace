@@ -61,7 +61,7 @@ public class DatasetMutation implements MutationOperator<DataSetSolution> {
 
     @Override
     public DataSetSolution execute(DataSetSolution source) {
-        return new DataSetSolution(execute(source.getClDataset()));
+        return new DataSetSolution(execute(source.getDataset()));
     }
 
     public Dataset executeAny(Dataset dataset, Random random) {

@@ -46,7 +46,7 @@ public class Algorithms {
         list.add(getDE(singleObjective));
         list.add(getGA(singleObjective, crossover, mutation));
         list.add(getGDE3());
-        list.add(getIBEA());
+        // list.add(getIBEA(singleObjective));
         list.add(getMOCell(crossover, mutation));
         list.add(getMOEAD());
         list.add(getNSGAII(crossover, mutation));
@@ -144,13 +144,15 @@ public class Algorithms {
         };
     }
 
-    public static Function<Problem<?>, Algorithm<?>> getIBEA() {
+    public static Function<Problem<?>, Algorithm<?>> getIBEA(boolean singleObjective) {
         return new Function<Problem<?>, Algorithm<?>>() {
             @Override
             public Algorithm<?> apply(Problem<?> problem) {
-                try {
-                    return new IBEABuilder((DoubleProblem) problem).setMaxEvaluations(10000000).setPopulationSize(32).build();
-                } catch (ClassCastException cce) {
+                if (singleObjective) {
+                    try {
+                        return new IBEABuilder((DoubleProblem) problem).setMaxEvaluations(10000000).setPopulationSize(32).build();
+                    } catch (ClassCastException cce) {
+                    }
                 }
                 return null;
             }

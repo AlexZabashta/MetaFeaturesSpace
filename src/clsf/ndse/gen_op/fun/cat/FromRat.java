@@ -15,13 +15,13 @@ public class FromRat implements CatFunction {
         }
 
         this.offset = node.min();
-        this.scale = node.max() - node.min();
+        this.scale = 1 / Math.max((node.max() - node.min()), 1e-3);
         this.range = range;
     }
 
     @Override
     public int applyAsInt(int objectId) {
-        int catValue = (int) (((node.applyAsDouble(objectId) - offset) / scale) * range);
+        int catValue = (int) (((node.applyAsDouble(objectId) - offset) * scale) * (range - 1));
         return Math.max(0, Math.min(range - 1, catValue));
     }
 

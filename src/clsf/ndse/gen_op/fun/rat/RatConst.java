@@ -15,12 +15,12 @@ public class RatConst implements RatFunction {
 
     @Override
     public double max() {
-        return value;
+        return value + 1e-3;
     }
 
     @Override
     public double min() {
-        return value;
+        return value - 1e-3;
     }
 
 }

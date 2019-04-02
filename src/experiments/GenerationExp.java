@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,6 +184,9 @@ public class GenerationExp {
         final int limit = paramLimit;
         final int cores = paramCores;
 
+        System.out.println("cores = " + cores);
+        System.out.println("limit = " + limit);
+
         double[][] metaData = new double[1024][];
 
         List<Dataset> datasets = readData("data.csv", new File("data"));
@@ -209,8 +213,6 @@ public class GenerationExp {
         MahalanobisDistance distance = new MahalanobisDistance(numMF, invCov);
 
         String res = FolderUtils.buildPath(false, Long.toString(System.currentTimeMillis()));
-
-        final int size = datasets.size();
 
         ExecutorService executor = new BlockingThreadPoolExecutor(cores, false);
 
@@ -257,8 +259,9 @@ public class GenerationExp {
         Converter direct = new DirectConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
         Converter gmmcon = new GMMConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
 
-        for (int targetIndex = 0; targetIndex < size; targetIndex++) {
-            Dataset targetDataset = datasets.get(targetIndex);
+        Collections.shuffle(datasets, new Random(42));
+
+        for (Dataset targetDataset : datasets) {
             final String targetName = targetDataset.name;
 
             final double[] target = extractor.apply(targetDataset);
@@ -280,9 +283,14 @@ public class GenerationExp {
 
             List<Dataset> realPopulation = new ArrayList<>();
             for (Dataset dataset : datasets) {
-                if (sError.applyAsDouble(dataset) > 1) {
-                    realPopulation.add(dataset);
+                if ((dataset.name.hashCode() & 3) == (targetDataset.name.hashCode() & 3)) {
+                    continue;
                 }
+
+                if (sError.applyAsDouble(dataset) < 1) {
+                    continue;
+                }
+                realPopulation.add(dataset);
             }
             List<Dataset> nullPopulation = null;
 
@@ -311,43 +319,52 @@ public class GenerationExp {
                             executor.submit(new Runnable() {
                                 @Override
                                 public void run() {
+
+                                    String tag = targetName + " " + problem.getName() + " " + algorithm.getName() + " " + singleObjective + " " + realInitialPopulation;
+
+                                    System.out.println("START " + tag);
+                                    System.out.flush();
+
                                     try {
-                                        algorithm.run();
-                                        algorithm.getResult();
-                                    } catch (RuntimeException exception) {
-                                        if (!(exception instanceof EndSearch)) {
-                                            exception.printStackTrace();
+                                        long startTime = System.currentTimeMillis();
+                                        try {
+                                            algorithm.run();
+                                            algorithm.getResult();
+                                        } catch (EndSearch e) {
+                                            System.out.println("FINISH " + tag);
+                                            System.out.flush();
                                         }
-                                    }
-                                    Dataset result = limited.dataset;
+                                        long finishTime = System.currentTimeMillis();
 
-                                    if (result == null) {
-                                        return;
-                                    }
+                                        Dataset result = limited.dataset;
+                                        Instances instances = WekaConverter.convert(result);
 
-                                    synchronized (res) {
+                                        synchronized (res) {
 
-                                        try (PrintWriter writer = new PrintWriter(new File(res + eid + ".txt"))) {
-                                            printLine(writer, targetName);
-                                            printLine(writer, Boolean.toString(singleObjective));
-                                            printLine(writer, Boolean.toString(realInitialPopulation));
-                                            printLine(writer, (problem.getClass().getSimpleName()));
-                                            printLine(writer, (algorithm.getClass().getSimpleName()));
-                                            printLine(writer, Double.toString(limited.best));
+                                            try (PrintWriter writer = new PrintWriter(new File(res + eid + ".arff"))) {
+                                                printLine(writer, targetName);
+                                                printLine(writer, Boolean.toString(singleObjective));
+                                                printLine(writer, Boolean.toString(realInitialPopulation));
+                                                printLine(writer, problem.getName());
+                                                printLine(writer, algorithm.getName());
+                                                printLine(writer, Long.toString(finishTime - startTime));
+                                                printLine(writer, Double.toString(limited.best));
 
-                                            writer.print("%");
-                                            double[] mf = extractor.apply(result);
-                                            for (int i = 0; i < mf.length; i++) {
-                                                writer.print(' ');
-                                                writer.print(mf[i]);
+                                                writer.print("%");
+                                                double[] mf = extractor.apply(result);
+                                                for (int i = 0; i < mf.length; i++) {
+                                                    writer.print(' ');
+                                                    writer.print(mf[i]);
+                                                }
+                                                writer.println();
+                                                writer.println(instances);
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
                                             }
-                                            writer.println();
-                                            writer.println(WekaConverter.convert(result));
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
+                                            System.out.println();
+                                            System.out.flush();
                                         }
-                                        System.out.println();
-                                        System.out.flush();
+                                    } catch (RuntimeException exception) {
                                     }
                                 }
 

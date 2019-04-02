@@ -2,8 +2,6 @@ package clsf.ndse.gen_op.fun.rat;
 
 import java.util.Random;
 
-import org.apache.commons.math3.stat.StatUtils;
-
 import clsf.ndse.gen_op.fun.cat.CatFunction;
 
 public class FromCat implements RatFunction {
@@ -28,13 +26,11 @@ public class FromCat implements RatFunction {
 
         this.min = tmpMin;
         this.max = tmpMax;
-
-        StatUtils.min(map);
     }
 
     @Override
-    public double applyAsDouble(int objectId) {
-        return map[node.applyAsInt(objectId)];
+    public double applyAsDouble(int object) {
+        return map[node.applyAsInt(object)];
     }
 
     @Override

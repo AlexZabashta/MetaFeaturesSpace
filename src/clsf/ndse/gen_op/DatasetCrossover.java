@@ -17,11 +17,7 @@ public class DatasetCrossover implements CrossoverOperator<DataSetSolution> {
 
     @Override
     public List<DataSetSolution> execute(List<DataSetSolution> source) {
-        if (source.size() != 2) {
-            throw new IllegalArgumentException("Source should have two datasets.");
-        }
-
-        Dataset realAncestA = source.get(0).getClDataset(), realAncestB = source.get(1).getClDataset();
+        Dataset realAncestA = source.get(0).getDataset(), realAncestB = source.get(1).getDataset();
 
         Dataset ancestorA = realAncestA, ancestorB = realAncestB;
 

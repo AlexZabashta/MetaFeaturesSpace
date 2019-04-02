@@ -16,8 +16,8 @@ public class RandomCat implements CatFunction {
     }
 
     @Override
-    public int applyAsInt(int objectId) {
-        return 0;
+    public int applyAsInt(int object) {
+        return random.nextInt(range);
     }
 
     @Override

@@ -8,8 +8,8 @@ public class Sin implements RatFunction {
     }
 
     @Override
-    public double applyAsDouble(int objectId) {
-        return Math.sin(node.applyAsDouble(objectId));
+    public double applyAsDouble(int object) {
+        return Math.sin(node.applyAsDouble(object));
     }
 
     @Override
