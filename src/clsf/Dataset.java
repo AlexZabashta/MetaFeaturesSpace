@@ -22,6 +22,9 @@ public class Dataset {
     public final String name;
 
     public boolean emptyMF = true;
+    public boolean emptyKNN = true;
+    public boolean emptySVM = true;
+
     public final double[] metaFeatures = new double[64];
 
     public final int numClasses;

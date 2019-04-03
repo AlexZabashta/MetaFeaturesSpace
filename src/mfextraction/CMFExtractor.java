@@ -1,8 +1,8 @@
-package clsf;
+package mfextraction;
 
 import java.util.Arrays;
 
-import mfextraction.MetaFeatures;
+import clsf.Dataset;
 import utils.ToDoubleArrayFunction;
 
 public class CMFExtractor implements ToDoubleArrayFunction<Dataset> {
@@ -10,9 +10,7 @@ public class CMFExtractor implements ToDoubleArrayFunction<Dataset> {
 
     @Override
     public double[] apply(Dataset dataset) {
-        if (dataset.emptyMF) {
-            MetaFeatures.evaluate(dataset);
-        }        
+        MetaFeatures.evaluate(dataset);
         return Arrays.copyOf(dataset.metaFeatures, lenght);
     }
 

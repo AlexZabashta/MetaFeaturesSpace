@@ -5,9 +5,9 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.Random;
 
-import clsf.CMFExtractor;
+import fitness_function.MahalanobisDistance;
+import mfextraction.CMFExtractor;
 import utils.ArrayUtils;
-import utils.MahalanobisDistance;
 import utils.MatrixUtils;
 import utils.StatUtils;
 

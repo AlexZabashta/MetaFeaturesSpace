@@ -32,19 +32,23 @@ import weka.core.Instances;
 public class MetaFeatures {
 
     public static void evaluate(Dataset dataset) {
-        synchronized (dataset.metaFeatures) {
-            int numFeatures = dataset.numFeatures;
-            int numObjects = dataset.numObjects;
+        if (dataset.emptyMF) {
+            synchronized (dataset.metaFeatures) {
+                if (dataset.emptyMF) {
+                    int numFeatures = dataset.numFeatures;
+                    int numObjects = dataset.numObjects;
 
-            double[] mean = new double[numFeatures];
-            double[][] tdata = MatrixUtils.transpose(numObjects, numFeatures, dataset.data);
+                    double[] mean = new double[numFeatures];
+                    double[][] tdata = MatrixUtils.transpose(numObjects, numFeatures, dataset.data);
 
-            calcCov(dataset, mean);
-            calcStat(dataset, tdata, mean);
-            calcClassVar(dataset);
-            calcClassDist(dataset, tdata);
-            calcTreeMF(dataset);
-            dataset.emptyMF = false;
+                    calcCov(dataset, mean);
+                    calcStat(dataset, tdata, mean);
+                    calcClassVar(dataset);
+                    calcClassDist(dataset, tdata);
+                    calcTreeMF(dataset);
+                    dataset.emptyMF = false;
+                }
+            }
         }
     }
 

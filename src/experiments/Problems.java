@@ -11,7 +11,7 @@ import clsf.ndse.GDSProblem;
 import clsf.ndse.gen_op.DatasetMutation;
 import clsf.vect.Converter;
 import clsf.vect.SimpleProblem;
-import utils.Limited;
+import fitness_function.Limited;
 
 public class Problems {
 

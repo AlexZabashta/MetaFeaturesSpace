@@ -1,8 +1,10 @@
-package utils;
+package fitness_function;
 
 import java.util.function.ToDoubleFunction;
 
 import clsf.Dataset;
+import utils.EndSearch;
+import utils.ToDoubleArrayFunction;
 
 public class Limited implements ToDoubleArrayFunction<Dataset> {
 

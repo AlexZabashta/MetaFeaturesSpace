@@ -1,9 +1,10 @@
-package utils;
+package fitness_function;
 
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
 
 import clsf.Dataset;
+import utils.ToDoubleArrayFunction;
 
 public class SingleObjectiveError implements ToDoubleArrayFunction<Dataset>, ToDoubleFunction<Dataset> {
 

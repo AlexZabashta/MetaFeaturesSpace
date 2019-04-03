@@ -11,8 +11,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import clsf.CMFExtractor;
 import clsf.Dataset;
+import mfextraction.CMFExtractor;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;

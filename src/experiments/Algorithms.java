@@ -51,7 +51,7 @@ public class Algorithms {
         list.add(getMOEAD());
         list.add(getNSGAII(crossover, mutation));
         list.add(getOMOPSO());
-        list.add(getPAES(crossover, mutation));
+        // list.add(getPAES(crossover, mutation));
         list.add(getPSO(singleObjective, crossover, mutation));
         list.add(getRAND(crossover, mutation));
         list.add(getSMSEMOA(crossover, mutation));

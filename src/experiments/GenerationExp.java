@@ -1,15 +1,13 @@
 package experiments;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,165 +15,46 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.problem.Problem;
 
-import clsf.CMFExtractor;
 import clsf.Dataset;
 import clsf.WekaConverter;
-import clsf.ndse.gen_op.ChangeNumClasses;
-import clsf.ndse.gen_op.ChangeNumFeatures;
-import clsf.ndse.gen_op.ChangeNumObjects;
 import clsf.ndse.gen_op.DatasetCrossover;
 import clsf.ndse.gen_op.DatasetMutation;
 import clsf.vect.Converter;
 import clsf.vect.DirectConverter;
 import clsf.vect.GMMConverter;
+import fitness_function.Limited;
+import fitness_function.MahalanobisDistance;
+import fitness_function.MultiObjectiveError;
+import fitness_function.SingleObjectiveError;
+import mfextraction.CMFExtractor;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
 import utils.EndSearch;
 import utils.FolderUtils;
-import utils.Limited;
-import utils.MahalanobisDistance;
 import utils.MatrixUtils;
-import utils.MultiObjectiveError;
-import utils.SingleObjectiveError;
 import utils.StatUtils;
 import utils.ToDoubleArrayFunction;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 public class GenerationExp {
 
-    public static final int MAX_FEATURES = 16;
-    public static final int MAX_OBJECTS = 256;
-    public static final int MAX_CLASSES = 5;
-
-    public static List<Dataset> readData(String description, File folder) throws IOException {
-
-        Map<String, String> target = new HashMap<>();
-
-        try (CSVParser parser = new CSVParser(new FileReader(description), CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
-            for (CSVRecord record : parser) {
-                target.put(record.get("id") + ".arff", record.get("target"));
-            }
-        }
-
-        List<Dataset> datasets = new ArrayList<>();
-
-        for (File file : folder.listFiles()) {
-
-            String className = target.get(file.getName());
-            if (className == null) {
-                continue;
-            }
-            className = className.toLowerCase();
-
-            try (FileReader reader = new FileReader(file)) {
-                Instances instances = new Instances(reader);
-
-                for (int i = 0; i < instances.numAttributes(); i++) {
-                    if (instances.attribute(i).name().toLowerCase().equals(className)) {
-                        instances.setClassIndex(i);
-                    }
-                }
-
-                if (instances.classIndex() < 0) {
-                    continue;
-                }
-
-                if (instances.numClasses() < 2 || instances.numInstances() < 20 || instances.numAttributes() < 2) {
-                    continue;
-                }
-
-                if (instances.numAttributes() > MAX_FEATURES * 10 || instances.numInstances() > MAX_OBJECTS * 10) {
-                    continue;
-                }
-
-                Filter rmv = new ReplaceMissingValues();
-                rmv.setInputFormat(instances);
-                instances = Filter.useFilter(instances, rmv);
-
-                Filter ntb = new NominalToBinary();
-                ntb.setInputFormat(instances);
-                instances = Filter.useFilter(instances, ntb);
-
-                if (instances.numAttributes() > MAX_FEATURES * 10 || instances.numInstances() > MAX_OBJECTS * 10) {
-                    continue;
-                }
-
-                int numObjects = instances.numInstances();
-                int numFeatures = instances.numAttributes() - 1;
-
-                double[][] data = new double[numObjects][numFeatures];
-                int[] labels = new int[numObjects];
-
-                for (int oid = 0; oid < numObjects; oid++) {
-                    Instance instance = instances.get(oid);
-                    for (int fid = 0, aid = 0; aid < instances.numAttributes(); aid++) {
-                        if (aid == instances.classIndex()) {
-                            continue;
-                        }
-                        data[oid][fid++] = instance.value(aid);
-                    }
-
-                    labels[oid] = (int) instance.classValue();
-                }
-
-                Dataset dataset = new Dataset(file.getName(), Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels);
-
-                if (dataset.numObjects > MAX_OBJECTS) {
-                    dataset = ChangeNumObjects.apply(dataset, new Random(dataset.hashCode()), MAX_OBJECTS);
-                }
-
-                if (dataset.numFeatures > MAX_FEATURES) {
-                    dataset = ChangeNumFeatures.apply(dataset, new Random(dataset.hashCode()), MAX_FEATURES);
-                }
-
-                if (dataset.numClasses > MAX_CLASSES) {
-                    dataset = ChangeNumClasses.apply(dataset, new Random(dataset.hashCode()), MAX_CLASSES);
-                }
-
-                boolean cnt = false;
-                for (int sub : dataset.classDistribution) {
-                    cnt |= sub < 5;
-                }
-                if (cnt) {
-                    continue;
-                }
-
-                datasets.add(dataset);
-
-                System.out.println(file.getName());
-                // System.out.println(Arrays.toString(mf));
-                System.out.flush();
-
-            } catch (Exception e) {
-                System.err.println(file.getName());
-                e.printStackTrace();
-            }
-        }
-
-        return datasets;
-    }
+    final static String[] ignore = { "1059.arff", "1061.arff", "1068.arff", "1448.arff", "1465.arff", "1511.arff", "1520.arff", "1553.arff", "336.arff", "337.arff", "35.arff", "43.arff", "476.arff", "49.arff", "62.arff", "683.arff", "717.arff", "719.arff", "726.arff", "730.arff", "731.arff", "746.arff", "756.arff",
+            "758.arff", "770.arff", "812.arff", "813.arff", "826.arff", "829.arff", "845.arff", "855.arff", "861.arff", "865.arff", "867.arff", "896.arff", "902.arff", "907.arff", "908.arff", "922.arff", "931.arff", "934.arff", "936.arff", "941.arff", "951.arff", "955.arff", "968.arff", "998.arff" };
 
     public static void main(String[] args) throws IOException {
 
         final int limit = 3000;
-        final int cores = 10;
+        final int cores = 16;
 
         System.out.println("cores = " + cores);
         System.out.println("limit = " + limit);
 
         double[][] metaData = new double[1024][];
 
-        List<Dataset> datasets = readData("data.csv", new File("data"));
+        List<Dataset> datasets = PrepareData.readData("data.csv", new File("data"));
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
@@ -202,7 +81,7 @@ public class GenerationExp {
 
         ExecutorService executor = new BlockingThreadPoolExecutor(cores, false);
 
-        int currentExperimentId = 0;
+        int currentExperimentId = 6000;
 
         DatasetCrossover crossover = new DatasetCrossover();
         int minNumObjects = Integer.MAX_VALUE;
@@ -247,8 +126,14 @@ public class GenerationExp {
 
         Collections.shuffle(datasets, new Random(42));
 
+        Set<String> ignoreData = new HashSet<>(Arrays.asList(ignore));
+
         for (Dataset targetDataset : datasets) {
             final String targetName = targetDataset.name;
+
+            if (ignoreData.contains(targetName)) {
+                continue;
+            }
 
             final double[] target = extractor.apply(targetDataset);
 

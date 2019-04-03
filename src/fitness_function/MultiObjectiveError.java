@@ -1,8 +1,9 @@
-package utils;
+package fitness_function;
 
 import java.util.Arrays;
 
 import clsf.Dataset;
+import utils.ToDoubleArrayFunction;
 
 public class MultiObjectiveError implements ToDoubleArrayFunction<Dataset> {
 

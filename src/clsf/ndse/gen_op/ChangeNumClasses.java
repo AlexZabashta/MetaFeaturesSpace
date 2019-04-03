@@ -6,6 +6,7 @@ import clsf.Dataset;
 import clsf.ndse.gen_op.fun.cat.CatFunction;
 import clsf.ndse.gen_op.fun.cat.ClassValue;
 import clsf.ndse.gen_op.fun.cat.SumMod;
+import utils.ArrayUtils;
 
 public class ChangeNumClasses {
 
@@ -29,6 +30,29 @@ public class ChangeNumClasses {
         }
 
         return dataset.changeLabels(true, labels);
+    }
+
+    public static Dataset removeRareClasses(Dataset dataset, Random random, int newNumClasses) {
+        int[] classDistribution = dataset.classDistribution;
+        int[] order = ArrayUtils.order(classDistribution);
+
+        int newNumObjects = 0;
+        for (int i = 0; i < newNumClasses; i++) {
+            newNumObjects += classDistribution[order[i]];
+        }
+
+        double[][] data = new double[newNumObjects][];
+        int[] labels = new int[newNumObjects];
+
+        for (int oid = 0, i = 0; i < newNumClasses; i++) {
+            for (double[] object : dataset.dataPerClass[order[i]]) {
+                data[oid] = object.clone();
+                labels[oid] = i;
+                ++oid;
+            }
+        }
+
+        return new Dataset(dataset.name, true, data, false, labels);
     }
 
     public static void main(String[] args) {

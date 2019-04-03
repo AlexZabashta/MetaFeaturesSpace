@@ -29,28 +29,36 @@ public class StatUtils {
     }
 
     public static void main(String[] args) {
-        double sum0 = 0, sum1 = 0, sum2 = 0;
-        int n = 100000;
         Random random = new Random();
 
-        double scale = 0, shift = -23;
+        double scale = 4, shift = -23;
+
+        int n = 1000;
+
+        double[] array = new double[n];
 
         for (int i = 0; i < n; i++) {
-            double v = random.nextGaussian() * scale + shift;
-            double p = 1;
-            sum0 += p;
-            p *= v;
-            sum1 += p;
-            p *= v;
-            sum2 += p;
+            array[i] = random.nextGaussian() * scale + shift;
         }
 
-        double mean = mean(sum0, sum1);
-        double std = std(sum0, mean, sum2);
+        System.out.println(var(array));
 
-        System.out.println(mean);
-        System.out.println(std);
+    }
 
+    public static double mean(double[] array) {
+        if (array.length == 0) {
+            return 0;
+        } else {
+            return sum(array) / array.length;
+        }
+    }
+
+    public static double sum(double[] array) {
+        double sum = 0;
+        for (double value : array) {
+            sum += value;
+        }
+        return sum;
     }
 
     public static double mean(double sum0, double sum1) {
@@ -81,5 +89,30 @@ public class StatUtils {
         } else {
             return Math.sqrt(Math.max(0, sum2 / sum0 - mean * mean));
         }
+    }
+
+    public static double var(double sum0, double sum1, double sum2) {
+        if (sum0 < 1e-9) {
+            return 0;
+        } else {
+            return (sum2 - sum1 * sum1 / sum0) / sum0;
+        }
+    }
+
+    public static double var(double[] array) {
+        if (array.length < 2) {
+            return 0;
+        }
+        double sum0 = 0, sum1 = 0, sum2 = 0;
+
+        for (double value : array) {
+            double power = 1;
+            sum0 += power;
+            power *= value;
+            sum1 += power;
+            power *= value;
+            sum2 += power;
+        }
+        return var(sum0, sum1, sum2);
     }
 }

@@ -2,6 +2,7 @@ package experiments;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,12 +27,22 @@ public class AggregateResults {
         class Result implements Comparable<Result> {
             public final String opt, prob, data, opt_prob;
             public final double value;
+            public final long time;
 
-            public Result(String opt, String prob, String data, double value) {
-                this.opt = opt;
-                this.prob = prob;
-                this.data = data;
-                this.value = value;
+            public Result(File file) throws IOException {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    this.data = reader.readLine().substring(2);
+
+                    String singleObjective = reader.readLine().substring(2);
+                    String realInitialPopulation = reader.readLine().substring(2);
+                    String problem = reader.readLine().substring(2);
+                    String algo = reader.readLine().substring(2);
+
+                    this.prob = realInitialPopulation + "_" + problem;
+                    this.opt = singleObjective + "_" + algo;
+                    this.time = Long.parseLong(reader.readLine().substring(2));
+                    this.value = Double.parseDouble(reader.readLine().substring(2));
+                }
                 this.opt_prob = opt + "_" + prob;
             }
 
@@ -41,7 +52,7 @@ public class AggregateResults {
             }
         }
 
-        String folder = "result\\experiments.RunExp\\1545332320227";
+        String folder = "result\\experiments.GenerationExp\\r1554216713827";
 
         List<Result> results = new ArrayList<>();
         Set<String> opts = new TreeSet<>();
@@ -49,24 +60,18 @@ public class AggregateResults {
         Set<String> datas = new TreeSet<>();
 
         for (File file : new File(folder).listFiles()) {
-            String[] name = file.getName().split("_");
-            if (name.length == 3) {
-                double value;
-                String opt = name[0];
-                String prob = name[1];
-                String data = name[2];
-
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    value = Double.parseDouble(reader.readLine().substring(2));
-                }
-
-                Result result = new Result(opt, prob, data, value);
-
-                results.add(result);
-                opts.add(opt);
-                probs.add(prob);
-                datas.add(data);
+            if (file.getName().contains("arff.txt")) {
+                continue;
             }
+            Result result = new Result(file);
+            results.add(result);
+            opts.add(result.opt);
+            probs.add(result.prob);
+            datas.add(result.data);
+        }
+
+        for (String data : datas) {
+            System.out.print('"' + data + '"' + ", ");
         }
 
         Collections.sort(results);
@@ -91,23 +96,24 @@ public class AggregateResults {
             }
 
             table.put(result.opt_prob, String.format(Locale.ENGLISH, "%.4f", avg / (r - l)));
+            // System.out.println(r - l);
 
             l = r;
         }
 
         try (PrintWriter writer = new PrintWriter("results.tex")) {
-
+            writer.printf("%14s", "");
             for (String prob : probs) {
                 writer.print("  &  ");
-                writer.printf("%10s", prob);
+                writer.printf("%14s", prob);
             }
+            writer.println();
             for (String opt : opts) {
-                writer.println();
-                writer.printf("%10s", opt);
+                writer.printf("%14s", opt);
                 for (String prob : probs) {
                     String value = table.get(opt + "_" + prob);
                     writer.print("  &  ");
-                    writer.printf("%10s", value);
+                    writer.printf("%14s", value);
                 }
                 writer.println();
             }
