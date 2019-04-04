@@ -11,11 +11,11 @@ import java.util.function.ToDoubleFunction;
 import org.apache.commons.compress.archivers.zip.UnsupportedZipFeatureException.Feature;
 
 import clsf.Dataset;
-import experiments.MetaSystem;
-import experiments.PrepareData;
+import experiments.DataReader;
 import fitness_function.MahalanobisDistance;
 import mfextraction.CMFExtractor;
 import mfextraction.KNNLandMark;
+import mfextraction.MetaSystem;
 import mfextraction.SVMLandMark;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
@@ -28,8 +28,10 @@ public class TestMetaSystem {
 
         double[][] metaData = new double[1024][];
 
-        List<Dataset> datasets = PrepareData.readData("data.csv", new File("data"));
+        List<Dataset> datasets = DataReader.readData("data.csv", new File("data"));
         final int numData = datasets.size();
+
+        System.out.println(numData);
 
         CMFExtractor extractor = new CMFExtractor();
         int numMF = extractor.length();

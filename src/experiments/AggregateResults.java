@@ -17,65 +17,31 @@ import java.util.TreeSet;
 
 import com.google.common.base.MoreObjects;
 
+import experiments.DataReader.Result;
+import utils.FolderUtils;
+
 public class AggregateResults {
 
-    public Integer notNull(Integer value) {
-        return MoreObjects.firstNonNull(value, Integer.valueOf(0));
-    }
-
     public static void main(String[] args) throws IOException {
-        class Result implements Comparable<Result> {
-            public final String opt, prob, data, opt_prob;
-            public final double value;
-            public final long time;
 
-            public Result(File file) throws IOException {
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    this.data = reader.readLine().substring(2);
-
-                    String singleObjective = reader.readLine().substring(2);
-                    String realInitialPopulation = reader.readLine().substring(2);
-                    String problem = reader.readLine().substring(2);
-                    String algo = reader.readLine().substring(2);
-
-                    this.prob = realInitialPopulation + "_" + problem;
-                    this.opt = singleObjective + "_" + algo;
-                    this.time = Long.parseLong(reader.readLine().substring(2));
-                    this.value = Double.parseDouble(reader.readLine().substring(2));
-                }
-                this.opt_prob = opt + "_" + prob;
-            }
-
-            @Override
-            public int compareTo(Result r) {
-                return opt_prob.compareTo(r.opt_prob);
-            }
-        }
-
-        String folder = "result\\experiments.GenerationExp\\r1554216713827";
-
-        List<Result> results = new ArrayList<>();
+        String folder = "result\\experiments.GenerationExp\\r1554296226634mix";
+        List<Result> results = DataReader.readResults(folder, false);
         Set<String> opts = new TreeSet<>();
         Set<String> probs = new TreeSet<>();
         Set<String> datas = new TreeSet<>();
 
-        for (File file : new File(folder).listFiles()) {
-            if (file.getName().contains("arff.txt")) {
-                continue;
-            }
-            Result result = new Result(file);
-            results.add(result);
+        for (Result result : results) {
             opts.add(result.opt);
             probs.add(result.prob);
             datas.add(result.data);
         }
 
-        for (String data : datas) {
-            System.out.print('"' + data + '"' + ", ");
-        }
+        // for (String data : datas) {
+        // System.out.print('"' + data + '"' + ", ");
+        // }
 
         Collections.sort(results);
-
+        System.out.println(datas.size());
         int n = results.size();
 
         Map<String, String> table = new HashMap<>();
@@ -100,8 +66,8 @@ public class AggregateResults {
 
             l = r;
         }
-
-        try (PrintWriter writer = new PrintWriter("results.tex")) {
+        String res = FolderUtils.buildPath(false, Long.toString(System.currentTimeMillis()));
+        try (PrintWriter writer = new PrintWriter(res + "results.tex")) {
             writer.printf("%14s", "");
             for (String prob : probs) {
                 writer.print("  &  ");
@@ -118,6 +84,5 @@ public class AggregateResults {
                 writer.println();
             }
         }
-
     }
 }

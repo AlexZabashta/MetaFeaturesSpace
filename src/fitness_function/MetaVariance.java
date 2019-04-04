@@ -3,7 +3,7 @@ package fitness_function;
 import java.util.function.ToDoubleFunction;
 
 import clsf.Dataset;
-import experiments.MetaSystem;
+import mfextraction.MetaSystem;
 import utils.StatUtils;
 import utils.ToDoubleArrayFunction;
 
@@ -17,7 +17,10 @@ public class MetaVariance implements ToDoubleFunction<Dataset>, ToDoubleArrayFun
 
     @Override
     public double applyAsDouble(Dataset dataset) {
-        return StatUtils.var(base.classifyDataset(dataset));
+        if (dataset.numClasses == 1) {
+            return 10;
+        }
+        return 1 - StatUtils.var(base.classifyDataset(dataset));
     }
 
     @Override

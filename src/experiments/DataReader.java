@@ -1,5 +1,6 @@
 package experiments;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import clsf.Dataset;
+import clsf.WekaConverter;
 import clsf.ndse.gen_op.ChangeNumClasses;
 import clsf.ndse.gen_op.ChangeNumFeatures;
 import clsf.ndse.gen_op.ChangeNumObjects;
@@ -23,7 +25,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
-public class PrepareData {
+public class DataReader {
 
     public static final int MAX_FEATURES = 16;
     public static final int MAX_OBJECTS = 256;
@@ -135,6 +137,56 @@ public class PrepareData {
         }
 
         return datasets;
+    }
+
+    static class Result implements Comparable<Result> {
+        public final String opt, prob, data, opt_prob;
+        public final double value;
+        public final long time;
+
+        final Dataset dataset;
+
+        public Result(File file, boolean readInstances) throws IOException {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                this.data = reader.readLine().substring(2);
+
+                String singleObjective = reader.readLine().substring(2);
+                String realInitialPopulation = reader.readLine().substring(2);
+                String problem = reader.readLine().substring(2);
+                String algo = reader.readLine().substring(2);
+
+                this.prob = realInitialPopulation + "_" + problem;
+                this.opt = singleObjective + "_" + algo;
+                this.time = Long.parseLong(reader.readLine().substring(2));
+                this.value = Double.parseDouble(reader.readLine().substring(2));
+
+                reader.readLine(); // skip meta-features
+
+                if (readInstances) {
+                    this.dataset = WekaConverter.convert(data, new Instances(reader));
+                } else {
+                    this.dataset = null;
+                }
+            }
+            this.opt_prob = opt + "_" + prob;
+        }
+
+        @Override
+        public int compareTo(Result r) {
+            return opt_prob.compareTo(r.opt_prob);
+        }
+    }
+
+    public static List<Result> readResults(String folder, boolean readInstances) throws IOException {
+        List<Result> list = new ArrayList<>();
+        for (File file : new File(folder).listFiles()) {
+            if (file.getName().contains("arff.txt")) {
+                continue;
+            }
+            list.add(new Result(file, readInstances));
+        }
+
+        return list;
     }
 
 }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -37,9 +39,9 @@ import fitness_function.DataDiversity;
 import fitness_function.Limited;
 import fitness_function.MahalanobisDistance;
 import fitness_function.MetaVariance;
-import fitness_function.MultiDiversity;
 import mfextraction.CMFExtractor;
 import mfextraction.KNNLandMark;
+import mfextraction.MetaSystem;
 import utils.ArrayUtils;
 import utils.EndSearch;
 import utils.FolderUtils;
@@ -51,9 +53,9 @@ public class MetaSystemExp {
 
     public static void main(String[] args) throws IOException {
 
-        final int limit = 5000;
+        final int limit = 4000;
         final int cores = 16;
-        int repeats = 10;
+        int repeats = 7;
 
         System.out.println("cores = " + cores);
         System.out.println("limit = " + limit);
@@ -61,7 +63,7 @@ public class MetaSystemExp {
 
         double[][] metaData = new double[2048][];
 
-        List<Dataset> datasets = PrepareData.readData("data.csv", new File("data"));
+        List<Dataset> datasets = DataReader.readData("data.csv", new File("data"));
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
@@ -140,7 +142,8 @@ public class MetaSystemExp {
         Converter direct = new DirectConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
         Converter gmmcon = new GMMConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
 
-        Random random = new Random();
+        Collections.sort(datasets, Comparator.comparing(d -> d.name));
+        Collections.shuffle(datasets, new Random(42));
 
         List<Runnable> experiments = new ArrayList<>();
 
@@ -165,8 +168,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -174,7 +178,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "RandDirect";
+            names[id] = "RAND_DIRECT";
 
             experiments.add(new Runnable() {
                 @Override
@@ -182,6 +186,7 @@ public class MetaSystemExp {
                     SimpleProblem problem = new SimpleProblem(direct, empty, null);
                     Dataset dataset = direct.convert(problem.createSolution());
                     train.add(dataset);
+
                     MetaSystem system = new MetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
@@ -195,8 +200,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -204,7 +210,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "RandGMM";
+            names[id] = "RAND_GMM";
 
             experiments.add(new Runnable() {
                 @Override
@@ -225,8 +231,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -234,7 +241,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "RandNDSE";
+            names[id] = "RAND_NDSE";
 
             experiments.add(new Runnable() {
                 @Override
@@ -255,8 +262,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -264,7 +272,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DivDirS";
+            names[id] = "DIV_DIRECT";
 
             experiments.add(new Runnable() {
                 @Override
@@ -296,8 +304,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -305,50 +314,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DivDirM";
-
-            experiments.add(new Runnable() {
-                @Override
-                public void run() {
-
-                    DataDiversity diversity = new DataDiversity(min, max, train, extractor, distance);
-                    MultiDiversity multiDiversity = new MultiDiversity(min, max, train, extractor, invSigma);
-
-                    Limited limited = new Limited(multiDiversity, diversity, limit);
-                    SimpleProblem problem = new SimpleProblem(direct, limited, train);
-                    Algorithm<?> algorithm = new MOCellBuilder<>(problem, new SBXCrossover(1.0, 10.0), new PolynomialMutation()).setMaxEvaluations(10000000).build();
-
-                    try {
-                        algorithm.run();
-                    } catch (EndSearch e) {
-                    }
-
-                    Dataset dataset = Objects.requireNonNull(limited.dataset);
-                    train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
-                    double score = system.rmse(test, knnScore);
-                    synchronized (rmse) {
-                        rmse[id] = score;
-                    }
-
-                }
-            });
-        }
-
-        for (int repeat = 0; repeat < repeats; repeat++) {
-            List<Dataset> train = new ArrayList<>();
-            List<Dataset> test = new ArrayList<>();
-
-            for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
-                    train.add(dataset);
-                } else {
-                    test.add(dataset);
-                }
-            }
-
-            int id = expId++;
-            names[id] = "DivGMMs";
+            names[id] = "DIV_GMM";
 
             experiments.add(new Runnable() {
                 @Override
@@ -380,8 +346,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -389,7 +356,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DivNDSEs";
+            names[id] = "DIV_NDSE";
 
             experiments.add(new Runnable() {
                 @Override
@@ -418,12 +385,14 @@ public class MetaSystemExp {
                 }
             });
         }
+
         for (int repeat = 0; repeat < repeats; repeat++) {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -431,51 +400,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DivNDSEm";
-
-            experiments.add(new Runnable() {
-                @Override
-                public void run() {
-
-                    DataDiversity diversity = new DataDiversity(min, max, train, extractor, distance);
-                    MultiDiversity multiDiversity = new MultiDiversity(min, max, train, extractor, invSigma);
-
-                    Limited limited = new Limited(multiDiversity, diversity, limit);
-                    GDSProblem problem = new GDSProblem(mutation, limited, train);
-
-                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>((GDSProblem) problem, crossover, mutation).setMaxIterations(10000000).build();
-
-                    try {
-                        algorithm.run();
-                    } catch (EndSearch e) {
-                    }
-
-                    Dataset dataset = Objects.requireNonNull(limited.dataset);
-                    train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
-                    double score = system.rmse(test, knnScore);
-                    synchronized (rmse) {
-                        rmse[id] = score;
-                    }
-
-                }
-            });
-        }
-
-        for (int repeat = 0; repeat < repeats; repeat++) {
-            List<Dataset> train = new ArrayList<>();
-            List<Dataset> test = new ArrayList<>();
-
-            for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
-                    train.add(dataset);
-                } else {
-                    test.add(dataset);
-                }
-            }
-
-            int id = expId++;
-            names[id] = "VarDir";
+            names[id] = "VAR_DIRECT";
 
             experiments.add(new Runnable() {
                 @Override
@@ -507,8 +432,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -516,7 +442,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "VarGMM";
+            names[id] = "VAR_GMM";
 
             experiments.add(new Runnable() {
                 @Override
@@ -548,8 +474,9 @@ public class MetaSystemExp {
             List<Dataset> train = new ArrayList<>();
             List<Dataset> test = new ArrayList<>();
 
+            Random random = new Random(repeat + 42);
             for (Dataset dataset : datasets) {
-                if (random.nextBoolean()) {
+                if (random.nextInt(3) == 0) {
                     train.add(dataset);
                 } else {
                     test.add(dataset);
@@ -557,7 +484,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "VarNDSE";
+            names[id] = "VAR_NDSE";
 
             experiments.add(new Runnable() {
                 @Override

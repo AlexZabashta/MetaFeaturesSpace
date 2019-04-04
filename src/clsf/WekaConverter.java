@@ -32,8 +32,18 @@ public class WekaConverter {
     }
 
     public static Dataset convert(Instances instances) {
+        return convert(instances.relationName(), instances);
+    }
+
+    public static Dataset convert(String name, Instances instances) {
         int classIndex = instances.classIndex();
 
+        for (int a = 0; classIndex < 0 && a < instances.numAttributes(); a++) {
+            if (instances.attribute(a).name().equals("class")) {
+                instances.setClassIndex(a);
+                classIndex = a;
+            }
+        }
         if (classIndex < 0) {
             throw new IllegalArgumentException("classIndex not set");
         }
@@ -56,7 +66,7 @@ public class WekaConverter {
             labels[oid] = (int) instance.classValue();
         }
 
-        return new Dataset(instances.relationName(), Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels);
+        return new Dataset(name, Dataset.defaultNormValues, data, Dataset.defaultNormLabels, labels);
     }
 
     public static Instances convert(Dataset dataset) {

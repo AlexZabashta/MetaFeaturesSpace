@@ -54,7 +54,7 @@ public class GenerationExp {
 
         double[][] metaData = new double[1024][];
 
-        List<Dataset> datasets = PrepareData.readData("data.csv", new File("data"));
+        List<Dataset> datasets = DataReader.readData("data.csv", new File("data"));
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
@@ -77,7 +77,9 @@ public class GenerationExp {
 
         MahalanobisDistance distance = new MahalanobisDistance(numMF, invCov);
 
-        String res = FolderUtils.buildPath(false, Long.toString(System.currentTimeMillis()));
+        String commonPath = Long.toString(System.currentTimeMillis());
+        String targetPath = FolderUtils.buildPath(false, commonPath + "target");
+        String resultPath = FolderUtils.buildPath(false, commonPath + "result");
 
         ExecutorService executor = new BlockingThreadPoolExecutor(cores, false);
 
@@ -137,13 +139,17 @@ public class GenerationExp {
 
             final double[] target = extractor.apply(targetDataset);
 
-            synchronized (res) {
-                try (PrintWriter writer = new PrintWriter(new File(res + targetName + ".txt"))) {
+            synchronized (commonPath) {
+                try (PrintWriter writer = new PrintWriter(new File(targetPath + targetName))) {
+                    writer.print("%");
                     for (int i = 0; i < numMF; i++) {
-                        writer.print(target[i]);
                         writer.print(' ');
+                        writer.print(target[i]);
                     }
                     writer.println();
+                    Instances instances = WekaConverter.convert(targetDataset);
+                    writer.println(instances);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -210,9 +216,9 @@ public class GenerationExp {
                                         Dataset result = limited.dataset;
                                         Instances instances = WekaConverter.convert(result);
 
-                                        synchronized (res) {
+                                        synchronized (commonPath) {
 
-                                            try (PrintWriter writer = new PrintWriter(new File(res + eid + ".arff"))) {
+                                            try (PrintWriter writer = new PrintWriter(new File(resultPath + eid + ".arff"))) {
                                                 printLine(writer, targetName);
                                                 printLine(writer, Boolean.toString(singleObjective));
                                                 printLine(writer, Boolean.toString(realInitialPopulation));

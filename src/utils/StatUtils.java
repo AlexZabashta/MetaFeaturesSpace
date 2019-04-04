@@ -38,7 +38,7 @@ public class StatUtils {
         double[] array = new double[n];
 
         for (int i = 0; i < n; i++) {
-            array[i] = random.nextGaussian() * scale + shift;
+            array[i] = random.nextInt(2);
         }
 
         System.out.println(var(array));

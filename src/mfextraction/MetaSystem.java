@@ -1,4 +1,4 @@
-package experiments;
+package mfextraction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class MetaSystem {
     }
 
     public MetaSystem(List<Dataset> train, ToDoubleArrayFunction<Dataset> extractor, ToDoubleFunction<Dataset> target) {
-        Random random = new Random();
+        Random random = new Random(42);
         int numMetaFeatures = extractor.length();
         ArrayList<Attribute> attributes = new ArrayList<>(numMetaFeatures + 1);
         for (int i = 0; i < numMetaFeatures; i++) {
@@ -57,6 +57,7 @@ public class MetaSystem {
             trees[i] = new REPTree();
             trees[i].setNoPruning(true);
             trees[i].setMaxDepth(10);
+            trees[i].setSeed(i + 42);
         }
 
         Instances[] instances = new Instances[size];
@@ -65,7 +66,6 @@ public class MetaSystem {
         }
 
         int id = 0;
-        Collections.shuffle(train, random);
         for (Dataset dataset : train) {
             Instance instance = convert(dataset, target.applyAsDouble(dataset));
             for (int i = 0; i < size; i++) {

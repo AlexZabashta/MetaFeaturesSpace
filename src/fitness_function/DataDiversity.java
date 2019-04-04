@@ -39,6 +39,10 @@ public class DataDiversity implements ToDoubleFunction<Dataset>, ToDoubleArrayFu
 
     @Override
     public double applyAsDouble(Dataset dataset) {
+        if (dataset.numClasses == 1) {
+            return 1000;
+        }
+
         double[] u = extractor.apply(dataset);
         double[] e = new double[length];
 
