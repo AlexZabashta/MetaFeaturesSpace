@@ -99,6 +99,10 @@ public class StatUtils {
         }
     }
 
+    public static double std(double[] array) {
+        return Math.sqrt(var(array));
+    }
+
     public static double var(double[] array) {
         if (array.length < 2) {
             return 0;

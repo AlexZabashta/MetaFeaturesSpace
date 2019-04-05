@@ -53,9 +53,9 @@ public class MetaSystemExp {
 
     public static void main(String[] args) throws IOException {
 
-        final int limit = 4000;
-        final int cores = 16;
-        int repeats = 7;
+        final int limit = 1000;
+        final int cores = 5;
+        int repeats = 5;
 
         System.out.println("cores = " + cores);
         System.out.println("limit = " + limit);
