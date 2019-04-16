@@ -29,7 +29,7 @@ public class WekaResults {
 
     public static void main(String[] args) throws IOException {
 
-        String folder = "result\\experiments.GenerationExp\\r1554296226634mix";
+        String folder = "result\\experiments.GenerationExp\\r1554731018458result";
         List<Result> results = DataReader.readResults(folder, true);
 
         Set<String> opts = new TreeSet<>();
@@ -91,20 +91,13 @@ public class WekaResults {
                             for (Dataset dataset : tmp) {
                                 if ((dataset.name.hashCode() & 3) == and) {
                                     test.add(dataset);
+                                } else {
+                                    train.add(dataset);
                                 }
                             }
 
                             for (Dataset dataset : genData) {
                                 if ((dataset.name.hashCode() & 3) == and) {
-                                    train.add(dataset);
-                                }
-                            }
-
-                            for (Dataset dataset : tmp) {
-                                if (train.size() >= test.size()) {
-                                    break;
-                                }
-                                if ((dataset.name.hashCode() & 3) != and) {
                                     train.add(dataset);
                                 }
                             }

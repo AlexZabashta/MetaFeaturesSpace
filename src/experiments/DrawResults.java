@@ -97,13 +97,13 @@ public class DrawResults {
 
         final int n = 9;
 
-        String folder = "result\\experiments.MetaSystemExp\\1554397984421\\";
-        final int m = 5;
-        final int s = 339;
+        // String folder = "result\\experiments.MetaSystemExp\\1554397984421\\";
+        // final int m = 5;
+        // final int s = 339;
 
-        // String folder = "result\\experiments.MetaSystemExp\\r1554396210193\\";
-        // final int m = 7;
-        // final int s = 51;
+        String folder = "result\\experiments.MetaSystemExp\\r1554396210193\\";
+        final int m = 7;
+        final int s = 132;
 
         final int k = n * m;
 

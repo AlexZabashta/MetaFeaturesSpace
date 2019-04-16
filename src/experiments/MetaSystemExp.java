@@ -19,10 +19,14 @@ import java.util.function.ToDoubleFunction;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.mocell.MOCellBuilder;
+import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
+import org.uma.jmetal.algorithm.multiobjective.smsemoa.SMSEMOABuilder;
 import org.uma.jmetal.algorithm.multiobjective.spea2.SPEA2Builder;
+import org.uma.jmetal.algorithm.singleobjective.differentialevolution.DifferentialEvolutionBuilder;
 import org.uma.jmetal.algorithm.singleobjective.particleswarmoptimization.StandardPSO2011;
 import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
+import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
@@ -50,16 +54,22 @@ import utils.StatUtils;
 import utils.ToDoubleArrayFunction;
 
 public class MetaSystemExp {
+    static int get(String name, String[] args, int index, int defaultValue) {
+        try {
+            int value = Integer.parseInt(args[index]);
+            System.out.println(name + " = " + value);
+            return value;
+        } catch (RuntimeException e) {
+            System.out.println(name + " = default = " + defaultValue);
+            return defaultValue;
+        }
+    }
 
     public static void main(String[] args) throws IOException {
-
-        final int limit = 1000;
-        final int cores = 5;
-        int repeats = 5;
-
-        System.out.println("cores = " + cores);
-        System.out.println("limit = " + limit);
-        System.out.println("repeats = " + repeats);
+        System.out.println("args = " + Arrays.toString(args));
+        final int limit = get("limit", args, 0, 300);
+        final int threads = get("threads", args, 1, 5);
+        final int repeats = get("repeats", args, 2, 2);
 
         double[][] metaData = new double[2048][];
 
@@ -272,7 +282,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DIV_DIRECT";
+            names[id] = "DIV_DIRECTP";
 
             experiments.add(new Runnable() {
                 @Override
@@ -281,7 +291,8 @@ public class MetaSystemExp {
                     DataDiversity diversity = new DataDiversity(min, max, train, extractor, distance);
                     Limited limited = new Limited(diversity, diversity, limit);
                     SimpleProblem problem = new SimpleProblem(direct, limited, train);
-                    Algorithm<?> algorithm = new MOCellBuilder<>(problem, new SBXCrossover(1.0, 10.0), new PolynomialMutation()).setMaxEvaluations(10000000).build();
+
+                    Algorithm<?> algorithm = new StandardPSO2011(problem, 100, 10000000, 10, new SequentialSolutionListEvaluator<DoubleSolution>());
 
                     try {
                         algorithm.run();
@@ -314,7 +325,50 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DIV_GMM";
+            names[id] = "DIV_DIRECTD";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+
+                    DataDiversity diversity = new DataDiversity(min, max, train, extractor, distance);
+                    Limited limited = new Limited(diversity, diversity, limit);
+                    SimpleProblem problem = new SimpleProblem(direct, limited, train);
+
+                    Algorithm<?> algorithm = new DifferentialEvolutionBuilder(problem).setMaxEvaluations(10000000).build();
+
+                    try {
+                        algorithm.run();
+                    } catch (EndSearch e) {
+                    }
+
+                    Dataset dataset = Objects.requireNonNull(limited.dataset);
+                    train.add(dataset);
+                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+
+                }
+            });
+        }
+
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "DIV_GMMP";
 
             experiments.add(new Runnable() {
                 @Override
@@ -341,6 +395,48 @@ public class MetaSystemExp {
                 }
             });
         }
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "DIV_GMMS";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+
+                    DataDiversity diversity = new DataDiversity(min, max, train, extractor, distance);
+
+                    Limited limited = new Limited(diversity, diversity, limit);
+                    SimpleProblem problem = new SimpleProblem(gmmcon, limited, train);
+                    Algorithm<?> algorithm = new SMSEMOABuilder<DoubleSolution>(problem, new SBXCrossover(1.0, 10.0), new PolynomialMutation()).setPopulationSize(100).setMaxEvaluations(10000000).build();
+
+                    try {
+                        algorithm.run();
+                    } catch (EndSearch e) {
+                    }
+
+                    Dataset dataset = Objects.requireNonNull(limited.dataset);
+                    train.add(dataset);
+                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+
+                }
+            });
+        }
 
         for (int repeat = 0; repeat < repeats; repeat++) {
             List<Dataset> train = new ArrayList<>();
@@ -356,7 +452,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "DIV_NDSE";
+            names[id] = "DIV_NDSEM";
 
             experiments.add(new Runnable() {
                 @Override
@@ -367,7 +463,50 @@ public class MetaSystemExp {
                     Limited limited = new Limited(diversity, diversity, limit);
                     GDSProblem problem = new GDSProblem(mutation, limited, train);
 
-                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>((GDSProblem) problem, crossover, mutation).setMaxIterations(10000000).build();
+                    Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, crossover, mutation).setMaxEvaluations(10000000).build();
+
+                    try {
+                        algorithm.run();
+                    } catch (EndSearch e) {
+                    }
+
+                    Dataset dataset = Objects.requireNonNull(limited.dataset);
+                    train.add(dataset);
+                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+
+                }
+            });
+        }
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "DIV_NDSEN";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+
+                    DataDiversity diversity = new DataDiversity(min, max, train, extractor, distance);
+
+                    Limited limited = new Limited(diversity, diversity, limit);
+                    GDSProblem problem = new GDSProblem(mutation, limited, train);
+
+                    Algorithm<?> algorithm = new NSGAIIBuilder<DataSetSolution>(problem, crossover, mutation).setMaxEvaluations(10000000).build();
 
                     try {
                         algorithm.run();
@@ -400,7 +539,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "VAR_DIRECT";
+            names[id] = "VAR_DIRECTP";
 
             experiments.add(new Runnable() {
                 @Override
@@ -409,7 +548,48 @@ public class MetaSystemExp {
 
                     Limited limited = new Limited(variance, variance, limit);
                     SimpleProblem problem = new SimpleProblem(direct, limited, train);
-                    Algorithm<?> algorithm = new MOCellBuilder<>(problem, new SBXCrossover(1.0, 10.0), new PolynomialMutation()).setMaxEvaluations(10000000).build();
+                    Algorithm<?> algorithm = new StandardPSO2011(problem, 100, 10000000, 10, new SequentialSolutionListEvaluator<DoubleSolution>());
+
+                    try {
+                        algorithm.run();
+                    } catch (EndSearch e) {
+                    }
+
+                    Dataset dataset = Objects.requireNonNull(limited.dataset);
+                    train.add(dataset);
+                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+
+                }
+            });
+        }
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "VAR_DIRECTD";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+
+                    Limited limited = new Limited(variance, variance, limit);
+                    SimpleProblem problem = new SimpleProblem(direct, limited, train);
+                    Algorithm<?> algorithm = new DifferentialEvolutionBuilder(problem).setMaxEvaluations(10000000).build();
 
                     try {
                         algorithm.run();
@@ -442,7 +622,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "VAR_GMM";
+            names[id] = "VAR_GMMP";
 
             experiments.add(new Runnable() {
                 @Override
@@ -469,6 +649,48 @@ public class MetaSystemExp {
                 }
             });
         }
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "VAR_GMMS";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+
+                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+
+                    Limited limited = new Limited(variance, variance, limit);
+                    SimpleProblem problem = new SimpleProblem(gmmcon, limited, train);
+
+                    Algorithm<?> algorithm = new SMSEMOABuilder<DoubleSolution>(problem, new SBXCrossover(1.0, 10.0), new PolynomialMutation()).setPopulationSize(100).setMaxEvaluations(10000000).build();
+                    try {
+                        algorithm.run();
+                    } catch (EndSearch e) {
+                    }
+
+                    Dataset dataset = Objects.requireNonNull(limited.dataset);
+                    train.add(dataset);
+                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+
+                }
+            });
+        }
 
         for (int repeat = 0; repeat < repeats; repeat++) {
             List<Dataset> train = new ArrayList<>();
@@ -484,7 +706,7 @@ public class MetaSystemExp {
             }
 
             int id = expId++;
-            names[id] = "VAR_NDSE";
+            names[id] = "VAR_NDSEM";
 
             experiments.add(new Runnable() {
                 @Override
@@ -493,8 +715,48 @@ public class MetaSystemExp {
 
                     Limited limited = new Limited(variance, variance, limit);
                     GDSProblem problem = new GDSProblem(mutation, limited, train);
+                    Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, crossover, mutation).setMaxEvaluations(10000000).build();
 
-                    Algorithm<?> algorithm = new SPEA2Builder<DataSetSolution>((GDSProblem) problem, crossover, mutation).setMaxIterations(10000000).build();
+                    try {
+                        algorithm.run();
+                    } catch (EndSearch e) {
+                    }
+
+                    Dataset dataset = Objects.requireNonNull(limited.dataset);
+                    train.add(dataset);
+                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+
+                }
+            });
+        }
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "VAR_NDSEN";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+
+                    Limited limited = new Limited(variance, variance, limit);
+                    GDSProblem problem = new GDSProblem(mutation, limited, train);
+                    Algorithm<?> algorithm = new NSGAIIBuilder<DataSetSolution>(problem, crossover, mutation).setMaxEvaluations(10000000).build();
 
                     try {
                         algorithm.run();
@@ -532,7 +794,7 @@ public class MetaSystemExp {
                 Arrays.fill(rmse, Double.NaN);
             }
 
-            ExecutorService executor = Executors.newFixedThreadPool(cores);
+            ExecutorService executor = Executors.newFixedThreadPool(threads);
             for (Runnable experiment : experiments) {
                 executor.submit(experiment);
             }

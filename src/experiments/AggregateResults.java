@@ -24,7 +24,7 @@ public class AggregateResults {
 
     public static void main(String[] args) throws IOException {
 
-        String folder = "result\\experiments.GenerationExp\\r1554296226634mix";
+        String folder = "result\\experiments.GenerationExp\\r1554731018458result";
         List<Result> results = DataReader.readResults(folder, false);
         Set<String> opts = new TreeSet<>();
         Set<String> probs = new TreeSet<>();
@@ -62,7 +62,7 @@ public class AggregateResults {
             }
 
             table.put(result.opt_prob, String.format(Locale.ENGLISH, "%.4f", avg / (r - l)));
-            // System.out.println(r - l);
+            System.out.println(result.opt_prob + " " + (r - l));
 
             l = r;
         }

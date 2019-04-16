@@ -41,16 +41,24 @@ import weka.core.Instances;
 
 public class GenerationExp {
 
-    final static String[] ignore = { "1059.arff", "1061.arff", "1068.arff", "1448.arff", "1465.arff", "1511.arff", "1520.arff", "1553.arff", "336.arff", "337.arff", "35.arff", "43.arff", "476.arff", "49.arff", "62.arff", "683.arff", "717.arff", "719.arff", "726.arff", "730.arff", "731.arff", "746.arff", "756.arff",
-            "758.arff", "770.arff", "812.arff", "813.arff", "826.arff", "829.arff", "845.arff", "855.arff", "861.arff", "865.arff", "867.arff", "896.arff", "902.arff", "907.arff", "908.arff", "922.arff", "931.arff", "934.arff", "936.arff", "941.arff", "951.arff", "955.arff", "968.arff", "998.arff" };
+    final static String[] ignore = {};
+
+    static int get(String name, String[] args, int index, int defaultValue) {
+        try {
+            int value = Integer.parseInt(args[index]);
+            System.out.println(name + " = " + value);
+            return value;
+        } catch (RuntimeException e) {
+            System.out.println(name + " = default = " + defaultValue);
+            return defaultValue;
+        }
+    }
 
     public static void main(String[] args) throws IOException {
+        System.out.println("args = " + Arrays.toString(args));
 
-        final int limit = 3000;
-        final int cores = 16;
-
-        System.out.println("cores = " + cores);
-        System.out.println("limit = " + limit);
+        final int limit = get("limit", args, 0, 1000);
+        final int threads = get("threads", args, 1, 5);
 
         double[][] metaData = new double[1024][];
 
@@ -81,9 +89,9 @@ public class GenerationExp {
         String targetPath = FolderUtils.buildPath(false, commonPath + "target");
         String resultPath = FolderUtils.buildPath(false, commonPath + "result");
 
-        ExecutorService executor = new BlockingThreadPoolExecutor(cores, false);
+        ExecutorService executor = new BlockingThreadPoolExecutor(threads, false);
 
-        int currentExperimentId = 6000;
+        int currentExperimentId = 0;
 
         DatasetCrossover crossover = new DatasetCrossover();
         int minNumObjects = Integer.MAX_VALUE;
