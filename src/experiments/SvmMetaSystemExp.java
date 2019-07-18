@@ -12,9 +12,11 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
@@ -61,11 +63,11 @@ public class SvmMetaSystemExp {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
         System.out.println("args = " + Arrays.toString(args));
-        final int limit = get("limit", args, 0, 5000);
+        final int limit = get("limit", args, 0, 300);
         final int threads = get("threads", args, 1, 16);
-        final int repeats = get("repeats", args, 2, 5);
+        final int repeats = get("repeats", args, 2, 2);
 
         double[][] metaData = new double[2048][];
         List<Dataset> datasets = DataReader.readData("data.csv", new File("data"));
@@ -357,10 +359,10 @@ public class SvmMetaSystemExp {
                 return "VAR_NDSE";
             }
         });
-        List<Runnable> experiments = new ArrayList<>();
-        double[] rmse = new double[512];
-        String[] names = new String[512];
-        int expId = 0;
+
+        List<Callable<Double>> experiments = new ArrayList<>();
+        int count = experiments.size();
+        double[] rmse = new double[count];
 
         for (Supplier<Function<List<Dataset>, Dataset>> strategy : strategies) {
             for (int repeat = 0; repeat < repeats; repeat++) {
@@ -374,62 +376,64 @@ public class SvmMetaSystemExp {
                         test.add(dataset);
                     }
                 }
-                int id = expId++;
-                names[id] = strategy.toString();
 
                 Function<List<Dataset>, Dataset> function = strategy.get();
 
-                experiments.add(new Runnable() {
+                experiments.add(new Callable<Double>() {
+
                     @Override
-                    public void run() {
+                    public Double call() throws Exception {
                         Dataset dataset = function.apply(train);
                         train.add(dataset);
                         SvmMetaSystem system = new SvmMetaSystem(train, extractor, knnScore);
-                        double score = system.rmse(test, knnScore);
-                        synchronized (rmse) {
-                            rmse[id] = score;
-                        }
+                        return system.rmse(test, knnScore);
                     }
+
+                    @Override
+                    public String toString() {
+                        return strategy.toString();
+                    }
+
                 });
             }
         }
 
         System.out.println(experiments.size());
-        System.out.println(expId);
-        System.out.println(Arrays.toString(Arrays.copyOf(names, expId)));
+
         try (PrintWriter writer = new PrintWriter(new File(res + "names.txt"))) {
-            for (int i = 0; i < expId; i++) {
-                writer.println(names[i]);
+            for (Callable<Double> experiment : experiments) {
+                writer.println(experiment);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         int step = 0;
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+
         while (true) {
-            synchronized (rmse) {
-                Arrays.fill(rmse, Double.NaN);
+            List<Future<Double>> futures = new ArrayList<>();
+
+            for (Callable<Double> experiment : experiments) {
+                futures.add(executor.submit(experiment));
             }
-            ExecutorService executor = Executors.newFixedThreadPool(threads);
-            for (Runnable experiment : experiments) {
-                executor.submit(experiment);
+
+            List<Double> result = new ArrayList<>();
+
+            for (Future<Double> future : futures) {
+                result.add(future.get());
             }
-            executor.shutdown();
-            try {
-                executor.awaitTermination(2, TimeUnit.HOURS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println(step);
-            System.out.flush();
+
             synchronized (rmse) {
                 try (PrintWriter writer = new PrintWriter(new File(res + (step++) + ".txt"))) {
-                    for (int i = 0; i < expId; i++) {
-                        writer.println(rmse[i]);
+                    for (Double value : result) {
+                        writer.println(value);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+            System.out.println(step);
+            System.out.flush();
         }
     }
 }
