@@ -45,7 +45,7 @@ import fitness_function.MahalanobisDistance;
 import fitness_function.MetaVariance;
 import mfextraction.CMFExtractor;
 import mfextraction.KNNLandMark;
-import mfextraction.MetaSystem;
+import mfextraction.TreeMetaSystem;
 import utils.ArrayUtils;
 import utils.EndSearch;
 import utils.FolderUtils;
@@ -170,9 +170,40 @@ public class MetaSystemExp {
         };
         ToDoubleFunction<Dataset> knnScore = new KNNLandMark();
 
-        double[] rmse = new double[256];
-        String[] names = new String[256];
+        double[] rmse = new double[512];
+        String[] names = new String[512];
         int expId = 0;
+
+        for (int repeat = 0; repeat < repeats; repeat++) {
+            List<Dataset> train = new ArrayList<>();
+            List<Dataset> test = new ArrayList<>();
+
+            Random random = new Random(repeat + 42);
+            for (Dataset dataset : datasets) {
+                if (random.nextInt(3) == 0) {
+                    train.add(dataset);
+                } else {
+                    test.add(dataset);
+                }
+            }
+
+            int id = expId++;
+            names[id] = "RAND_DATA";
+
+            experiments.add(new Runnable() {
+                @Override
+                public void run() {
+                    Random random = new Random();
+                    train.add(train.get(random.nextInt(train.size())));
+                    
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
+                    double score = system.rmse(test, knnScore);
+                    synchronized (rmse) {
+                        rmse[id] = score;
+                    }
+                }
+            });
+        }
 
         for (int repeat = 0; repeat < repeats; repeat++) {
             List<Dataset> train = new ArrayList<>();
@@ -197,7 +228,7 @@ public class MetaSystemExp {
                     Dataset dataset = direct.convert(problem.createSolution());
                     train.add(dataset);
 
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -228,7 +259,7 @@ public class MetaSystemExp {
                     SimpleProblem problem = new SimpleProblem(gmmcon, empty, null);
                     Dataset dataset = gmmcon.convert(problem.createSolution());
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -258,7 +289,7 @@ public class MetaSystemExp {
                 public void run() {
                     Dataset dataset = mutation.generate(new Random());
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -301,7 +332,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -344,7 +375,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -386,7 +417,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -428,7 +459,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -472,7 +503,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -515,7 +546,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -544,7 +575,7 @@ public class MetaSystemExp {
             experiments.add(new Runnable() {
                 @Override
                 public void run() {
-                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+                    MetaVariance variance = new MetaVariance(new TreeMetaSystem(train, extractor, knnScore));
 
                     Limited limited = new Limited(variance, variance, limit);
                     SimpleProblem problem = new SimpleProblem(direct, limited, train);
@@ -557,7 +588,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -585,7 +616,7 @@ public class MetaSystemExp {
             experiments.add(new Runnable() {
                 @Override
                 public void run() {
-                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+                    MetaVariance variance = new MetaVariance(new TreeMetaSystem(train, extractor, knnScore));
 
                     Limited limited = new Limited(variance, variance, limit);
                     SimpleProblem problem = new SimpleProblem(direct, limited, train);
@@ -598,7 +629,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -628,7 +659,7 @@ public class MetaSystemExp {
                 @Override
                 public void run() {
 
-                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+                    MetaVariance variance = new MetaVariance(new TreeMetaSystem(train, extractor, knnScore));
 
                     Limited limited = new Limited(variance, variance, limit);
                     SimpleProblem problem = new SimpleProblem(gmmcon, limited, train);
@@ -640,7 +671,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -669,7 +700,7 @@ public class MetaSystemExp {
                 @Override
                 public void run() {
 
-                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+                    MetaVariance variance = new MetaVariance(new TreeMetaSystem(train, extractor, knnScore));
 
                     Limited limited = new Limited(variance, variance, limit);
                     SimpleProblem problem = new SimpleProblem(gmmcon, limited, train);
@@ -682,7 +713,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -711,7 +742,7 @@ public class MetaSystemExp {
             experiments.add(new Runnable() {
                 @Override
                 public void run() {
-                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+                    MetaVariance variance = new MetaVariance(new TreeMetaSystem(train, extractor, knnScore));
 
                     Limited limited = new Limited(variance, variance, limit);
                     GDSProblem problem = new GDSProblem(mutation, limited, train);
@@ -724,7 +755,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;
@@ -752,7 +783,7 @@ public class MetaSystemExp {
             experiments.add(new Runnable() {
                 @Override
                 public void run() {
-                    MetaVariance variance = new MetaVariance(new MetaSystem(train, extractor, knnScore));
+                    MetaVariance variance = new MetaVariance(new TreeMetaSystem(train, extractor, knnScore));
 
                     Limited limited = new Limited(variance, variance, limit);
                     GDSProblem problem = new GDSProblem(mutation, limited, train);
@@ -765,7 +796,7 @@ public class MetaSystemExp {
 
                     Dataset dataset = Objects.requireNonNull(limited.dataset);
                     train.add(dataset);
-                    MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                    TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                     double score = system.rmse(test, knnScore);
                     synchronized (rmse) {
                         rmse[id] = score;

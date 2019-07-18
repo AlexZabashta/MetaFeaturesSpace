@@ -21,7 +21,7 @@ public class KNNLandMark implements ToDoubleFunction<Dataset> {
                     for (int rep = 0; rep < 10; rep++) {
                         mean += getFscore(random, instances);
                     }
-                    dataset.metaFeatures[30] = mean / 20;
+                    dataset.metaFeatures[30] = mean / 10;
                     dataset.emptyKNN = false;
                 }
             }

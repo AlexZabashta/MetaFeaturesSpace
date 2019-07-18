@@ -22,7 +22,7 @@ import clsf.Dataset;
 import experiments.DataReader.Result;
 import mfextraction.CMFExtractor;
 import mfextraction.KNNLandMark;
-import mfextraction.MetaSystem;
+import mfextraction.TreeMetaSystem;
 import utils.FolderUtils;
 
 public class WekaResults {
@@ -102,7 +102,7 @@ public class WekaResults {
                                 }
                             }
 
-                            MetaSystem system = new MetaSystem(train, extractor, knnScore);
+                            TreeMetaSystem system = new TreeMetaSystem(train, extractor, knnScore);
                             rmse += system.rmse(test, knnScore) / repeats;
                         }
                     }

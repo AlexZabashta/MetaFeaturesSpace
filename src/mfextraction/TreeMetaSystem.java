@@ -16,7 +16,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class MetaSystem {
+public class TreeMetaSystem implements ToDoubleArrayFunction<Dataset> {
     public final Instances instancesFormat;
     public final ToDoubleArrayFunction<Dataset> extractor;
     public final REPTree[] trees;
@@ -40,7 +40,7 @@ public class MetaSystem {
         return instance;
     }
 
-    public MetaSystem(List<Dataset> train, ToDoubleArrayFunction<Dataset> extractor, ToDoubleFunction<Dataset> target) {
+    public TreeMetaSystem(List<Dataset> train, ToDoubleArrayFunction<Dataset> extractor, ToDoubleFunction<Dataset> target) {
         Random random = new Random(42);
         int numMetaFeatures = extractor.length();
         ArrayList<Attribute> attributes = new ArrayList<>(numMetaFeatures + 1);
@@ -85,7 +85,22 @@ public class MetaSystem {
         }
     }
 
-    public double[] classifyDataset(Dataset dataset) {
+    public double rmse(List<Dataset> test, ToDoubleFunction<Dataset> target) {
+        double sumSquareErrors = 0;
+
+        for (Dataset dataset : test) {
+            double real = target.applyAsDouble(dataset);
+
+            double mean = StatUtils.mean(apply(dataset));
+            double diff = real - mean;
+            sumSquareErrors += diff * diff;
+
+        }
+        return Math.sqrt(sumSquareErrors / test.size());
+    }
+
+    @Override
+    public double[] apply(Dataset dataset) {
         Instance instance = convert(dataset, Double.NaN);
         double[] result = new double[size];
         int p = 0;
@@ -102,18 +117,9 @@ public class MetaSystem {
         return Arrays.copyOf(result, p);
     }
 
-    public double rmse(List<Dataset> test, ToDoubleFunction<Dataset> target) {
-        double sumSquareErrors = 0;
-
-        for (Dataset dataset : test) {
-            double real = target.applyAsDouble(dataset);
-
-            double mean = StatUtils.mean(classifyDataset(dataset));
-            double diff = real - mean;
-            sumSquareErrors += diff * diff;
-
-        }
-        return Math.sqrt(sumSquareErrors / test.size());
+    @Override
+    public int length() {
+        return size;
     }
 
 }

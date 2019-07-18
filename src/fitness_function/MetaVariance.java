@@ -3,15 +3,15 @@ package fitness_function;
 import java.util.function.ToDoubleFunction;
 
 import clsf.Dataset;
-import mfextraction.MetaSystem;
+import mfextraction.TreeMetaSystem;
 import utils.StatUtils;
 import utils.ToDoubleArrayFunction;
 
 public class MetaVariance implements ToDoubleFunction<Dataset>, ToDoubleArrayFunction<Dataset> {
 
-    final MetaSystem base;
+    final ToDoubleArrayFunction<Dataset> base;
 
-    public MetaVariance(MetaSystem base) {
+    public MetaVariance(ToDoubleArrayFunction<Dataset> base) {
         this.base = base;
     }
 
@@ -20,7 +20,7 @@ public class MetaVariance implements ToDoubleFunction<Dataset>, ToDoubleArrayFun
         if (dataset.numClasses == 1) {
             return 10;
         }
-        return 1 - StatUtils.var(base.classifyDataset(dataset));
+        return 1 - StatUtils.var(base.apply(dataset));
     }
 
     @Override

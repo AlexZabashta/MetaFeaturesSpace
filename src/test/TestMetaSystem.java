@@ -15,8 +15,9 @@ import experiments.DataReader;
 import fitness_function.MahalanobisDistance;
 import mfextraction.CMFExtractor;
 import mfextraction.KNNLandMark;
-import mfextraction.MetaSystem;
+import mfextraction.TreeMetaSystem;
 import mfextraction.SVMLandMark;
+import mfextraction.SvmMetaSystem;
 import utils.ArrayUtils;
 import utils.BlockingThreadPoolExecutor;
 import utils.MatrixUtils;
@@ -69,7 +70,8 @@ public class TestMetaSystem {
                 }
             }
 
-            MetaSystem metaSystem = new MetaSystem(train, extractor, fscore);
+            // TreeMetaSystem metaSystem = new TreeMetaSystem(train, extractor, fscore);
+            SvmMetaSystem metaSystem = new SvmMetaSystem(train, extractor, fscore);
 
             double sumSquareErrors = 0;
 
@@ -78,7 +80,7 @@ public class TestMetaSystem {
                 // System.out.printf(Locale.ENGLISH, "%5s ", dataset.name);
                 // System.out.printf(Locale.ENGLISH, "%.3f ", real);
 
-                double mean = StatUtils.mean(metaSystem.classifyDataset(dataset));
+                double mean = StatUtils.mean(metaSystem.apply(dataset));
                 double diff = real - mean;
                 sumSquareErrors += diff * diff;
 
