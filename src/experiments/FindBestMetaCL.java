@@ -10,9 +10,18 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
+import org.uma.jmetal.algorithm.Algorithm;
+import org.uma.jmetal.algorithm.singleobjective.particleswarmoptimization.StandardPSO2011;
+import org.uma.jmetal.problem.DoubleProblem;
+import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
+import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+
 import clsf.Dataset;
 import mfextraction.CMFExtractor;
 import mfextraction.KNNLandMark;
+import mfextraction.RelLandMark;
+import utils.EndSearch;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMOreg;
@@ -55,28 +64,26 @@ public class FindBestMetaCL {
             list.add(iBk);
         }
 
-        {
-            SMOreg svm = new SMOreg();
-            svm.setC(1.0);
-            RBFKernel kernel = new RBFKernel();
-            kernel.setGamma(1.0);
-            svm.setKernel(kernel);
-            list.add(svm);
-        }
-
-        {
-
-            for (double m = 0.1; m <= 1; m += 0.1) {
+        for (double c = 0.001; c <= 101; c *= 10) {
+            for (double g = 0.001; g <= 101; g *= 10) {
+                SMOreg svm = new SMOreg();
+                svm.setC(c);
+                RBFKernel kernel = new RBFKernel();
+                kernel.setGamma(g);
+                svm.setKernel(kernel);
+                list.add(svm);
 
             }
-
-            MultilayerPerceptron mlp = new MultilayerPerceptron();
-
-            mlp.setNormalizeNumericClass(true);
-            mlp.setNormalizeAttributes(true);
-            list.add(mlp);
-
         }
+
+        // {
+        // SMOreg svm = new SMOreg();
+        // svm.setC(1.0);
+        // RBFKernel kernel = new RBFKernel();
+        // kernel.setGamma(1.0);
+        // svm.setKernel(kernel);
+        // list.add(svm);
+        // }
 
         return list;
     }
@@ -90,6 +97,8 @@ public class FindBestMetaCL {
         double[][] metaData = new double[2048][];
 
         List<Dataset> datasets = DataReader.readData("data.csv", new File("data"));
+        ToDoubleFunction<Dataset> relScore = new RelLandMark();
+
         final int numData = datasets.size();
 
         CMFExtractor extractor = new CMFExtractor();
@@ -101,70 +110,213 @@ public class FindBestMetaCL {
 
         Collections.sort(datasets, Comparator.comparing(d -> d.name));
         Collections.shuffle(datasets, new Random(42));
-        ToDoubleFunction<Dataset> knnScore = new KNNLandMark();
 
-        for (Classifier classifier : listClassifiers()) {
-            double mse = 0;
-            long time = 0;
+        DoubleProblem problem = new DoubleProblem() {
+            double best = 1;
 
-            for (int repeat = 0; repeat < repeats; repeat++) {
-                ArrayList<Attribute> attributes = new ArrayList<>();
-                for (int i = 0; i < numMF; i++) {
-                    attributes.add(new Attribute("mf" + i));
-                }
-                attributes.add(new Attribute("knnScore"));
-                Instances header = new Instances("meta", attributes, 0);
-                header.setClassIndex(numMF);
+            @Override
+            public int getNumberOfVariables() {
+                return 2;
+            }
 
-                Instances train = new Instances(header);
-                Instances test = new Instances(header);
+            @Override
+            public int getNumberOfObjectives() {
+                return 1;
+            }
 
-                Random random = new Random(repeat + 42);
-                for (Dataset dataset : datasets) {
-                    Instance instance = new DenseInstance(numMF + 1);
-                    instance.setDataset(header);
+            @Override
+            public int getNumberOfConstraints() {
+                return 0;
+            }
 
-                    double[] mf = extractor.apply(dataset);
-                    for (int i = 0; i < numMF; i++) {
-                        instance.setValue(i, mf[i]);
-                    }
-                    instance.setClassValue(knnScore.applyAsDouble(dataset));
+            @Override
+            public String getName() {
+                return "SVM";
+            }
 
-                    if (random.nextInt(3) == 0) {
-                        train.add(instance);
-                    } else {
-                        test.add(instance);
-                    }
-                }
+            @Override
+            public void evaluate(DoubleSolution solution) {
+                double pg = solution.getVariableValue(0);
+                double pc = solution.getVariableValue(1);
 
-                double sum = 0;
-                long start = System.currentTimeMillis();
+                double g = Math.pow(10, pg);
+                double c = Math.pow(10, pc);
 
                 try {
-                    classifier.buildClassifier(train);
+                    SMOreg classifier = new SMOreg();
+                    classifier.setC(c);
+                    RBFKernel kernel = new RBFKernel();
+                    kernel.setGamma(g);
+                    classifier.setKernel(kernel);
 
-                    for (Instance instance : test) {
-                        double pr = classifier.classifyInstance(instance);
-                        double re = instance.classValue();
-                        double diff = pr - re;
-                        sum += diff * diff;
+                    double mse = 0;
+                    long time = 0;
+
+                    for (int repeat = 0; repeat < repeats; repeat++) {
+                        ArrayList<Attribute> attributes = new ArrayList<>();
+                        for (int i = 0; i < numMF; i++) {
+                            attributes.add(new Attribute("mf" + i));
+                        }
+                        attributes.add(new Attribute("knnScore"));
+                        Instances header = new Instances("meta", attributes, 0);
+                        header.setClassIndex(numMF);
+
+                        Instances train = new Instances(header);
+                        Instances test = new Instances(header);
+
+                        Random random = new Random(repeat + 42);
+                        for (Dataset dataset : datasets) {
+                            Instance instance = new DenseInstance(numMF + 1);
+                            instance.setDataset(header);
+
+                            double[] mf = extractor.apply(dataset);
+                            for (int i = 0; i < numMF; i++) {
+                                instance.setValue(i, mf[i]);
+                            }
+                            instance.setClassValue(relScore.applyAsDouble(dataset));
+
+                            if (random.nextInt(3) == 0) {
+                                train.add(instance);
+                            } else {
+                                test.add(instance);
+                            }
+                        }
+
+                        double sum = 0;
+                        long start = System.currentTimeMillis();
+
+                        classifier.buildClassifier(train);
+
+                        for (Instance instance : test) {
+                            double pr = classifier.classifyInstance(instance);
+                            double re = instance.classValue();
+                            double diff = pr - re;
+                            sum += diff * diff;
+                        }
+
+                        long finish = System.currentTimeMillis();
+                        time += finish - start;
+                        mse += sum / test.size();
                     }
+
+                    double rmse = Math.sqrt(mse / repeats);
+
+                    if (rmse < best) {
+                        best = rmse;
+                        System.out.println(g + " " + c + " " + rmse + " " + time);
+                        System.out.flush();
+                    }
+
+                    solution.setObjective(0, rmse);
 
                 } catch (Exception e) {
                     e.printStackTrace();
+                    solution.setObjective(0, 1);
                 }
 
-                long finish = System.currentTimeMillis();
-                time += finish - start;
-                mse += sum / test.size();
             }
 
-            // System.out.println(classifier);
-            System.out.print(time);
-            System.out.print(' ');
-            System.out.println(Math.sqrt(mse / repeats));
+            @Override
+            public DoubleSolution createSolution() {
+                return new DefaultDoubleSolution(this);
+            }
 
+            @Override
+            public Double getUpperBound(int arg0) {
+                return +5.0;
+            }
+
+            @Override
+            public Double getLowerBound(int arg0) {
+                return -0.5;
+            }
+        };
+
+        Algorithm<?> algorithm = new StandardPSO2011(problem, 100, 10000000, 10, new SequentialSolutionListEvaluator<DoubleSolution>());
+        try {
+            algorithm.run();
+        } catch (EndSearch e) {
         }
 
+        if (numData > 0) {
+            return;
+        }
+
+        for (double c = 0.001; c <= 101; c *= 10) {
+            for (double g = 0.001; g <= 101; g *= 10) {
+                SMOreg classifier = new SMOreg();
+                classifier.setC(c);
+                RBFKernel kernel = new RBFKernel();
+                kernel.setGamma(g);
+                classifier.setKernel(kernel);
+
+                // for (Classifier classifier : listClassifiers()) {
+                double mse = 0;
+                long time = 0;
+
+                for (int repeat = 0; repeat < repeats; repeat++) {
+                    ArrayList<Attribute> attributes = new ArrayList<>();
+                    for (int i = 0; i < numMF; i++) {
+                        attributes.add(new Attribute("mf" + i));
+                    }
+                    attributes.add(new Attribute("knnScore"));
+                    Instances header = new Instances("meta", attributes, 0);
+                    header.setClassIndex(numMF);
+
+                    Instances train = new Instances(header);
+                    Instances test = new Instances(header);
+
+                    Random random = new Random(repeat + 42);
+                    for (Dataset dataset : datasets) {
+                        Instance instance = new DenseInstance(numMF + 1);
+                        instance.setDataset(header);
+
+                        double[] mf = extractor.apply(dataset);
+                        for (int i = 0; i < numMF; i++) {
+                            instance.setValue(i, mf[i]);
+                        }
+                        instance.setClassValue(relScore.applyAsDouble(dataset));
+
+                        if (random.nextInt(3) == 0) {
+                            train.add(instance);
+                        } else {
+                            test.add(instance);
+                        }
+                    }
+
+                    double sum = 0;
+                    long start = System.currentTimeMillis();
+
+                    try {
+                        classifier.buildClassifier(train);
+
+                        for (Instance instance : test) {
+                            double pr = classifier.classifyInstance(instance);
+                            double re = instance.classValue();
+                            double diff = pr - re;
+                            sum += diff * diff;
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    long finish = System.currentTimeMillis();
+                    time += finish - start;
+                    mse += sum / test.size();
+                }
+
+                // System.out.println(classifier);
+                System.out.print(time);
+                System.out.print(' ');
+                System.out.print(g);
+                System.out.print(' ');
+                System.out.print(c);
+                System.out.print(' ');
+                System.out.println(Math.sqrt(mse / repeats));
+
+            }
+
+        }
     }
 }

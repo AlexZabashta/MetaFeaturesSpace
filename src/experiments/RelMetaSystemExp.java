@@ -42,7 +42,7 @@ import fitness_function.Limited;
 import fitness_function.MahalanobisDistance;
 import fitness_function.MetaVariance;
 import mfextraction.CMFExtractor;
-import mfextraction.KNNLandMark;
+import mfextraction.RelLandMark;
 import mfextraction.SvmMetaSystem;
 import utils.ArrayUtils;
 import utils.EndSearch;
@@ -51,7 +51,7 @@ import utils.MatrixUtils;
 import utils.StatUtils;
 import utils.ToDoubleArrayFunction;
 
-public class SvmMetaSystemExp {
+public class RelMetaSystemExp {
     static int get(String name, String[] args, int index, int defaultValue) {
         try {
             int value = Integer.parseInt(args[index]);
@@ -131,7 +131,7 @@ public class SvmMetaSystemExp {
         Converter gmmcon = new GMMConverter(numObjectsDistribution, numFeaturesDistribution, numClassesDistribution);
         Collections.sort(datasets, Comparator.comparing(d -> d.name));
         Collections.shuffle(datasets, new Random(42));
-        ToDoubleFunction<Dataset> knnScore = new KNNLandMark();
+        ToDoubleFunction<Dataset> relScore = new RelLandMark();
         ToDoubleArrayFunction<Dataset> empty = new ToDoubleArrayFunction<Dataset>() {
             @Override
             public double[] apply(Dataset dataset) {
@@ -293,7 +293,7 @@ public class SvmMetaSystemExp {
                 return new Function<List<Dataset>, Dataset>() {
                     @Override
                     public Dataset apply(List<Dataset> train) {
-                        MetaVariance variance = new MetaVariance(new SvmMetaSystem(train, extractor, knnScore));
+                        MetaVariance variance = new MetaVariance(new SvmMetaSystem(train, extractor, relScore));
                         Limited limited = new Limited(variance, variance, limit);
                         SimpleProblem problem = new SimpleProblem(direct, limited, train);
                         Algorithm<?> algorithm = new DifferentialEvolutionBuilder(problem).setMaxEvaluations(10000000).build();
@@ -317,7 +317,7 @@ public class SvmMetaSystemExp {
                 return new Function<List<Dataset>, Dataset>() {
                     @Override
                     public Dataset apply(List<Dataset> train) {
-                        MetaVariance variance = new MetaVariance(new SvmMetaSystem(train, extractor, knnScore));
+                        MetaVariance variance = new MetaVariance(new SvmMetaSystem(train, extractor, relScore));
                         Limited limited = new Limited(variance, variance, limit);
                         SimpleProblem problem = new SimpleProblem(gmmcon, limited, train);
                         Algorithm<?> algorithm = new StandardPSO2011(problem, 100, 10000000, 10, new SequentialSolutionListEvaluator<DoubleSolution>());
@@ -341,7 +341,7 @@ public class SvmMetaSystemExp {
                 return new Function<List<Dataset>, Dataset>() {
                     @Override
                     public Dataset apply(List<Dataset> train) {
-                        MetaVariance variance = new MetaVariance(new SvmMetaSystem(train, extractor, knnScore));
+                        MetaVariance variance = new MetaVariance(new SvmMetaSystem(train, extractor, relScore));
                         Limited limited = new Limited(variance, variance, limit);
                         GDSProblem problem = new GDSProblem(mutation, limited, train);
                         Algorithm<?> algorithm = new MOCellBuilder<DataSetSolution>(problem, crossover, mutation).setMaxEvaluations(10000000).build();
@@ -385,8 +385,8 @@ public class SvmMetaSystemExp {
                     public Double call() throws Exception {
                         Dataset dataset = function.apply(train);
                         train.add(dataset);
-                        SvmMetaSystem system = new SvmMetaSystem(train, extractor, knnScore);
-                        return system.rmse(test, knnScore);
+                        SvmMetaSystem system = new SvmMetaSystem(train, extractor, relScore);
+                        return system.rmse(test, relScore);
                     }
 
                     @Override

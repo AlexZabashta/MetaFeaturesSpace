@@ -24,6 +24,7 @@ public class Dataset {
     public boolean emptyMF = true;
     public boolean emptyKNN = true;
     public boolean emptySVM = true;
+    public boolean emptyREL = true;
 
     public final double[] metaFeatures = new double[64];
 

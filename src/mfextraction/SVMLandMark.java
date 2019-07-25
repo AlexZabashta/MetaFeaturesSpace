@@ -13,17 +13,17 @@ import weka.core.Instances;
 public class SVMLandMark implements ToDoubleFunction<Dataset> {
     @Override
     public double applyAsDouble(Dataset dataset) {
-        if (dataset.emptyKNN) {
+        if (dataset.emptySVM) {
             synchronized (dataset.metaFeatures) {
-                if (dataset.emptyKNN) {
+                if (dataset.emptySVM) {
                     Random random = new Random();
                     Instances instances = WekaConverter.convert(dataset);
                     double mean = 0;
                     for (int rep = 0; rep < 10; rep++) {
                         mean += getFscore(random, instances);
                     }
-                    dataset.metaFeatures[31] = mean / 20;
-                    dataset.emptyKNN = false;
+                    dataset.metaFeatures[31] = mean / 10;
+                    dataset.emptySVM = false;
                 }
             }
         }

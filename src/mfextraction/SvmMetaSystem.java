@@ -57,9 +57,9 @@ public class SvmMetaSystem implements ToDoubleArrayFunction<Dataset> {
 
         for (int i = 0; i <= size; i++) {
             svm[i] = new SMOreg();
-            svm[i].setC(1.0);
+            svm[i].setC(0.86);
             RBFKernel kernel = new RBFKernel();
-            kernel.setGamma(1.0);
+            kernel.setGamma(1.0 / Math.sqrt(10));
             svm[i].setKernel(kernel);
         }
 

@@ -95,15 +95,15 @@ public class DrawResults {
     public static void main(String[] args) throws IOException {
         String result = FolderUtils.buildPath(false, Long.toString(System.currentTimeMillis()));
 
-        final int n = 9;
+        final int n = 10;
 
         // String folder = "result\\experiments.MetaSystemExp\\1554397984421\\";
         // final int m = 5;
         // final int s = 339;
 
-        String folder = "result\\experiments.MetaSystemExp\\r1554396210193\\";
-        final int m = 7;
-        final int s = 132;
+        String folder = "result\\experiments.RelMetaSystemExp\\1563975046032\\";
+        final int m = 5;
+        final int s = 29;
 
         final int k = n * m;
 
@@ -167,7 +167,7 @@ public class DrawResults {
         int h = 450;
 
         for (String prefix : Arrays.asList("RAND", "DIV", "VAR")) {
-            BufferedImage image = convert(0.075, 0.105, w, h, s, m, data[ids.get(prefix + "_DIRECT")], data[ids.get(prefix + "_GMM")], data[ids.get(prefix + "_NDSE")]);
+            BufferedImage image = convert(0.33, 0.37, w, h, s, m, data[ids.get(prefix + "_DIRECT")], data[ids.get(prefix + "_GMM")], data[ids.get(prefix + "_NDSE")]);
             ImageIO.write(image, "png", new File(result + prefix + ".png"));
         }
 
